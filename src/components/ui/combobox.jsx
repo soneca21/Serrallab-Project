@@ -1,0 +1,1 @@
+// Deleting this file as it's being replaced by CategorySelector and is no longer needed in the pages.

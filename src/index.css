@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 7%; /* #121212 */
+    --foreground: 0 0% 93%; /* #EDEDED */
+
+    --card: 0 0% 12%; /* #1E1E1E */
+    --card-foreground: 0 0% 93%;
+ 
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 93%;
+ 
+    --primary: 22 93% 45%; /* #DA690B */
+    --primary-foreground: 0 0% 100%;
+ 
+    --secondary: 0 0% 16%; /* #2A2A2A */
+    --secondary-foreground: 0 0% 93%;
+ 
+    --muted: 0 0% 16%;
+    --muted-foreground: 240 5% 65%; /* #A1A1AA */
+ 
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 93%;
+ 
+    --destructive: 0 84% 60%; /* #EF4444 */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 71% 37%; /* #16A34A */
+    --success-foreground: 0 0% 100%;
+
+    --border: 0 0% 16%;
+    --input: 0 0% 11%; /* #1C1C1C */
+    --ring: 22 93% 45%;
+ 
+    --radius: 0.75rem;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+    background-color: #121212;
+    color: #EDEDED;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+  }
+}
+
+/* Esconder barra de rolagem para navegadores WebKit (Chrome, Safari) */
+::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    background: transparent;
+}
+
+/* Esconder barra de rolagem para Firefox */
+html {
+    scrollbar-width: none;
+}
+
+/* Esconder barra de rolagem para IE/Edge */
+body {
+    -ms-overflow-style: none;
+}
+
+/* Garantir que todos os elementos com overflow também escondam a barra */
+.overflow-y-auto, .overflow-auto, .overflow-x-auto {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+    display: none;
+}
