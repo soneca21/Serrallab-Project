@@ -5,6 +5,7 @@ import { useAuth, AuthProvider } from '@/contexts/SupabaseAuthContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { RealtimeProvider } from '@/contexts/RealtimeContext';
+import { UsageProvider } from '@/contexts/UsageContext.tsx';
 import PublicLayout from '@/layouts/PublicLayout';
 import AppLayout from '@/layouts/AppLayout';
 import LandingPage from '@/pages/LandingPage';
@@ -125,10 +126,12 @@ function App() {
                 <AuthProvider>
                     <NotificationProvider>
                         <SubscriptionProvider>
-                            <RealtimeProvider>
-                                <AppRoutes />
-                                <Toaster />
-                            </RealtimeProvider>
+                            <UsageProvider>
+                                <RealtimeProvider>
+                                    <AppRoutes />
+                                    <Toaster />
+                                </RealtimeProvider>
+                            </UsageProvider>
                         </SubscriptionProvider>
                     </NotificationProvider>
                 </AuthProvider>

@@ -59,7 +59,7 @@ const OverviewTab = () => {
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {statsCards.map((card, index) => (
-                    <Card key={index} className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-all">
+                    <Card key={index} className="border-l-4 border-l-transparent hover:border-l-primary shadow-sm hover:shadow-md transition-all">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
                             <card.icon className="h-4 w-4 text-primary" />
@@ -346,7 +346,7 @@ const PlansManagementTab = () => {
                 </div>
                 <div className="grid gap-4">
                     {loading ? <Loader2 className="animate-spin" /> : plans.length > 0 ? plans.map(plan => (
-                         <Card key={plan.id} className="overflow-hidden border-l-4 border-l-primary hover:shadow-md transition-shadow">
+                         <Card key={plan.id} className="overflow-hidden border-l-4 border-l-transparent hover:border-l-primary hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-center p-6">
                                 <div>
                                     <h4 className="font-bold text-lg">{plan.name}</h4>
@@ -367,7 +367,7 @@ const PlansManagementTab = () => {
                 </div>
                 <div className="grid gap-4">
                     {loading ? <Loader2 className="animate-spin" /> : packages.length > 0 ? packages.map(pkg => (
-                         <Card key={pkg.id} className={`overflow-hidden hover:shadow-md transition-shadow ${pkg.is_active ? 'border-l-4 border-l-green-500' : 'border-l-4 border-l-gray-500 opacity-60'}`}>
+                         <Card key={pkg.id} className={`overflow-hidden hover:shadow-md transition-shadow border-l-4 border-l-transparent ${pkg.is_active ? 'hover:border-l-green-500' : 'hover:border-l-gray-500 opacity-60'}`}>
                             <div className="flex justify-between items-center p-6">
                                 <div>
                                     <div className="flex items-center gap-2">

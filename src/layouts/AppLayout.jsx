@@ -98,8 +98,8 @@ const SidebarContent = ({ onLinkClick }) => {
                                 cn(
                                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group",
                                     isActive
-                                        ? 'bg-primary/10 text-primary border-l-4 border-primary shadow-[0_0_10px_rgba(218,105,11,0.1)]'
-                                        : 'text-muted-foreground hover:bg-surface hover:text-white border-l-4 border-transparent'
+                                        ? 'bg-primary/10 text-primary border-l-4 border-transparent hover:border-primary hover:shadow-[0_0_10px_rgba(218,105,11,0.1)]'
+                                        : 'text-muted-foreground hover:bg-surface hover:text-white border-l-4 border-transparent hover:border-primary'
                                 )
                             }
                         >
@@ -113,7 +113,7 @@ const SidebarContent = ({ onLinkClick }) => {
                         <button
                             onClick={toggleConfig}
                             className={cn(
-                                "w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group hover:bg-surface hover:text-white border-l-4 border-transparent",
+                                "w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group hover:bg-surface hover:text-white border-l-4 border-transparent hover:border-primary",
                                 location.pathname.includes('/app/config') ? "text-white" : "text-muted-foreground"
                             )}
                         >
@@ -145,7 +145,7 @@ const SidebarContent = ({ onLinkClick }) => {
                                                 to={item.path}
                                                 onClick={onLinkClick}
                                                 className={cn(
-                                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 border-l-2 border-transparent hover:border-l-primary",
                                                     isActive
                                                         ? 'text-primary font-medium bg-primary/5'
                                                         : 'text-muted-foreground hover:text-white'
@@ -169,8 +169,8 @@ const SidebarContent = ({ onLinkClick }) => {
                                 cn(
                                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group mt-4",
                                     isActive
-                                        ? 'bg-primary/10 text-primary border-l-4 border-primary shadow-[0_0_10px_rgba(218,105,11,0.1)]'
-                                        : 'text-muted-foreground hover:bg-surface hover:text-white border-l-4 border-transparent'
+                                        ? 'bg-primary/10 text-primary border-l-4 border-transparent hover:border-primary hover:shadow-[0_0_10px_rgba(218,105,11,0.1)]'
+                                        : 'text-muted-foreground hover:bg-surface hover:text-white border-l-4 border-transparent hover:border-primary'
                                 )
                             }
                         >

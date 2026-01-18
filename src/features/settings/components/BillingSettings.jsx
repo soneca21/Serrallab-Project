@@ -1,8 +1,9 @@
-
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import stripePromise from '@/lib/stripe';
+import { createBillingPortalSession } from '@/features/billing/api/billingPortal';
+import { getInvoices } from '@/features/billing/api/invoices';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ const BillingSettings = () => {
     const { toast } = useToast();
     const [subscription, setSubscription] = useState(null);
     const [packages, setPackages] = useState([]);
+    const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(null);
 
@@ -35,6 +37,13 @@ const BillingSettings = () => {
                     .eq('is_active', true)
                     .order('price');
                 setPackages(pkgData || []);
+
+                try {
+                    const invoiceData = await getInvoices();
+                    setInvoices(invoiceData || []);
+                } catch (invoiceError) {
+                    console.error("Error fetching invoices:", invoiceError);
+                }
             } catch (error) {
                 console.error("Error fetching billing:", error);
             } finally {
@@ -44,8 +53,13 @@ const BillingSettings = () => {
         fetchData();
     }, [user]);
 
-    const handleManageSubscription = () => {
-        toast({ description: "Portal de cliente Stripe será aberto em breve." });
+    const handleManageSubscription = async () => {
+        try {
+            const { url } = await createBillingPortalSession(window.location.href);
+            if (url) window.location.href = url;
+        } catch (error) {
+            toast({ title: "Erro no portal", description: error.message, variant: "destructive" });
+        }
     };
 
     const handlePurchasePackage = async (pkg) => {
@@ -97,21 +111,21 @@ const BillingSettings = () => {
                 <CardContent className="space-y-6 relative z-10">
                     <div className="flex flex-col md:flex-row gap-8">
                         <div className="flex-1 space-y-4">
-                            <h3 className="text-3xl font-heading font-bold text-white">{subscription?.plans?.name || 'Plano Básico'}</h3>
+                            <h3 className="text-3xl font-heading font-bold text-white">{subscription?.plans?.name || 'Plano Basico'}</h3>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-gray-300">
                                     <CheckCircle className="h-4 w-4 text-primary" />
-                                    <span>Renovação: {subscription ? new Date(subscription.current_period_end).toLocaleDateString() : 'N/A'}</span>
+                                    <span>Renovacao: {subscription ? new Date(subscription.current_period_end).toLocaleDateString() : 'N/A'}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-gray-300">
                                     <CreditCard className="h-4 w-4 text-primary" />
-                                    <span>Valor: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subscription?.plans?.price || 0)}/mês</span>
+                                    <span>Valor: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subscription?.plans?.price || 0)}/mes</span>
                                 </div>
                             </div>
                         </div>
                         <div className="flex flex-col gap-3 justify-center min-w-[200px]">
                             <Button onClick={handleManageSubscription} variant="default" className="w-full">Gerenciar Assinatura</Button>
-                            <Button variant="outline" className="w-full">Ver Outros Planos</Button>
+                            <Button variant="outline" className="w-full" onClick={() => window.location.assign('/app/planos')}>Ver Outros Planos</Button>
                         </div>
                     </div>
                 </CardContent>
@@ -121,14 +135,14 @@ const BillingSettings = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><PackagePlus className="h-5 w-5 text-primary" /> Pacotes Extras</CardTitle>
-                        <CardDescription>Precisa de mais orçamentos este mês?</CardDescription>
+                        <CardDescription>Precisa de mais orcamentos este mes?</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {packages.map(pkg => (
                             <div key={pkg.id} className="flex items-center justify-between p-3 rounded-lg border border-surface-strong hover:border-primary/50 transition-colors">
                                 <div>
                                     <p className="font-bold text-white">{pkg.name}</p>
-                                    <p className="text-sm text-gray-400">+{pkg.quote_amount} orçamentos</p>
+                                    <p className="text-sm text-gray-400">+{pkg.quote_amount} orcamentos</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-bold text-primary mb-2">R$ {Number(pkg.price).toFixed(2)}</p>
@@ -138,30 +152,43 @@ const BillingSettings = () => {
                                 </div>
                             </div>
                         ))}
-                        {packages.length === 0 && <p className="text-sm text-gray-400 italic">Nenhum pacote disponível.</p>}
+                        {packages.length === 0 && <p className="text-sm text-gray-400 italic">Nenhum pacote disponivel.</p>}
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /> Histórico de Faturas</CardTitle>
-                        <CardDescription>Últimos pagamentos realizados.</CardDescription>
+                        <CardTitle className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /> Historico de Faturas</CardTitle>
+                        <CardDescription>Ultimos pagamentos realizados.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">
-                            {/* Mock Data for Placeholder */}
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex items-center justify-between p-3 rounded-lg hover:bg-surface-strong/50 transition-colors">
+                            {invoices.length === 0 && (
+                                <p className="text-sm text-muted-foreground italic">Nenhuma fatura encontrada.</p>
+                            )}
+                            {invoices.map((invoice) => (
+                                <div key={invoice.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-surface-strong/50 transition-colors">
                                     <div className="flex items-center gap-3">
                                         <div className="h-8 w-8 rounded-full bg-surface-strong flex items-center justify-center">
                                             <Download className="h-4 w-4 text-gray-400" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium">Fatura #{2023000 + i}</p>
-                                            <p className="text-xs text-muted-foreground">Pago em 10/10/2023</p>
+                                            <p className="text-sm font-medium">Fatura #{invoice.number || invoice.id?.slice(-6)}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {invoice.status === 'paid' ? 'Pago' : 'Pendente'} em {new Date(invoice.created * 1000).toLocaleDateString('pt-BR')}
+                                            </p>
                                         </div>
                                     </div>
-                                    <span className="text-sm font-medium text-white">R$ 99,00</span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm font-medium text-white">
+                                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: invoice.currency?.toUpperCase() || 'BRL' }).format((invoice.total || 0) / 100)}
+                                        </span>
+                                        {invoice.hosted_invoice_url && (
+                                            <Button size="sm" variant="secondary" onClick={() => window.open(invoice.hosted_invoice_url, '_blank')}>
+                                                Abrir
+                                            </Button>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>

@@ -74,11 +74,11 @@ const PipelinePage = () => {
                 </div>
 
                 {loading ? <div className="flex-1 flex justify-center items-center"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div> : (
-                    <div className="flex-1 flex gap-4 overflow-x-auto pb-4">
+                    <div className="flex-1 grid grid-cols-5 gap-4 pb-4">
                         {STAGES.map(stage => (
                             <div 
                                 key={stage.id} 
-                                className="flex-shrink-0 w-80 bg-surface/30 rounded-xl border border-border/50 flex flex-col"
+                                className="min-w-0 bg-surface/30 rounded-xl border border-border/50 flex flex-col"
                                 onDragOver={e => e.preventDefault()}
                                 onDrop={e => {
                                     e.preventDefault();

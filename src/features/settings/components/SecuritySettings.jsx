@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { Button } from '@/components/ui/button';
@@ -51,18 +51,18 @@ const SecuritySettings = () => {
     return (
         <div className="space-y-6">
             {/* 2FA Section - New */}
-            <Card className="border-blue-500/20 bg-blue-500/5">
+            <Card className="border-border/60 bg-surface/30">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Autenticação em Dois Fatores (2FA)</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary"><ShieldCheck className="h-4 w-4" /></span> Autenticação em Dois Fatores (2FA)</CardTitle>
                     <CardDescription>Adicione uma camada extra de segurança à sua conta.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center justify-between p-4 bg-white/50 rounded-lg border">
+                    <div className="flex flex-col gap-4 rounded-xl border border-border/40 bg-background/30 p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p className="font-medium">Proteja seu acesso</p>
-                            <p className="text-xs text-muted-foreground mt-1">Configure o Google Authenticator ou Authy para gerar códigos de acesso.</p>
+                            <p className="mt-1 text-xs text-muted-foreground">Configure o Google Authenticator ou Authy para gerar códigos de acesso.</p>
                         </div>
-                        <Button onClick={() => navigate('/app/config/security-2fa')}>
+                        <Button onClick={() => navigate('/app/config/security-2fa')} className="sm:min-w-[170px]">
                            Configurar 2FA
                         </Button>
                     </div>
@@ -104,7 +104,7 @@ const SecuritySettings = () => {
                 </CardContent>
             </Card>
 
-            <Card className="border-red-900/50 bg-red-950/10">
+            <Card className="border-red-900/50 bg-red-950/10 border-l-4 border-l-transparent hover:border-l-red-500">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="h-5 w-5" /> Zona de Perigo</CardTitle>
                     <CardDescription className="text-red-300/70">Ações irreversíveis que afetam sua conta.</CardDescription>
@@ -139,3 +139,4 @@ const SecuritySettings = () => {
 };
 
 export default SecuritySettings;
+

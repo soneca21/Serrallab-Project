@@ -177,6 +177,45 @@ export const RealtimeProvider = ({ children }) => {
       }
   }
 
+  const deleteReadNotifications = async () => {
+      try {
+          const readIds = notifications.filter(n => n.read).map(n => n.id);
+          if (readIds.length === 0) return;
+
+          const remaining = notifications.filter(n => !n.read);
+          setNotifications(remaining);
+          setUnreadCount(remaining.filter(n => !n.read).length);
+
+          const { error } = await supabase
+              .from('notifications')
+              .delete()
+              .eq('user_id', user.id)
+              .eq('read', true);
+
+          if (error) throw error;
+      } catch (error) {
+          console.error("Error deleting read notifications", error);
+          fetchInitialNotifications();
+      }
+  }
+
+  const deleteAllNotifications = async () => {
+      try {
+          setNotifications([]);
+          setUnreadCount(0);
+
+          const { error } = await supabase
+              .from('notifications')
+              .delete()
+              .eq('user_id', user.id);
+
+          if (error) throw error;
+      } catch (error) {
+          console.error("Error deleting all notifications", error);
+          fetchInitialNotifications();
+      }
+  }
+
   const clearNewLeadsFlag = () => setHasNewLeads(false);
 
   return (
@@ -188,6 +227,8 @@ export const RealtimeProvider = ({ children }) => {
       hasNewLeads,
       markAsRead,
       markAllAsRead,
+      deleteReadNotifications,
+      deleteAllNotifications,
       clearNewLeadsFlag
     }}>
       {children}

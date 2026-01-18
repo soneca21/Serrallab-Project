@@ -89,7 +89,7 @@ const SchedulesPage = () => {
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="rounded-xl border-l-4 border-l-primary shadow-sm bg-card hover:shadow-md transition-shadow">
+                    <Card className="rounded-xl shadow-sm bg-card hover:shadow-md transition-shadow">
                         <CardContent className="p-6 flex items-center gap-4">
                             <div className="p-3 rounded-full bg-primary/10 text-primary ring-1 ring-primary/20">
                                 <CalendarClock className="h-6 w-6" />
@@ -101,7 +101,7 @@ const SchedulesPage = () => {
                         </CardContent>
                     </Card>
                     
-                    <Card className="rounded-xl border-l-4 border-l-emerald-500 shadow-sm bg-card hover:shadow-md transition-shadow">
+                    <Card className="rounded-xl shadow-sm bg-card hover:shadow-md transition-shadow">
                         <CardContent className="p-6 flex items-center gap-4">
                             <div className="p-3 rounded-full bg-emerald-500/10 text-emerald-500 ring-1 ring-emerald-500/20">
                                 <PlayCircle className="h-6 w-6" />
@@ -113,7 +113,7 @@ const SchedulesPage = () => {
                         </CardContent>
                     </Card>
                     
-                    <Card className="rounded-xl border-l-4 border-l-orange-500 shadow-sm bg-card hover:shadow-md transition-shadow">
+                    <Card className="rounded-xl shadow-sm bg-card hover:shadow-md transition-shadow">
                         <CardContent className="p-6 flex items-center gap-4">
                             <div className="p-3 rounded-full bg-orange-500/10 text-orange-500 ring-1 ring-orange-500/20">
                                 <PauseCircle className="h-6 w-6" />

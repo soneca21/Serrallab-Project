@@ -7,10 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { cn } from '@/lib/utils';
 
 const PlanCard = ({ plan, isCurrentPlan, onSelectPlan, isLoading }) => {
+  const priceValue = plan.price_cents !== undefined && plan.price_cents !== null
+    ? (plan.price_cents || 0) / 100
+    : Number(plan.price || 0);
+
   const price = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL'
-  }).format((plan.price_cents || 0) / 100);
+  }).format(priceValue);
 
   // Helper to format features list from JSONB or standard list
   const getFeaturesList = () => {

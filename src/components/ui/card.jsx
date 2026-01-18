@@ -6,8 +6,8 @@ const Card = React.forwardRef(({ className, hasLeftBorder = true, ...props }, re
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border border-surface-strong bg-surface text-card-foreground shadow-sm",
-      hasLeftBorder && "border-l-4 border-l-primary",
+      "rounded-xl border border-surface-strong bg-surface text-card-foreground shadow-sm transition-colors",
+      hasLeftBorder && "border-l-4 border-l-transparent hover:border-l-primary",
       className
     )}
     {...props} />
