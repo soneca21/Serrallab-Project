@@ -1,4 +1,4 @@
-
+﻿
 import React, { useEffect, useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,7 @@ const SchedulesPage = () => {
         try {
             await deleteSchedule(id);
             setSchedules(prev => prev.filter(s => s.id !== id));
-            toast({ title: "Sucesso", description: "Agendamento excluído." });
+            toast({ title: "Sucesso", description: "Agendamento exclu\u00eddo." });
         } catch (error) {
             toast({ title: "Erro", description: "Falha ao excluir.", variant: "destructive" });
         }
@@ -70,7 +70,7 @@ const SchedulesPage = () => {
 
     return (
         <HelmetProvider>
-            <Helmet><title>Agendamentos — Serrallab</title></Helmet>
+            <Helmet><title>Agendamentos - Serrallab</title></Helmet>
             <div className="space-y-8 pb-8">
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -79,7 +79,7 @@ const SchedulesPage = () => {
                             Agendamentos
                         </h2>
                         <p className="text-muted-foreground">
-                            Programe mensagens recorrentes, lembretes e follow-ups automáticos.
+                            {'Programe mensagens recorrentes, lembretes e follow-ups autom\u00e1ticos.'}
                         </p>
                     </div>
                     <Button onClick={() => { setEditingSchedule(undefined); setIsFormOpen(true); }} className="w-full sm:w-auto">

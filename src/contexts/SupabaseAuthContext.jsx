@@ -14,6 +14,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
   
   // 2FA State
   const [is2FARequired, setIs2FARequired] = useState(false);
@@ -108,8 +110,36 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(STORAGE_KEY);
     const { error } = await supabase.auth.signOut();
     setUser(null);
+    setProfile(null);
     setSession(null);
     return { error };
+  }, []);
+
+  const fetchProfile = useCallback(async (userId) => {
+    if (!userId) {
+      setProfile(null);
+      return;
+    }
+    setProfileLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Erro ao carregar perfil:', error);
+        setProfile(null);
+        return;
+      }
+      setProfile(data || null);
+    } catch (err) {
+      console.error('Erro ao carregar perfil:', err);
+      setProfile(null);
+    } finally {
+      setProfileLoading(false);
+    }
   }, []);
 
   // Init Auth
@@ -128,15 +158,26 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, []);
 
+  useEffect(() => {
+    if (user?.id) {
+      fetchProfile(user.id);
+    } else {
+      setProfile(null);
+    }
+  }, [user, fetchProfile]);
+
   const value = useMemo(() => ({
     user,
     session,
     loading,
+    profile,
+    profileLoading,
     signUp,
     signIn,
     signOut,
+    refreshProfile: () => fetchProfile(user?.id),
     updateUserPassword: async (pw) => await supabase.auth.updateUser({ password: pw })
-  }), [user, session, loading, signUp, signIn, signOut]);
+  }), [user, session, loading, profile, profileLoading, signUp, signIn, signOut, fetchProfile]);
 
   return (
     <AuthContext.Provider value={value}>

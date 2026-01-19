@@ -1,132 +1,102 @@
-
-import React, { useEffect, useState } from 'react';
-import MobileHeader from '@/components/MobileHeader';
-import SyncStatus from '@/components/SyncStatus';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getLeadsOffline, getOrcamentosOffline } from '@/lib/offline';
-import { useOfflineSync } from '@/hooks/useOfflineSync';
-import { Users, FileText, DollarSign, Inbox } from 'lucide-react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
+import React from 'react';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useDashboardData } from '@/hooks/useDashboardData';
 import { formatCurrency } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 
-const DashboardMobile: React.FC = () => {
-    const { sync, isSyncing } = useOfflineSync();
-    const [stats, setStats] = useState({ leads: 0, orcamentos: 0, revenue: 0 });
-    const [leads, setLeads] = useState<any[]>([]);
-    const [orcamentos, setOrcamentos] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
+const MetricCard = ({ label, value, helper }) => (
+  <Card className="p-4">
+    <CardHeader className="p-0">
+      <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{label}</p>
+    </CardHeader>
+    <CardContent className="p-0 mt-2">
+      <p className="text-2xl font-bold text-foreground">{value}</p>
+      {helper && <p className="text-xs text-muted-foreground mt-1">{helper}</p>}
+    </CardContent>
+  </Card>
+);
 
-    const loadData = async () => {
-        try {
-            const l = await getLeadsOffline() || [];
-            const o = await getOrcamentosOffline() || [];
-            
-            setLeads(l.slice(0, 5)); // Recent 5
-            setOrcamentos(o.filter((x: any) => x.status === 'Negociação').slice(0, 5));
+const DashboardMobile = () => {
+  const { data, loading } = useDashboardData();
 
-            const revenue = o.filter((x: any) => x.status === 'Aprovado').reduce((acc: number, curr: any) => acc + (Number(curr.final_price) || 0), 0);
-            
-            setStats({
-                leads: l.length,
-                orcamentos: o.length,
-                revenue
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadData();
-    }, [isSyncing]); // Reload when sync finishes
-
-    const handleRefresh = async () => {
-        await sync();
-        await loadData();
-    };
-
+  if (loading) {
     return (
-        <div className="space-y-4 p-4">
-            <div className="flex items-center justify-between mb-2">
-                <h1 className="text-xl font-bold font-heading">Dashboard</h1>
-                <SyncStatus />
-            </div>
-
-            {/* KPI Stack */}
-            <div className="grid gap-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-                        <DollarSign className="h-4 w-4 text-primary" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-24" /> : formatCurrency(stats.revenue)}</div>
-                    </CardContent>
-                </Card>
-                <div className="grid grid-cols-2 gap-3">
-                     <Card onClick={() => navigate('/app/leads')}>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Leads</CardTitle>
-                            <Inbox className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-12" /> : stats.leads}</div>
-                        </CardContent>
-                    </Card>
-                    <Card onClick={() => navigate('/app/orcamentos')}>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Orçamentos</CardTitle>
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{loading ? <Skeleton className="h-8 w-12" /> : stats.orcamentos}</div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-
-            {/* Leads Scroll */}
-            <div>
-                <h2 className="text-sm font-semibold mb-2">Leads Recentes</h2>
-                <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-                    <div className="flex w-max space-x-4 p-4">
-                        {loading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-24 w-40" />) : 
-                         leads.map((lead) => (
-                            <div key={lead.id} className="w-[180px] p-3 rounded-lg bg-card border text-card-foreground flex flex-col gap-1">
-                                <span className="font-semibold truncate">{lead.name || 'Sem nome'}</span>
-                                <span className="text-xs text-muted-foreground truncate">{lead.phone}</span>
-                                <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-full w-fit mt-1">{lead.source}</span>
-                            </div>
-                        ))}
-                        {leads.length === 0 && !loading && <span className="text-sm text-muted-foreground">Nenhum lead recente.</span>}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-            </div>
-
-             {/* Orcamentos Scroll */}
-             <div>
-                <h2 className="text-sm font-semibold mb-2">Em Negociação</h2>
-                <ScrollArea className="w-full whitespace-nowrap rounded-md border">
-                    <div className="flex w-max space-x-4 p-4">
-                        {loading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-24 w-40" />) : 
-                         orcamentos.map((orc) => (
-                            <div key={orc.id} className="w-[200px] p-3 rounded-lg bg-card border text-card-foreground flex flex-col gap-1">
-                                <span className="font-semibold truncate">{orc.title}</span>
-                                <span className="text-xs text-muted-foreground truncate">{orc.clients?.name}</span>
-                                <span className="font-bold text-sm text-primary mt-1">{formatCurrency(orc.final_price)}</span>
-                            </div>
-                        ))}
-                         {orcamentos.length === 0 && !loading && <span className="text-sm text-muted-foreground">Nenhum orçamento em negociação.</span>}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-            </div>
-        </div>
+      <div className="h-full flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
     );
+  }
+
+  const { kpis, pipeline, recentLeads, activeNegotiations } = data;
+
+  return (
+    <div className="space-y-6">
+      <section className="px-4 pb-2">
+        <div className="grid grid-cols-2 gap-3">
+          <MetricCard label="Leads mês" value={kpis.leadsCount} />
+          <MetricCard label="Clientes ativos" value={kpis.clientsCount} />
+          <MetricCard label="Faturamento" value={formatCurrency(kpis.revenueMonth)} />
+          <MetricCard label="Conversão" value={`${kpis.conversionRate.toFixed(1)}%`} />
+        </div>
+      </section>
+
+      <section className="px-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-foreground">Pipeline</h2>
+          <Button variant="ghost" size="sm">Ver Pipeline</Button>
+        </div>
+        <div className="space-y-3">
+          {pipeline.map((item) => (
+            <div key={item.name} className="flex items-center justify-between rounded-xl border border-border bg-surface/50 p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">{item.name}</p>
+                <p className="text-xl font-semibold text-foreground">{item.count} negociações</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="px-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-foreground">Orçamentos em negociação</h2>
+          <Button variant="ghost" size="sm">Ver tudo</Button>
+        </div>
+        <div className="space-y-3">
+          {activeNegotiations.map((order) => (
+            <div key={order.id} className="rounded-xl border border-border bg-surface/60 p-4 space-y-1">
+              <p className="text-sm font-semibold text-white truncate">{order.title || 'Orçamento'}</p>
+              <p className="text-xs text-muted-foreground">{order.clients?.name || 'Cliente não informado'}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-primary font-semibold">{formatCurrency(order.final_price)}</span>
+                <span className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">{order.status}</span>
+              </div>
+            </div>
+          ))}
+          {!activeNegotiations.length && (
+            <p className="text-sm text-muted-foreground">Nenhuma negociação ativa no momento.</p>
+          )}
+        </div>
+      </section>
+
+      <section className="px-4 pb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-foreground">Leads recentes</h2>
+          <Button variant="ghost" size="sm">Abrir CRM</Button>
+        </div>
+        <div className="space-y-3">
+          {recentLeads.map((lead) => (
+            <div key={lead.id} className="rounded-xl border border-border bg-background/50 p-4">
+              <p className="text-sm font-semibold text-foreground">{lead.name || 'Lead sem nome'}</p>
+              <p className="text-xs text-muted-foreground">{lead.phone}</p>
+              <p className="text-[11px] text-primary mt-1">{lead.source}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
 };
 
 export default DashboardMobile;

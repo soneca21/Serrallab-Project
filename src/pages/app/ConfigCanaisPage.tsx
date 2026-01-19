@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import SenderChannelsForm from '@/features/messaging/components/SenderChannelsForm.tsx';
@@ -13,16 +12,14 @@ import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { getAutomationRules, getAutomationLog, deleteAutomationRule } from '@/features/messaging/api/automationRules';
 import { MessageRetryRule, MessageAutomationLog } from '@/types/automation';
 import { useToast } from '@/components/ui/use-toast';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const ConfigCanaisPage = () => {
     const { user } = useAuth();
     const { toast } = useToast();
     
-    // Messages State
     const [messages, setMessages] = useState([]);
     const [loadingMessages, setLoadingMessages] = useState(true);
-
-    // Automation State
     const [rules, setRules] = useState<MessageRetryRule[]>([]);
     const [logs, setLogs] = useState<MessageAutomationLog[]>([]);
     const [loadingRules, setLoadingRules] = useState(false);
@@ -84,80 +81,82 @@ const ConfigCanaisPage = () => {
 
     return (
         <HelmetProvider>
-            <Helmet><title>Configuração de Canais — Serrallab</title></Helmet>
-            <div className="container mx-auto max-w-5xl p-4 space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Canais de Mensagem</h1>
-                    <p className="text-muted-foreground">Gerencie canais de WhatsApp, SMS e Email.</p>
+            <Helmet>
+                <title>Configuração de Canais — Serrallab</title>
+            </Helmet>
+            <div className="w-full space-y-6">
+                <AppSectionHeader
+                    title="Canais de mensagem"
+                    description="Gerencie WhatsApp, SMS e automações em um único lugar."
+                />
+                <div className="space-y-6 max-w-5xl">
+                    <Tabs defaultValue="config" className="w-full">
+                        <TabsList className="mb-4">
+                            <TabsTrigger value="config">Configuração</TabsTrigger>
+                            <TabsTrigger value="history">Histórico</TabsTrigger>
+                            <TabsTrigger value="automation">Automações</TabsTrigger>
+                        </TabsList>
+                        
+                        <TabsContent value="config">
+                            <div className="grid grid-cols-1 gap-6">
+                                <SenderChannelsForm />
+                            </div>
+                        </TabsContent>
+                        
+                        <TabsContent value="history">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Histórico de envios</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <MessageOutboxList 
+                                        messages={messages} 
+                                        isLoading={loadingMessages} 
+                                        onUpdate={fetchHistory}
+                                    />
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="automation">
+                            <div className="space-y-6">
+                               {isEditingRule ? (
+                                   <AutomationRulesForm 
+                                     rule={editingRule} 
+                                     onSave={() => {
+                                         setIsEditingRule(false);
+                                         setEditingRule(undefined);
+                                         fetchAutomation();
+                                     }} 
+                                     onCancel={() => {
+                                         setIsEditingRule(false);
+                                         setEditingRule(undefined);
+                                     }}
+                                   />
+                               ) : (
+                                   <AutomationRulesList 
+                                     rules={rules} 
+                                     isLoading={loadingRules}
+                                     onEdit={(rule) => {
+                                         setEditingRule(rule);
+                                         setIsEditingRule(true);
+                                     }}
+                                     onDelete={handleDeleteRule}
+                                     onCreate={() => {
+                                         setEditingRule(undefined);
+                                         setIsEditingRule(true);
+                                     }}
+                                   />
+                               )}
+
+                               <div className="mt-8">
+                                   <h3 className="text-lg font-medium mb-4">Log de execuções</h3>
+                                   <AutomationLogList logs={logs} isLoading={loadingRules} />
+                               </div>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
                 </div>
-
-                <Tabs defaultValue="config" className="w-full">
-                    <TabsList className="mb-4">
-                        <TabsTrigger value="config">Configuração</TabsTrigger>
-                        <TabsTrigger value="history">Histórico de Mensagens</TabsTrigger>
-                        <TabsTrigger value="automation">Automações</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="config">
-                        <div className="grid grid-cols-1 gap-6">
-                            {/* Assuming SenderChannelsForm handles the rendering of WhatsApp/SMS/Email forms */}
-                            <SenderChannelsForm />
-                        </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="history">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Histórico de Envios</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <MessageOutboxList 
-                                    messages={messages} 
-                                    isLoading={loadingMessages} 
-                                    onUpdate={fetchHistory}
-                                />
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    <TabsContent value="automation">
-                        <div className="space-y-6">
-                           {isEditingRule ? (
-                               <AutomationRulesForm 
-                                 rule={editingRule} 
-                                 onSave={() => {
-                                     setIsEditingRule(false);
-                                     setEditingRule(undefined);
-                                     fetchAutomation();
-                                 }} 
-                                 onCancel={() => {
-                                     setIsEditingRule(false);
-                                     setEditingRule(undefined);
-                                 }}
-                               />
-                           ) : (
-                               <AutomationRulesList 
-                                 rules={rules} 
-                                 isLoading={loadingRules}
-                                 onEdit={(rule) => {
-                                     setEditingRule(rule);
-                                     setIsEditingRule(true);
-                                 }}
-                                 onDelete={handleDeleteRule}
-                                 onCreate={() => {
-                                     setEditingRule(undefined);
-                                     setIsEditingRule(true);
-                                 }}
-                               />
-                           )}
-
-                           <div className="mt-8">
-                               <h3 className="text-lg font-medium mb-4">Log de Execuções</h3>
-                               <AutomationLogList logs={logs} isLoading={loadingRules} />
-                           </div>
-                        </div>
-                    </TabsContent>
-                </Tabs>
             </div>
         </HelmetProvider>
     );

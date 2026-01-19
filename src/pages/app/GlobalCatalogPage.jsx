@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Edit, Trash2, Loader2, BookCopy } from 'lucide-react';
@@ -204,64 +204,70 @@ const GlobalCatalogPage = () => {
     return (
         <>
             <Helmet><title>Catálogo Global — Serrallab</title></Helmet>
-            <Card>
-                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                        <CardTitle><BookCopy className="text-primary"/> Catálogo Global de Materiais</CardTitle>
-                        <CardDescription>Base de insumos compartilhada entre todos os usuários.</CardDescription>
+            <div className="w-full space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="flex items-start gap-3">
+                        <BookCopy className="text-primary h-6 w-6 mt-1" />
+                        <div>
+                            <h2 className="text-3xl font-heading font-bold">Catálogo Global de Materiais</h2>
+                            <p className="text-muted-foreground">Base de insumos compartilhada entre todos os usuários.</p>
+                        </div>
                     </div>
                     {isAdmin && (
-                        <Button onClick={() => handleOpenDialog()}>
+                        <Button onClick={() => handleOpenDialog()} className="rounded-xl w-full sm:w-auto">
                             <PlusCircle className="mr-2 h-4 w-4" /> Novo Material
                         </Button>
                     )}
-                </CardHeader>
-                <CardContent>
-                    {loading ? (
-                        <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-                    ) : (
-                        <div className="flex flex-col md:flex-row gap-6">
-                            <aside className="w-full md:w-1/4 lg:w-1/5">
-                                <h3 className="font-semibold mb-2 px-2 text-primary border-b border-primary/20 pb-1">Categorias</h3>
-                                <div className="space-y-1">
-                                    {categories.map(cat => (
-                                        <Button
-                                            key={cat}
-                                            variant="ghost"
-                                            onClick={() => setSelectedCategory(cat)}
-                                            className={cn(
-                                                "w-full justify-start text-left h-auto py-2 px-2 whitespace-normal rounded-r-none border-l-2",
-                                                selectedCategory === cat ? "bg-primary/10 text-primary border-primary" : "text-muted-foreground border-transparent hover:text-primary"
-                                            )}
-                                        >
-                                            {cat === 'all' ? 'Todas as Categorias' : cat}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </aside>
-                            <main className="flex-1">
-                                {filteredMaterials.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {filteredMaterials.map(material => (
-                                            <MaterialCard
-                                                key={material.id}
-                                                material={material}
-                                                isAdmin={isAdmin}
-                                                onEdit={handleOpenDialog}
-                                                onDelete={handleDelete}
-                                            />
+                </div>
+
+                <Card className="rounded-xl border-surface-strong">
+                    <CardContent>
+                        {loading ? (
+                            <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+                        ) : (
+                            <div className="flex flex-col md:flex-row gap-6">
+                                <aside className="w-full md:w-1/4 lg:w-1/5 mt-4">
+                                    <h3 className="font-semibold mb-2 px-2 text-primary border-b border-primary/20 pb-1">Categorias</h3>
+                                    <div className="space-y-1">
+                                        {categories.map(cat => (
+                                            <Button
+                                                key={cat}
+                                                variant="ghost"
+                                                onClick={() => setSelectedCategory(cat)}
+                                                className={cn(
+                                                    "w-full justify-start text-left h-auto py-2 px-2 whitespace-normal rounded-r-none border-l-2",
+                                                    selectedCategory === cat ? "bg-primary/10 text-primary border-primary" : "text-muted-foreground border-transparent hover:text-primary"
+                                                )}
+                                            >
+                                                {cat === 'all' ? 'Todas as Categorias' : cat}
+                                            </Button>
                                         ))}
                                     </div>
-                                ) : (
-                                    <div className="flex items-center justify-center h-full text-muted-foreground p-10 border-2 border-dashed border-surface-strong rounded-xl">
-                                        <p>Nenhum material neste catálogo.</p>
-                                    </div>
-                                )}
-                            </main>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+                                </aside>
+                                <main className="flex-1">
+                                    {filteredMaterials.length > 0 ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                            {filteredMaterials.map(material => (
+                                                <MaterialCard
+                                                    key={material.id}
+                                                    material={material}
+                                                    isAdmin={isAdmin}
+                                                    onEdit={handleOpenDialog}
+                                                    onDelete={handleDelete}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full text-muted-foreground p-10 border-2 border-dashed border-surface-strong rounded-xl">
+                                            <p>Nenhum material neste catálogo.</p>
+                                        </div>
+                                    )}
+                                </main>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
 
             {isAdmin && (
                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

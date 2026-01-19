@@ -19,6 +19,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import MaterialSelectorDialog from '@/components/MaterialSelectorDialog';
 import DownloadPdfButton from '@/features/orcamentos/components/DownloadPdfButton';
+import { createAuditLog } from '@/features/audit/api/auditLog';
 
 const AiSugestionDialog = ({ isOpen, onOpenChange, onApplySuggestion, userMaterials }) => {
     const { toast } = useToast();
@@ -384,6 +385,19 @@ const OrcamentoFormPage = () => {
             }).catch(err => console.error('Webhook dispatch failed', err));
             // -------------------------------------------------------------
 
+            createAuditLog(
+                'orcamento',
+                orcamentoId,
+                id ? 'update' : 'create',
+                {
+                    title: quoteData.title,
+                    client_id: quoteData.client_id,
+                    total_cost: quoteData.total_cost,
+                    final_price: quoteData.final_price,
+                    status: quoteData.status,
+                }
+            );
+
             if (!id && result.data) { navigate(`/app/orcamentos/editar/${result.data.id}`, { replace: true }); } 
             return { success: true }; 
         }
@@ -399,7 +413,16 @@ const OrcamentoFormPage = () => {
         else if (method === 'email') { if (!client.email) { toast({ title: 'Erro', description: 'O cliente não possui um email válido.', variant: 'destructive' }); return; } window.open(`mailto:${client.email}?subject=${encodeURIComponent(`Proposta de Orçamento: ${formData.title}`)}&body=${encodeURIComponent(messageBody)}`, '_blank'); }
         // Changed from 'quotes' to 'orders'
         const { error } = await supabase.from('orders').update({ status: 'Enviado' }).eq('id', id);
-        if (!error) { setFormData(prev => ({ ...prev, status: 'Enviado' })); toast({ title: 'Proposta Enviada!', description: `A proposta foi aberta no ${method} para envio.` }); }
+        if (!error) {
+            setFormData(prev => ({ ...prev, status: 'Enviado' }));
+            toast({ title: 'Proposta Enviada!', description: `A proposta foi aberta no ${method} para envio.` });
+            createAuditLog(
+                'orcamento',
+                id,
+                'update',
+                { status: 'Enviado', method }
+            );
+        }
     };
     
     if (loading) return <div className="flex justify-center items-center h-full"><Loader2 className="h-16 w-16 animate-spin text-metallic-orange" /></div>;

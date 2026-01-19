@@ -17,7 +17,7 @@ export function usePushNotifications() {
         const handleMessage = (event: MessageEvent) => {
             if (event.data && event.data.type === 'PUSH_NOTIFICATION') {
                 // Handle foreground notification logic if needed
-                console.log('Received push in foreground', event.data);
+                console.log('Push recebido em primeiro plano', event.data);
             }
         };
 

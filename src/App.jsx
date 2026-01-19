@@ -15,6 +15,7 @@ import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import DashboardPage from '@/pages/app/DashboardPage';
 import ClientesPage from '@/pages/app/ClientesPage';
+import ClienteProfilePage from '@/pages/app/ClienteProfilePage';
 import OrcamentosPage from '@/pages/app/OrcamentosPage';
 import OrcamentoFormPage from '@/pages/app/OrcamentoFormPage';
 import PipelinePage from '@/pages/app/PipelinePage';
@@ -71,20 +72,21 @@ function AppRoutes() {
         <Route path="redefinir-senha" element={<ResetPasswordPage />} />
       </Route>
       
-      <Route 
-        path="/app" 
-        element={
-          <ProtectedRoute>
-            <AppLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<DashboardPage />} />
+        <Route 
+          path="/app" 
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<DashboardPage />} />
         <Route path="orcamentos" element={<OrcamentosPage />} />
         <Route path="orcamentos/novo" element={<OrcamentoFormPage />} />
         <Route path="orcamentos/editar/:id" element={<OrcamentoFormPage />} />
         <Route path="pipeline" element={<PipelinePage />} />
         <Route path="clientes" element={<ClientesPage />} />
+        <Route path="clientes/:id" element={<ClienteProfilePage />} />
         <Route path="leads" element={<LeadsPage />} />
         <Route path="agendamentos" element={<SchedulesPage />} />
         <Route path="materiais" element={<MateriaisPage />} />

@@ -126,31 +126,31 @@ const SidebarContent = ({ onLinkClick }) => {
                         
                         <AnimatePresence initial={false}>
                             {isConfigExpanded && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: "auto", opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="overflow-hidden ml-4 pl-4 border-l border-border mt-1 space-y-1"
-                                >
-                                    {configItems.map((item) => {
-                                        // Simple logic to detect active state for submenu items
-                                        const isTabMatch = item.path.includes('?tab') && location.pathname === '/app/config' && item.path.includes(`tab=${currentTab}`);
-                                        const isPathMatch = !item.path.includes('?tab') && location.pathname === item.path;
-                                        const isActive = isTabMatch || isPathMatch;
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="overflow-hidden ml-4 pl-4 border-l border-border mt-1 space-y-1"
+                                    >
+                                        {configItems.map((item) => {
+                                            // Simple logic to detect active state for submenu items
+                                            const isTabMatch = item.path.includes('?tab') && location.pathname === '/app/config' && item.path.includes(`tab=${currentTab}`);
+                                            const isPathMatch = !item.path.includes('?tab') && location.pathname === item.path;
+                                            const isActive = isTabMatch || isPathMatch;
 
-                                        return (
-                                            <NavLink
-                                                key={item.label}
-                                                to={item.path}
-                                                onClick={onLinkClick}
-                                                className={cn(
-                                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 border-l-2 border-transparent hover:border-l-primary",
-                                                    isActive
-                                                        ? 'text-primary font-medium bg-primary/5'
-                                                        : 'text-muted-foreground hover:text-white'
-                                                )}
-                                            >
+                                            return (
+                                                <NavLink
+                                                    key={item.label}
+                                                    to={item.path}
+                                                    onClick={onLinkClick}
+                                                    className={cn(
+                                                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 border-l-2 border-transparent hover:border-l-primary group hover:bg-surface hover:text-white",
+                                                        isActive
+                                                            ? 'text-primary font-medium bg-primary/5'
+                                                            : 'text-muted-foreground'
+                                                    )}
+                                               >
                                                 <item.icon className="h-4 w-4" />
                                                 <span>{item.label}</span>
                                             </NavLink>
@@ -201,7 +201,7 @@ const SidebarContent = ({ onLinkClick }) => {
     );
 }
 
-const Header = ({ onMenuClick }) => {
+const Header = () => {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     
@@ -234,9 +234,6 @@ const Header = ({ onMenuClick }) => {
 
     return (
         <header className="bg-background/80 backdrop-blur-lg p-4 border-b border-border flex items-center gap-4 sticky top-0 z-30">
-            <Button variant="ghost" size="icon" className="md:hidden hover:bg-surface hover:text-primary" onClick={onMenuClick}>
-                <Menu className="h-6 w-6 text-white" />
-            </Button>
             <h1 className="text-xl sm:text-2xl font-heading text-white flex items-center gap-2">
                 <span className="bg-primary/20 w-2 h-6 rounded-full"></span>
                 {pageTitle}
@@ -246,7 +243,6 @@ const Header = ({ onMenuClick }) => {
 }
 
 const AppLayout = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
 
@@ -279,32 +275,9 @@ const AppLayout = () => {
                 <SidebarContent />
             </aside>
             <div className="hidden md:block w-64 flex-shrink-0" />
-            <AnimatePresence>
-                {isSidebarOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-sm"
-                            onClick={() => setIsSidebarOpen(false)}
-                        />
-                        <motion.aside
-                            initial={{ x: "-100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "-100%" }}
-                            transition={{ type: "tween", ease: "easeInOut", duration: 0.3 }}
-                            className="fixed top-0 left-0 h-full w-64 z-50 md:hidden shadow-2xl bg-background"
-                        >
-                            <SidebarContent onLinkClick={() => setIsSidebarOpen(false)} />
-                        </motion.aside>
-                    </>
-                )}
-            </AnimatePresence>
             <div className="flex-1 flex flex-col min-w-0">
-                <Header onMenuClick={() => setIsSidebarOpen(true)} />
-                <main className="flex-1 p-6 overflow-y-auto bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
+                <Header />
+                <main className="flex-1 p-6 overflow-y-auto overflow-x-auto scrollbar-visible bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
                     <motion.div
                         key={location.pathname + location.search}
                         initial={{ opacity: 0, y: 15 }}

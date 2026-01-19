@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Users, Percent } from 'lucide-react';
 import LeadsList from '@/features/leads/components/LeadsList';
@@ -8,6 +9,7 @@ import LeadDetail from '@/features/leads/components/LeadDetail';
 import ConvertLeadModal from '@/features/leads/components/ConvertLeadModal';
 import { useLeads } from '@/features/leads/hooks/useLeads';
 import { Lead } from '@/types/leads';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const LeadsPage = () => {
     const { leads, isLoading, refetch, removeLead, resetReply } = useLeads();
@@ -40,19 +42,19 @@ const LeadsPage = () => {
     return (
         <HelmetProvider>
             <Helmet><title>Leads (WhatsApp) — Serrallab</title></Helmet>
-            <div className="container mx-auto max-w-7xl space-y-6">
-                
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                           <MessageSquare className="h-8 w-8 text-primary" />
-                           Leads
-                        </h1>
-                        <p className="text-muted-foreground">Gerencie contatos recebidos via WhatsApp.</p>
-                    </div>
-                </div>
+            <div className="w-full space-y-6 pt-6">
+                <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-0 space-y-6">
+                    <AppSectionHeader
+                        title="Leads"
+                        description="Conduza conversas e mantenha cada lead registrado com histórico completo."
+                        actions={
+                            <Button variant="outline" size="sm" onClick={refetch}>
+                                <Users className="h-4 w-4" /> Atualizar
+                            </Button>
+                        }
+                    />
 
-                <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid gap-4 md:grid-cols-3">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total de Leads</CardTitle>
@@ -83,31 +85,31 @@ const LeadsPage = () => {
                             <p className="text-xs text-muted-foreground">100% dos leads</p>
                         </CardContent>
                     </Card>
+                    </div>
+
+                    <LeadsList 
+                        leads={leads} 
+                        isLoading={isLoading} 
+                        onViewDetail={handleViewDetail} 
+                        onConvert={handleConvertClick} 
+                    />
+
+                    <LeadDetail 
+                        lead={selectedLead} 
+                        open={detailOpen} 
+                        onOpenChange={setDetailOpen}
+                        onConvert={handleConvertClick}
+                        onDelete={removeLead}
+                        onResetReply={resetReply}
+                    />
+
+                    <ConvertLeadModal 
+                        lead={leadToConvert} 
+                        open={convertOpen} 
+                        onOpenChange={setConvertOpen}
+                        onSuccess={handleConversionSuccess}
+                    />
                 </div>
-
-                <LeadsList 
-                    leads={leads} 
-                    isLoading={isLoading} 
-                    onViewDetail={handleViewDetail} 
-                    onConvert={handleConvertClick} 
-                />
-
-                <LeadDetail 
-                    lead={selectedLead} 
-                    open={detailOpen} 
-                    onOpenChange={setDetailOpen}
-                    onConvert={handleConvertClick}
-                    onDelete={removeLead}
-                    onResetReply={resetReply}
-                />
-
-                <ConvertLeadModal 
-                    lead={leadToConvert} 
-                    open={convertOpen} 
-                    onOpenChange={setConvertOpen}
-                    onSuccess={handleConversionSuccess}
-                />
-
             </div>
         </HelmetProvider>
     );

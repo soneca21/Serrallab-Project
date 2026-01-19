@@ -1,4 +1,5 @@
 import * as React from "react"
+import { translateNotificationTitle, translateNotificationMessage } from "@/lib/notificationTranslator"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
@@ -60,20 +61,30 @@ function dispatch(action) {
   })
 }
 
+const sanitizeToastProps = (toastProps) => {
+  const { title, description, ...rest } = toastProps
+  return {
+    ...rest,
+    title: translateNotificationTitle(title),
+    description:
+      typeof description === "string" ? translateNotificationMessage(description) : description,
+  }
+}
+
 function toast(props) {
   const id = Math.random().toString(36).substr(2, 9)
 
   const update = (props) =>
     dispatch({
       type: "UPDATE_TOAST",
-      toast: { ...props, id },
+      toast: sanitizeToastProps({ ...props, id }),
     })
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id })
 
   dispatch({
     type: "ADD_TOAST",
     toast: {
-      ...props,
+      ...sanitizeToastProps(props),
       id,
       open: true,
       onOpenChange: (open) => {

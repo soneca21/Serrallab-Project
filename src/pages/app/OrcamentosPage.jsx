@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import DownloadPdfButton from '@/features/orcamentos/components/DownloadPdfButton';
+import { createAuditLog } from '@/features/audit/api/auditLog';
 
 const OrcamentosPage = () => {
     const { user } = useAuth();
@@ -37,16 +38,35 @@ const OrcamentosPage = () => {
         const { data: fullQuote, error } = await supabase.from('orders').select('*').eq('id', quoteId).single();
         if (error) { toast({ title: 'Erro ao duplicar', variant: 'destructive' }); return; }
         const { id, created_at, ...newQuoteData } = fullQuote;
-        const { data: duplicatedQuote, error: insertError } = await supabase.from('orders').insert({ ...newQuoteData, title: `${fullQuote.title} (Cópia)`, status: 'Rascunho' }).select('id').single();
+        const duplicatedTitle = `${fullQuote.title} (C\u00f3pia)`;
+        const { data: duplicatedQuote, error: insertError } = await supabase.from('orders').insert({ ...newQuoteData, title: duplicatedTitle, status: 'Rascunho' }).select('id').single();
         if (insertError) toast({ title: 'Erro ao duplicar', variant: 'destructive' });
-        else { toast({ title: 'Duplicado com sucesso!' }); navigate(`/app/orcamentos/editar/${duplicatedQuote.id}`); }
+        else {
+            toast({ title: 'Duplicado com sucesso!' });
+            createAuditLog(
+                'orcamento',
+                duplicatedQuote.id,
+                'create',
+                { title: duplicatedTitle, source_id: quoteId, status: 'Rascunho' }
+            );
+            navigate(`/app/orcamentos/editar/${duplicatedQuote.id}`);
+        }
     };
-
     const handleDelete = async (quoteId) => {
         if(!confirm('Tem certeza?')) return;
         const { error } = await supabase.from('orders').delete().eq('id', quoteId);
         if (error) toast({ title: 'Erro ao excluir', variant: 'destructive' });
-        else { toast({ title: 'Excluído com sucesso!' }); fetchQuotes(); }
+        else {
+            const removed = quotes.find((quote) => quote.id === quoteId);
+            toast({ title: 'Excluido com sucesso!' });
+            fetchQuotes();
+            createAuditLog(
+                'orcamento',
+                quoteId,
+                'delete',
+                { title: removed?.title || 'Orcamento' }
+            );
+        }
     };
 
     const filteredQuotes = quotes.filter(q => 
@@ -156,3 +176,4 @@ const OrcamentosPage = () => {
 };
 
 export default OrcamentosPage;
+

@@ -38,12 +38,12 @@ const LeadsMobile: React.FC = () => {
                 onMenu={handleRefresh} // Using menu icon spot for refresh on this page logic
             />
             
-            <div className="p-4 space-y-4">
+            <div className="px-4 pt-4 space-y-4">
                 {loading ? (
-                    Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+                    Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-2xl" />)
                 ) : (
                     leads.map(lead => (
-                        <Card key={lead.id} className="overflow-hidden">
+                        <Card key={lead.id} className="overflow-hidden rounded-2xl border border-border/40">
                             <CardContent className="p-4">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>

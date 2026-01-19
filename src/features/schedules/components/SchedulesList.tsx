@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -34,73 +34,85 @@ const SchedulesList: React.FC<SchedulesListProps> = ({
   return (
     <Card>
       <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Cliente / Modelo</TableHead>
-              <TableHead>Canal</TableHead>
-              <TableHead>Recorrência</TableHead>
-              <TableHead>Próxima Execução</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {schedules.length === 0 ? (
+        <div className="overflow-hidden rounded-xl border border-border bg-surface-variant">
+          <Table className="w-full table-fixed">
+            <TableHeader className="border-b border-border bg-surface-strong">
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  Nenhum agendamento encontrado.
-                </TableCell>
+                <TableHead className="w-[32%] px-6 py-3 text-center border-l border-border first:border-l-0">
+                  Cliente / Modelo
+                </TableHead>
+                <TableHead className="w-[12%] px-5 py-3 text-center border-l border-border">Canal</TableHead>
+                <TableHead className="w-[14%] px-5 py-3 text-center border-l border-border">{'Recorr\u00eancia'}</TableHead>
+                <TableHead className="w-[16%] px-5 py-3 text-center border-l border-border">
+                  {'Pr\u00f3xima Execu\u00e7\u00e3o'}
+                </TableHead>
+                <TableHead className="w-[12%] px-5 py-3 text-center border-l border-border">Status</TableHead>
+                <TableHead className="w-[14%] px-6 py-3 text-center border-l border-border">{'A\u00e7\u00f5es'}</TableHead>
               </TableRow>
-            ) : (
-              schedules.map((schedule) => {
-                const ChannelIcon = getChannelIcon(schedule.channel);
-                return (
-                  <TableRow key={schedule.id}>
-                    <TableCell>
-                      <div className="font-medium">{schedule.client?.name || 'Cliente Removido'}</div>
-                      <div className="text-xs text-muted-foreground">{getTemplateLabel(schedule.template)}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-sm">
-                        <ChannelIcon className="w-4 h-4" />
-                        <span className="capitalize">{schedule.channel}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {formatScheduleRecurrence(schedule.recurrence, schedule.recurrence_interval, schedule.recurrence_weekdays)}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                       {schedule.next_run_at 
-                         ? format(new Date(schedule.next_run_at), "dd/MM/yy HH:mm", { locale: ptBR })
-                         : '-'
-                       }
-                    </TableCell>
-                    <TableCell>
-                      <Switch 
-                        checked={schedule.enabled}
-                        onCheckedChange={(checked) => onToggle(schedule.id, checked)}
-                      />
-                    </TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button variant="ghost" size="icon" onClick={() => onViewHistory(schedule)} title="Histórico">
-                        <History className="h-4 w-4 text-blue-500" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => onEdit(schedule)} title="Editar">
-                        <Edit2 className="h-4 w-4 text-gray-600" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                          if (confirm('Tem certeza que deseja excluir?')) onDelete(schedule.id);
-                      }} title="Excluir">
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {schedules.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                    Nenhum agendamento encontrado.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                schedules.map((schedule) => {
+                  const ChannelIcon = getChannelIcon(schedule.channel);
+                  return (
+                    <TableRow key={schedule.id} className="border-b border-border/60 last:border-b-0">
+                      <TableCell className="px-6 py-3 align-middle border-l border-border first:border-l-0">
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">{schedule.client?.name || 'Cliente Removido'}</div>
+                          <div className="text-xs text-muted-foreground truncate">{getTemplateLabel(schedule.template)}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-5 py-3 align-middle border-l border-border">
+                        <div className="flex items-center justify-center gap-1 text-sm min-w-0">
+                          <ChannelIcon className="w-4 h-4" />
+                          <span className="capitalize truncate">{schedule.channel}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-5 py-3 align-middle text-center border-l border-border truncate">
+                        {formatScheduleRecurrence(schedule.recurrence, schedule.recurrence_interval, schedule.recurrence_weekdays)}
+                      </TableCell>
+                      <TableCell className="px-5 py-3 align-middle text-center border-l border-border truncate">
+                        {schedule.next_run_at 
+                          ? format(new Date(schedule.next_run_at), "dd/MM/yy HH:mm", { locale: ptBR })
+                          : '-'
+                        }
+                      </TableCell>
+                      <TableCell className="px-5 py-3 align-middle border-l border-border">
+                        <div className="flex items-center justify-center">
+                          <Switch
+                            checked={schedule.enabled}
+                            onCheckedChange={(checked) => onToggle(schedule.id, checked)}
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="px-6 py-3 align-middle border-l border-border">
+                        <div className="flex justify-center gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => onViewHistory(schedule)} title={'Hist\u00f3rico'}>
+                            <History className="h-4 w-4 text-blue-500" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => onEdit(schedule)} title="Editar">
+                            <Edit2 className="h-4 w-4 text-gray-600" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                              if (confirm('Tem certeza que deseja excluir?')) onDelete(schedule.id);
+                          }} title="Excluir">
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

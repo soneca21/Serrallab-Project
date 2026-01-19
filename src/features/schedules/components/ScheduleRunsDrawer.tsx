@@ -1,4 +1,4 @@
-
+﻿
 import React, { useEffect, useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -52,7 +52,7 @@ const ScheduleRunsDrawer: React.FC<ScheduleRunsDrawerProps> = ({ schedule, isOpe
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent className="w-[400px] sm:w-[600px] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Histórico de Execuções</SheetTitle>
+          <SheetTitle>{'Hist\u00f3rico de Execu\u00e7\u00f5es'}</SheetTitle>
           <SheetDescription>
             {schedule?.client?.name} - {schedule?.template}
           </SheetDescription>
@@ -74,7 +74,7 @@ const ScheduleRunsDrawer: React.FC<ScheduleRunsDrawerProps> = ({ schedule, isOpe
                 {runs.length === 0 ? (
                    <TableRow>
                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                       Nenhuma execução registrada.
+                       {'Nenhuma execu\u00e7\u00e3o registrada.'}
                      </TableCell>
                    </TableRow>
                 ) : (

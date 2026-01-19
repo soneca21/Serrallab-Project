@@ -3,7 +3,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
-        console.log('This browser does not support desktop notification');
+        console.log('Este navegador não oferece suporte a notificações na área de trabalho');
         return 'denied';
     }
     return await Notification.requestPermission();
@@ -31,7 +31,7 @@ export async function registerPushToken() {
         }, { onConflict: 'user_id, token' });
 
     } catch (error) {
-        console.error('Failed to register push token:', error);
+        console.error('Falha ao registrar token de push:', error);
     }
 }
 
