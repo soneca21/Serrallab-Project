@@ -52,8 +52,8 @@ const NotificationSettings = () => {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-primary" /> Notificacoes por Email</CardTitle>
-                    <CardDescription>Defina o que voce quer receber por email.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5 text-primary" /> Notificações por Email</CardTitle>
+                    <CardDescription>Defina o que você quer receber por email.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="flex items-center justify-between">
@@ -70,7 +70,7 @@ const NotificationSettings = () => {
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                             <Label className="text-base">Resumo Semanal</Label>
-                            <p className="text-sm text-muted-foreground">Resumo da sua performance no dia e horario escolhidos.</p>
+                            <p className="text-sm text-muted-foreground">Resumo da sua performance no dia e horário escolhidos.</p>
                         </div>
                          <Switch 
                             checked={prefs.email_weekly_digest}
@@ -87,7 +87,7 @@ const NotificationSettings = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="monday">Segunda</SelectItem>
-                                    <SelectItem value="tuesday">Terca</SelectItem>
+                                    <SelectItem value="tuesday">Terça</SelectItem>
                                     <SelectItem value="wednesday">Quarta</SelectItem>
                                     <SelectItem value="thursday">Quinta</SelectItem>
                                     <SelectItem value="friday">Sexta</SelectItem>
@@ -95,7 +95,7 @@ const NotificationSettings = () => {
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label>Horario</Label>
+                            <Label>Horário</Label>
                             <Input
                                 type="time"
                                 value={prefs.email_digest_time}
@@ -108,7 +108,7 @@ const NotificationSettings = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5 text-primary" /> Notificacoes Push (App)</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5 text-primary" /> Notificações Push (App)</CardTitle>
                     <CardDescription>Alertas em tempo real no navegador ou celular.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -125,8 +125,8 @@ const NotificationSettings = () => {
                     </div>
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="text-base">Mudanca de Status</Label>
-                            <p className="text-sm text-muted-foreground">Quando um orcamento for aprovado ou rejeitado.</p>
+                            <Label className="text-base">Mudança de Status</Label>
+                            <p className="text-sm text-muted-foreground">Quando um orçamento for aprovado ou rejeitado.</p>
                         </div>
                         <Switch 
                             checked={prefs.push_status_change}
@@ -137,7 +137,7 @@ const NotificationSettings = () => {
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                             <Label className="text-base">Pipeline</Label>
-                            <p className="text-sm text-muted-foreground">Atualizacoes de etapa no funil.</p>
+                            <p className="text-sm text-muted-foreground">Atualizações de etapa no funil.</p>
                         </div>
                         <Switch 
                             checked={prefs.push_pipeline_updates}
@@ -161,14 +161,14 @@ const NotificationSettings = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Moon className="h-5 w-5 text-primary" /> Horario Silencioso</CardTitle>
-                    <CardDescription>Evite alertas fora do horario de trabalho.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Moon className="h-5 w-5 text-primary" /> Horário Silencioso</CardTitle>
+                    <CardDescription>Evite alertas fora do horário de trabalho.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="text-base">Ativar horario silencioso</Label>
-                            <p className="text-sm text-muted-foreground">Pausar push durante o periodo configurado.</p>
+                            <Label className="text-base">Ativar horário silencioso</Label>
+                            <p className="text-sm text-muted-foreground">Pausar push durante o período configurado.</p>
                         </div>
                         <Switch 
                             checked={prefs.quiet_hours_enabled}
@@ -178,7 +178,7 @@ const NotificationSettings = () => {
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-2">
-                            <Label>Inicio</Label>
+                            <Label>Início</Label>
                             <Input
                                 type="time"
                                 value={prefs.quiet_hours_start}
@@ -199,12 +199,12 @@ const NotificationSettings = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5 text-primary" /> Preferencias de Canal</CardTitle>
-                    <CardDescription>Defina o canal principal para alertas criticos.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><MessageSquare className="h-5 w-5 text-primary" /> Preferências de Canal</CardTitle>
+                    <CardDescription>Defina o canal principal para alertas críticos.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label>Canal prioritario</Label>
+                        <Label>Canal prioritário</Label>
                         <Select value={prefs.priority_channel} onValueChange={(value) => handleChange('priority_channel', value)}>
                             <SelectTrigger className="max-w-xs">
                                 <SelectValue placeholder="Selecione" />
@@ -222,13 +222,13 @@ const NotificationSettings = () => {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><ShieldAlert className="h-5 w-5 text-primary" /> Tipos de Alertas</CardTitle>
-                    <CardDescription>Escolha quais tipos voce deseja receber.</CardDescription>
+                    <CardDescription>Escolha quais tipos você deseja receber.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                             <Label className="text-base">Erros</Label>
-                            <p className="text-sm text-muted-foreground">Falhas em envios, integracoes e automacoes.</p>
+                            <p className="text-sm text-muted-foreground">Falhas em envios, integrações e automações.</p>
                         </div>
                         <Switch 
                             checked={prefs.notify_errors}
@@ -250,7 +250,7 @@ const NotificationSettings = () => {
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                             <Label className="text-base">Sucesso</Label>
-                            <p className="text-sm text-muted-foreground">Aprovacoes, pagamentos e metas atingidas.</p>
+                            <p className="text-sm text-muted-foreground">Aprovações, pagamentos e metas atingidas.</p>
                         </div>
                         <Switch 
                             checked={prefs.notify_success}
@@ -261,7 +261,7 @@ const NotificationSettings = () => {
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
                             <Label className="text-base">Informativos</Label>
-                            <p className="text-sm text-muted-foreground">Dicas, novidades e atualizacoes do app.</p>
+                            <p className="text-sm text-muted-foreground">Dicas, novidades e atualizações do app.</p>
                         </div>
                         <Switch 
                             checked={prefs.notify_info}

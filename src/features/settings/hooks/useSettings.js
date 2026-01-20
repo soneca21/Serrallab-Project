@@ -1,11 +1,11 @@
-
+﻿
 import { useState, useCallback } from 'react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 
 export const useSettings = () => {
-    const { user, fetchProfile } = useAuth();
+    const { user, refreshProfile } = useAuth();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
 
@@ -20,7 +20,7 @@ export const useSettings = () => {
 
             if (error) throw error;
 
-            await fetchProfile(user.id);
+            await refreshProfile?.();
             toast({ title: 'Perfil atualizado', description: 'Suas informações foram salvas.' });
             return true;
         } catch (error) {
@@ -30,7 +30,7 @@ export const useSettings = () => {
         } finally {
             setLoading(false);
         }
-    }, [user, toast, fetchProfile]);
+    }, [user, toast, refreshProfile]);
 
     const saveCompany = useCallback(async (companyId, data) => {
         if (!user || !companyId) return;
@@ -65,7 +65,7 @@ export const useSettings = () => {
 
             if (error) throw error;
 
-            await fetchProfile(user.id);
+            await refreshProfile?.();
             toast({ title: 'Preferências salvas', description: 'Suas configurações de notificação foram atualizadas.' });
             return true;
         } catch (error) {
@@ -75,7 +75,7 @@ export const useSettings = () => {
         } finally {
             setLoading(false);
         }
-    }, [user, toast, fetchProfile]);
+    }, [user, toast, refreshProfile]);
 
     return {
         loading,
@@ -84,3 +84,5 @@ export const useSettings = () => {
         savePreferences
     };
 };
+
+

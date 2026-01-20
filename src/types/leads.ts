@@ -6,6 +6,7 @@ export interface Lead {
     phone: string;
     name?: string;
     source: 'whatsapp';
+    pipeline_stage_id?: string | null;
 }
 
 export interface LeadMessage {

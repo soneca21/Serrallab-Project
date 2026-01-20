@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
@@ -9,13 +9,28 @@ const DEFAULT_STATE = {
     clientsCount: 0,
     revenueMonth: 0,
     conversionRate: 0,
+    leadsToday: 0,
+    schedulesToday: 0,
+    openOrdersCount: 0,
+    openOrdersValue: 0,
   },
   pipeline: [],
   recentLeads: [],
   activeNegotiations: [],
   revenueHistory: [],
   recentActivity: [],
+  overdueOrders: [],
+  todaySchedules: [],
 };
+
+const normalizeStatus = (status) => (
+  (status || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+);
 
 export function useDashboardData() {
   const { user, profile } = useAuth();
@@ -33,6 +48,10 @@ export function useDashboardData() {
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(startOfDay);
+      endOfDay.setDate(endOfDay.getDate() + 1);
 
       const { count: clientsCount } = await supabase
         .from('clients')
@@ -51,6 +70,25 @@ export function useDashboardData() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
+      const { data: pipelineStages, error: pipelineStagesError } = await supabase
+        .from('pipeline_stages')
+        .select('id, name, color, "order"')
+        .order('order', { ascending: true });
+
+      const { data: schedules, error: schedulesError } = await supabase
+        .from('message_schedules')
+        .select('id, template, channel, next_run_at, run_at')
+        .eq('user_id', user.id)
+        .gte('next_run_at', startOfDay.toISOString())
+        .lt('next_run_at', endOfDay.toISOString());
+
+      if (pipelineStagesError) {
+        console.warn('Falha ao carregar etapas da pipeline', pipelineStagesError);
+      }
+      if (schedulesError) {
+        console.warn('Falha ao carregar agendamentos do dia', schedulesError);
+      }
+
       let auditQuery = supabase
         .from('audit_logs')
         .select('*')
@@ -65,34 +103,76 @@ export function useDashboardData() {
 
       const { data: auditLogs } = await auditQuery;
 
+      const leadsToday = leads ? leads.filter((l) => l.created_at >= startOfDay.toISOString()).length : 0;
       const currentMonthLeads = leads ? leads.filter((l) => l.created_at >= startOfMonth).length : 0;
       const currentMonthOrders = orders ? orders.filter((o) => o.created_at >= startOfMonth) : [];
+      const wonStatusSet = new Set(['ganho', 'aprovado', 'concluido', 'entregue']);
       const wonOrdersThisMonth = currentMonthOrders.filter((o) =>
-        ['Ganho', 'Aprovado', 'Concluído'].includes(o.status)
+        wonStatusSet.has(normalizeStatus(o.status))
       );
 
       const revenueMonth = wonOrdersThisMonth.reduce((sum, o) => sum + (Number(o.final_price) || 0), 0);
       const conversionRate = currentMonthLeads > 0 ? (wonOrdersThisMonth.length / currentMonthLeads) * 100 : 0;
 
-      const pipelineBuckets = {
-        Proposta: 0,
-        Negociação: 0,
-        Ganho: 0,
-        Perdido: 0,
-      };
+      const openStatusSet = new Set([
+        'rascunho',
+        'proposta',
+        'negociacao',
+        'em analise',
+        'enviado',
+        'novo',
+        'atendimento',
+        'em producao',
+      ]);
+      const openOrders = orders ? orders.filter((o) => openStatusSet.has(normalizeStatus(o.status))) : [];
+      const openOrdersValue = openOrders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.total_cost) || 0), 0);
 
-      orders?.forEach((o) => {
-        if (['Proposta', 'Rascunho', 'Novo'].includes(o.status)) pipelineBuckets.Proposta += 1;
-        else if (['Negociação', 'Em Análise'].includes(o.status)) pipelineBuckets.Negociação += 1;
-        else if (['Ganho', 'Aprovado'].includes(o.status)) pipelineBuckets.Ganho += 1;
-        else if (['Perdido', 'Rejeitado'].includes(o.status)) pipelineBuckets.Perdido += 1;
-      });
+      const followupCutoff = new Date(now);
+      followupCutoff.setDate(followupCutoff.getDate() - 2);
+      const overdueOrders = orders ? orders.filter((o) => {
+        const normalizedStatus = normalizeStatus(o.status);
+        if (!['enviado', 'proposta'].includes(normalizedStatus)) return false;
+        return o.created_at && new Date(o.created_at) < followupCutoff;
+      }) : [];
 
-      const pipeline = Object.entries(pipelineBuckets).map(([name, count]) => ({
-        name,
-        count,
-        totalValue: 0,
-      }));
+      let pipeline = [];
+      if (pipelineStages && pipelineStages.length) {
+        const novoStage = pipelineStages.find((stage) => normalizeStatus(stage.name) === 'novo');
+        pipeline = pipelineStages.map((stage) => {
+          const stageOrders = orders ? orders.filter((order) => {
+            if (order.pipeline_stage_id === stage.id) return true;
+            return !order.pipeline_stage_id && novoStage?.id === stage.id;
+          }) : [];
+
+          return {
+            name: stage.name,
+            count: stageOrders.length,
+            totalValue: stageOrders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.total_cost) || 0), 0),
+            color: stage.color,
+          };
+        });
+      } else {
+        const pipelineBuckets = {
+          Proposta: 0,
+          Negociacao: 0,
+          Ganho: 0,
+          Perdido: 0,
+        };
+
+        orders?.forEach((o) => {
+          const normalized = normalizeStatus(o.status);
+          if (['proposta', 'rascunho', 'novo'].includes(normalized)) pipelineBuckets.Proposta += 1;
+          else if (['negociacao', 'em analise'].includes(normalized)) pipelineBuckets.Negociacao += 1;
+          else if (['ganho', 'aprovado'].includes(normalized)) pipelineBuckets.Ganho += 1;
+          else if (['perdido', 'rejeitado'].includes(normalized)) pipelineBuckets.Perdido += 1;
+        });
+
+        pipeline = Object.entries(pipelineBuckets).map(([name, count]) => ({
+          name,
+          count,
+          totalValue: 0,
+        }));
+      }
 
       const months = [];
       for (let i = 5; i >= 0; i -= 1) {
@@ -105,12 +185,17 @@ export function useDashboardData() {
       }
 
       orders?.forEach((o) => {
-        if (['Ganho', 'Aprovado'].includes(o.status) && o.created_at) {
+        if (['ganho', 'aprovado'].includes(normalizeStatus(o.status)) && o.created_at) {
           const monthKey = o.created_at.slice(0, 7);
           const targetMonth = months.find((m) => m.key === monthKey);
           if (targetMonth) targetMonth.value += (Number(o.final_price) || 0);
         }
       });
+
+      const negotiationStatuses = new Set(['negociacao', 'proposta', 'enviado']);
+      const activeNegotiations = orders ? orders.filter((o) =>
+        negotiationStatuses.has(normalizeStatus(o.status))
+      ).slice(0, 5) : [];
 
       setData({
         kpis: {
@@ -118,21 +203,25 @@ export function useDashboardData() {
           clientsCount: Number(clientsCount) || 0,
           revenueMonth,
           conversionRate,
+          leadsToday,
+          schedulesToday: schedules?.length || 0,
+          openOrdersCount: openOrders.length,
+          openOrdersValue,
         },
         pipeline,
         recentLeads: leads ? leads.slice(0, 5) : [],
-        activeNegotiations: orders ? orders.filter((o) =>
-          ['Negociação', 'Proposta'].includes(o.status)
-        ).slice(0, 5) : [],
+        activeNegotiations,
         revenueHistory: months,
         recentActivity: auditLogs || [],
+        overdueOrders,
+        todaySchedules: schedules || [],
       });
     } catch (fetchError) {
       console.error(fetchError);
       setError(fetchError);
       toast({
-        title: "Erro",
-        description: "Falha ao carregar dados do dashboard.",
+        title: 'Erro',
+        description: 'Falha ao carregar dados do dashboard.',
         variant: 'destructive',
       });
     } finally {

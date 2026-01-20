@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
@@ -36,3 +36,4 @@ const ViewToggle = ({ currentView, onToggle }) => {
 };
 
 export default ViewToggle;
+

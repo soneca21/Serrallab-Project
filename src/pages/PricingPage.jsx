@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { Check, X, Award, Cpu, Gem, Building, PackagePlus, ShoppingCart, Loader2, ArrowRight } from 'lucide-react';

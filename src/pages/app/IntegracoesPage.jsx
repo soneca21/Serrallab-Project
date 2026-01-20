@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { CreditCard, Calendar, Slack, Database, Mail } from 'lucide-react';
 import { useConnections } from '@/features/connections/hooks/useConnections.ts';
@@ -18,19 +17,19 @@ const INTEGRATIONS = [
 
 const IntegracoesPage = () => {
     const { connections, loading, connect, disconnect } = useConnections();
-    
+
     const [connectModal, setConnectModal] = useState({ isOpen: false, type: null });
     const [disconnectModal, setDisconnectModal] = useState({ isOpen: false, id: null, type: null });
     const [actionLoading, setActionLoading] = useState(false);
 
     const handleConnect = async (token, creds) => {
         const integration = INTEGRATIONS.find(c => c.id === connectModal.type);
-        if(!integration) return;
+        if (!integration) return;
         return await connect(integration.id, 'integration', token, creds);
     };
 
     const handleDisconnect = async () => {
-        if(!disconnectModal.id) return;
+        if (!disconnectModal.id) return;
         setActionLoading(true);
         await disconnect(disconnectModal.id);
         setActionLoading(false);
@@ -39,7 +38,7 @@ const IntegracoesPage = () => {
 
     return (
         <>
-            <Helmet><title>Integrações — Serrallab</title></Helmet>
+            <Helmet><title>Integrações - Serrallab</title></Helmet>
             <div className="space-y-6 w-full max-w-6xl mx-auto">
                  <div>
                     <h2 className="text-3xl font-heading font-bold">Integrações</h2>

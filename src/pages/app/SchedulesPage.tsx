@@ -73,7 +73,7 @@ const SchedulesPage = () => {
             <Helmet><title>Agendamentos - Serrallab</title></Helmet>
             <div className="space-y-8 pb-8">
                 {/* Header Section */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-2"><div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex flex-col gap-2">
                         <h2 className="text-3xl font-heading font-bold text-foreground tracking-tight">
                             Agendamentos
@@ -85,7 +85,7 @@ const SchedulesPage = () => {
                     <Button onClick={() => { setEditingSchedule(undefined); setIsFormOpen(true); }} className="w-full sm:w-auto">
                         <Plus className="mr-2 h-4 w-4" /> Novo Agendamento
                     </Button>
-                </div>
+                </div><div className="h-px bg-border mb-4" /></div>
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -164,3 +164,4 @@ const SchedulesPage = () => {
 };
 
 export default SchedulesPage;
+

@@ -111,15 +111,15 @@ const BillingSettings = () => {
                 <CardContent className="space-y-6 relative z-10">
                     <div className="flex flex-col md:flex-row gap-8">
                         <div className="flex-1 space-y-4">
-                            <h3 className="text-3xl font-heading font-bold text-white">{subscription?.plans?.name || 'Plano Basico'}</h3>
+                            <h3 className="text-3xl font-heading font-bold text-white">{subscription?.plans?.name || 'Plano Básico'}</h3>
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2 text-gray-300">
                                     <CheckCircle className="h-4 w-4 text-primary" />
-                                    <span>Renovacao: {subscription ? new Date(subscription.current_period_end).toLocaleDateString() : 'N/A'}</span>
+                                    <span>Renovação: {subscription ? new Date(subscription.current_period_end).toLocaleDateString() : 'N/A'}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-gray-300">
                                     <CreditCard className="h-4 w-4 text-primary" />
-                                    <span>Valor: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subscription?.plans?.price || 0)}/mes</span>
+                                    <span>Valor: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subscription?.plans?.price || 0)}/mês</span>
                                 </div>
                             </div>
                         </div>
@@ -135,14 +135,14 @@ const BillingSettings = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><PackagePlus className="h-5 w-5 text-primary" /> Pacotes Extras</CardTitle>
-                        <CardDescription>Precisa de mais orcamentos este mes?</CardDescription>
+                        <CardDescription>Precisa de mais orçamentos este mês?</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {packages.map(pkg => (
                             <div key={pkg.id} className="flex items-center justify-between p-3 rounded-lg border border-surface-strong hover:border-primary/50 transition-colors">
                                 <div>
                                     <p className="font-bold text-white">{pkg.name}</p>
-                                    <p className="text-sm text-gray-400">+{pkg.quote_amount} orcamentos</p>
+                                    <p className="text-sm text-gray-400">+{pkg.quote_amount} orçamentos</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-bold text-primary mb-2">R$ {Number(pkg.price).toFixed(2)}</p>
@@ -152,14 +152,14 @@ const BillingSettings = () => {
                                 </div>
                             </div>
                         ))}
-                        {packages.length === 0 && <p className="text-sm text-gray-400 italic">Nenhum pacote disponivel.</p>}
+                        {packages.length === 0 && <p className="text-sm text-gray-400 italic">Nenhum pacote disponível.</p>}
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /> Historico de Faturas</CardTitle>
-                        <CardDescription>Ultimos pagamentos realizados.</CardDescription>
+                        <CardTitle className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /> Histórico de Faturas</CardTitle>
+                        <CardDescription>Últimos pagamentos realizados.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">

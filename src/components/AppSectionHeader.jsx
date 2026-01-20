@@ -12,7 +12,7 @@ const AppSectionHeader = ({ title, description, actions }) => {
                     <div className="flex flex-wrap gap-2">{actions}</div>
                 )}
             </div>
-            <div className="h-px bg-border mt-2" />
+            <div className="h-px bg-border mt-2 mb-4" />
         </div>
     );
 };

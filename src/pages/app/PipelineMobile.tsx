@@ -1,5 +1,4 @@
-
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import MobileHeader from '@/components/MobileHeader';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { getOrcamentosOffline } from '@/lib/offline';
@@ -12,13 +11,36 @@ const PipelineMobile: React.FC = () => {
     const [pipeline, setPipeline] = useState<Record<string, any[]>>({});
     const navigate = useNavigate();
 
-    const columns = ['Proposta', 'Negociação', 'Aprovado', 'Rejeitado'];
+    const columns = [
+        'Novo',
+        'Atendimento',
+        'Enviado',
+        'Em Producao',
+        'Entregue',
+        'Perdido',
+    ];
+    const stageLabels: Record<string, string> = {
+        'Em Producao': 'Em Produ\u00e7\u00e3o',
+    };
+    const statusFallback = {
+        Rascunho: 'Novo',
+        Enviado: 'Enviado',
+        Aprovado: 'Em Producao',
+        'Proposta Aceita': 'Em Producao',
+        'Conclu\u00eddo': 'Entregue',
+        Concluido: 'Entregue',
+        Ganho: 'Entregue',
+        Rejeitado: 'Perdido',
+    };
 
     useEffect(() => {
         const load = async () => {
             const data = await getOrcamentosOffline() || [];
             const grouped = columns.reduce((acc, status) => {
-                acc[status] = data.filter((i: any) => i.status === status);
+                acc[status] = data.filter((item: any) => {
+                    const stage = item.pipeline_stage_name || statusFallback[item.status] || 'Novo';
+                    return stage === status;
+                });
                 return acc;
             }, {} as Record<string, any[]>);
             setPipeline(grouped);
@@ -35,7 +57,7 @@ const PipelineMobile: React.FC = () => {
                     {columns.map(status => (
                         <div key={status} className="w-[85vw] md:w-[300px] flex flex-col h-full bg-secondary/30 rounded-lg p-2">
                             <div className="flex justify-between items-center mb-3 px-2">
-                                <h3 className="font-bold text-sm">{status}</h3>
+                                <h3 className="font-bold text-sm">{stageLabels[status] || status}</h3>
                                 <span className="text-xs bg-background px-2 py-1 rounded-full">
                                     {pipeline[status]?.length || 0}
                                 </span>

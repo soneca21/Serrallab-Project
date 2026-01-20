@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Edit, Trash2, Loader2, BookCopy } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Loader2, BookCopy, Search } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -19,6 +19,7 @@ import CategorySelector from '@/components/CategorySelector';
 import { supabase } from '@/lib/customSupabaseClient';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
+import { useViewMode } from '@/contexts/ViewModeContext';
 
 const MaterialForm = ({ material, onSave, onCancel, categories, isLoading }) => {
     const defaultState = { name: '', category: '', unit: 'un', cost: '', length: '' };
@@ -71,7 +72,7 @@ const MaterialForm = ({ material, onSave, onCancel, categories, isLoading }) => 
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="m">Metro (m)</SelectItem>
-                                <SelectItem value="m2">Metro Quadrado (m²)</SelectItem>
+                                <SelectItem value="m2">Metro Quadrado (m\u00b2)</SelectItem>
                                 <SelectItem value="kg">Quilograma (kg)</SelectItem>
                                 <SelectItem value="un">Unidade (un)</SelectItem>
                             </SelectContent>
@@ -128,14 +129,16 @@ const MaterialCard = ({ material, isAdmin, onEdit, onDelete }) => {
 
 const GlobalCatalogPage = () => {
     const { profile } = useAuth();
+    const { viewMode } = useViewMode();
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [formIsLoading, setFormIsLoading] = useState(false);
     const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const { toast } = useToast();
-    const isAdmin = profile?.role === 'admin';
+    const isAdmin = profile?.role === 'admin' && viewMode === 'admin';
 
     const fetchMaterials = useCallback(async () => {
         setLoading(true);
@@ -146,7 +149,7 @@ const GlobalCatalogPage = () => {
             .order('name', { ascending: true });
 
         if (error) {
-            toast({ title: 'Erro ao buscar catálogo', description: error.message, variant: 'destructive' });
+            toast({ title: 'Erro ao buscar cat\u00e1logo', description: error.message, variant: 'destructive' });
         } else {
             setMaterials(data);
         }
@@ -158,12 +161,16 @@ const GlobalCatalogPage = () => {
     }, [fetchMaterials]);
 
     const { categories, filteredMaterials } = useMemo(() => {
+        const search = searchTerm.toLowerCase();
         const cats = ['all', ...Array.from(new Set(materials.map(m => m.category || 'Sem Categoria'))).sort()];
-        const filtered = selectedCategory === 'all'
-            ? materials
-            : materials.filter(m => (m.category || 'Sem Categoria') === selectedCategory);
+        const filtered = materials.filter((material) => {
+            const category = material.category || 'Sem Categoria';
+            const matchesCategory = selectedCategory === 'all' || category === selectedCategory;
+            const matchesSearch = material.name.toLowerCase().includes(search);
+            return matchesCategory && matchesSearch;
+        });
         return { categories: cats, filteredMaterials: filtered };
-    }, [materials, selectedCategory]);
+    }, [materials, selectedCategory, searchTerm]);
 
     const handleSaveMaterial = async (materialData) => {
         setFormIsLoading(true);
@@ -203,14 +210,14 @@ const GlobalCatalogPage = () => {
 
     return (
         <>
-            <Helmet><title>Catálogo Global — Serrallab</title></Helmet>
+            <Helmet><title>{'Cat\u00e1logo Global \u2014 Serrallab'}</title></Helmet>
             <div className="w-full space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="flex items-start gap-3">
                         <BookCopy className="text-primary h-6 w-6 mt-1" />
                         <div>
-                            <h2 className="text-3xl font-heading font-bold">Catálogo Global de Materiais</h2>
-                            <p className="text-muted-foreground">Base de insumos compartilhada entre todos os usuários.</p>
+                            <h2 className="text-3xl font-heading font-bold">{'Cat\u00e1logo Global de Materiais'}</h2>
+                            <p className="text-muted-foreground">{'Base de insumos compartilhada entre todos os usu\u00e1rios.'}</p>
                         </div>
                     </div>
                     {isAdmin && (
@@ -218,6 +225,16 @@ const GlobalCatalogPage = () => {
                             <PlusCircle className="mr-2 h-4 w-4" /> Novo Material
                         </Button>
                     )}
+                </div><div className="h-px bg-border mb-4" /></div>
+
+                <div className="relative max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Buscar..."
+                        className="pl-9 rounded-xl"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                 </div>
 
                 <Card className="rounded-xl border-surface-strong">
@@ -246,7 +263,7 @@ const GlobalCatalogPage = () => {
                                 </aside>
                                 <main className="flex-1">
                                     {filteredMaterials.length > 0 ? (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                                             {filteredMaterials.map(material => (
                                                 <MaterialCard
                                                     key={material.id}
@@ -259,7 +276,7 @@ const GlobalCatalogPage = () => {
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-center h-full text-muted-foreground p-10 border-2 border-dashed border-surface-strong rounded-xl">
-                                            <p>Nenhum material neste catálogo.</p>
+                                            <p>{'Nenhum material neste cat\u00e1logo.'}</p>
                                         </div>
                                     )}
                                 </main>
@@ -290,3 +307,6 @@ const GlobalCatalogPage = () => {
 };
 
 export default GlobalCatalogPage;
+
+
+

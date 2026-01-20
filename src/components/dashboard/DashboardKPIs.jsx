@@ -1,14 +1,13 @@
-
-import React from 'react';
+﻿import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, TrendingUp, UserPlus } from 'lucide-react';
+import { UserPlus, DollarSign, FileText, Calendar } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const KPICard = ({ title, value, icon: Icon, subtext }) => (
   <motion.div
     whileHover={{ y: -2 }}
-    transition={{ type: "spring", stiffness: 300 }}
+    transition={{ type: 'spring', stiffness: 300 }}
   >
     <Card className="h-full bg-surface border-border shadow-sm hover:shadow-md hover:bg-surface-hover transition-all duration-200">
       <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -24,33 +23,37 @@ const KPICard = ({ title, value, icon: Icon, subtext }) => (
 );
 
 const DashboardKPIs = ({ data }) => {
-  const { leadsCount, clientsCount, revenueMonth, conversionRate } = data;
+  const leadsToday = data.leadsToday ?? data.leadsCount ?? 0;
+  const openOrdersCount = data.openOrdersCount ?? 0;
+  const openOrdersValue = data.openOrdersValue ?? 0;
+  const schedulesToday = data.schedulesToday ?? 0;
+  const revenueMonth = data.revenueMonth ?? 0;
 
   return (
     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
       <KPICard
-        title="Total de Leads (Mês)"
-        value={leadsCount}
+        title="Leads de hoje"
+        value={leadsToday}
         icon={UserPlus}
-        subtext="Novos leads este mês"
+        subtext="Novos contatos nas \u00faltimas 24h"
       />
       <KPICard
-        title="Total de Clientes"
-        value={clientsCount}
-        icon={Users}
-        subtext="Base ativa de clientes"
+        title="Or\u00e7amentos em aberto"
+        value={openOrdersCount}
+        icon={FileText}
+        subtext={`Valor pendente: ${formatCurrency(openOrdersValue)}`}
       />
       <KPICard
-        title="Receita (Mês)"
+        title="Agendamentos do dia"
+        value={schedulesToday}
+        icon={Calendar}
+        subtext="Mensagens e lembretes programados"
+      />
+      <KPICard
+        title="Receita do m\u00eas"
         value={formatCurrency(revenueMonth)}
         icon={DollarSign}
-        subtext="Faturamento confirmado"
-      />
-      <KPICard
-        title="Taxa de Conversão"
-        value={`${conversionRate.toFixed(1)}%`}
-        icon={TrendingUp}
-        subtext="Leads convertidos em vendas"
+        subtext="Pedidos confirmados no per\u00edodo"
       />
     </div>
   );

@@ -11,7 +11,6 @@ import BillingSettings from './components/BillingSettings';
 import SecuritySettings from './components/SecuritySettings';
 import ChannelsSettings from './components/ChannelsSettings';
 import NotificationSettings from './components/NotificationSettings';
-import AuditLogs from './components/AuditLogs';
 
 const COMPONENTS = {
     profile: ProfileSettings,
@@ -21,7 +20,6 @@ const COMPONENTS = {
     channels: ChannelsSettings,
     notifications: NotificationSettings,
     security: SecuritySettings,
-    audit: AuditLogs,
 };
 
 const SettingsLayout = () => {

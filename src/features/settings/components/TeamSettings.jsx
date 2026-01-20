@@ -14,18 +14,18 @@ import { Check, X, Loader2, Users, UserPlus, Pencil, Trash2, ShieldCheck, Mail, 
 
 const roleMeta = {
     owner: {
-        label: 'Proprietario',
-        description: 'Controle total da organizacao, faturamento e equipe.',
+        label: 'Proprietário',
+        description: 'Controle total da organização, faturamento e equipe.',
         badge: 'default'
     },
     admin: {
         label: 'Admin',
-        description: 'Administra operacao e configuracoes (sem faturamento).',
+        description: 'Administra operação e configurações (sem faturamento).',
         badge: 'secondary'
     },
     editor: {
         label: 'Editor',
-        description: 'Cria e edita clientes, orcamentos e agendamentos.',
+        description: 'Cria e edita clientes, orçamentos e agendamentos.',
         badge: 'outline'
     },
     viewer: {
@@ -38,13 +38,13 @@ const roleMeta = {
 const permissionMatrix = [
     { key: 'dashboard', label: 'Ver dashboard', owner: true, admin: true, editor: true, viewer: true },
     { key: 'clients', label: 'Gerenciar clientes', owner: true, admin: true, editor: true, viewer: false },
-    { key: 'quotes', label: 'Criar/editar orcamentos', owner: true, admin: true, editor: true, viewer: false },
+    { key: 'quotes', label: 'Criar/editar orçamentos', owner: true, admin: true, editor: true, viewer: false },
     { key: 'pipeline', label: 'Atualizar pipeline', owner: true, admin: true, editor: true, viewer: false },
     { key: 'schedules', label: 'Gerenciar agendamentos', owner: true, admin: true, editor: true, viewer: false },
     { key: 'materials', label: 'Gerenciar materiais', owner: true, admin: true, editor: true, viewer: false },
-    { key: 'reports', label: 'Ver relatorios', owner: true, admin: true, editor: true, viewer: true },
-    { key: 'integrations', label: 'Canais e integracoes', owner: true, admin: true, editor: false, viewer: false },
-    { key: 'security', label: 'Seguranca e 2FA', owner: true, admin: true, editor: false, viewer: false },
+    { key: 'reports', label: 'Ver relatórios', owner: true, admin: true, editor: true, viewer: true },
+    { key: 'integrations', label: 'Canais e integrações', owner: true, admin: true, editor: false, viewer: false },
+    { key: 'security', label: 'Segurança e 2FA', owner: true, admin: true, editor: false, viewer: false },
     { key: 'team', label: 'Gerenciar equipe', owner: true, admin: true, editor: false, viewer: false },
     { key: 'billing', label: 'Planos e faturamento', owner: true, admin: false, editor: false, viewer: false }
 ];
@@ -80,7 +80,7 @@ const TeamSettings = () => {
 
     const handleInvite = async () => {
         if (!inviteEmail) {
-            toast({ title: 'Email obrigatorio', description: 'Informe um email para convite.', variant: 'destructive'});
+            toast({ title: 'Email obrigatório', description: 'Informe um email para convite.', variant: 'destructive'});
             return;
         }
         setIsSubmitting(true);
@@ -116,7 +116,7 @@ const TeamSettings = () => {
             
             if (error) throw error;
             
-            toast({ title: 'Permissao atualizada', description: 'Nivel de acesso alterado.' });
+            toast({ title: 'Permissão atualizada', description: 'Nível de acesso alterado.' });
             setEditingMember(null);
             fetchTeamMembers();
         } catch (error) {
@@ -137,7 +137,7 @@ const TeamSettings = () => {
 
             if (error) throw error;
 
-            toast({ title: 'Membro removido', description: 'O usuario nao tem mais acesso.' });
+            toast({ title: 'Membro removido', description: 'O usuário não tem mais acesso.' });
             fetchTeamMembers();
         } catch (error) {
             toast({ title: 'Erro ao remover', description: error.message, variant: 'destructive' });
@@ -157,8 +157,8 @@ const TeamSettings = () => {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Equipe e Permissoes</CardTitle>
-                    <CardDescription>Defina quem pode acessar o que dentro da sua organizacao.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Equipe e Permissões</CardTitle>
+                    <CardDescription>Defina quem pode acessar o que dentro da sua organização.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -185,19 +185,19 @@ const TeamSettings = () => {
                                 <p>Convide por email e defina o papel inicial.</p>
                             </div>
                             <div className="space-y-1">
-                                <p className="text-foreground font-medium">2. Ativacao</p>
-                                <p>O usuario cria senha e entra com o papel definido.</p>
+                                <p className="text-foreground font-medium">2. Ativação</p>
+                                <p>O usuário cria senha e entra com o papel definido.</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-foreground font-medium">3. Ajustes</p>
-                                <p>Altere permissao a qualquer momento.</p>
+                                <p>Altere permissão a qualquer momento.</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs text-amber-200 flex items-start gap-3">
                         <AlertTriangle className="h-4 w-4" />
-                        Recomendamos ativar 2FA para administradores e proprietario.
+                        Recomendamos ativar 2FA para administradores e proprietário.
                     </div>
                 </CardContent>
             </Card>
@@ -235,14 +235,14 @@ const TeamSettings = () => {
                         </div>
                     </div>
 
-                    <div className="rounded-md border border-surface-strong overflow-hidden">
+                    <div className="mt-4 rounded-md border border-surface-strong overflow-hidden">
                         <Table>
                             <TableHeader className="bg-surface-strong">
                                 <TableRow>
-                                    <TableHead>Usuario</TableHead>
-                                    <TableHead>Papel</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Acoes</TableHead>
+                                    <TableHead className="text-center">Usuário</TableHead>
+                                    <TableHead className="text-center">Papel</TableHead>
+                                    <TableHead className="text-center">Status</TableHead>
+                                    <TableHead className="text-center">Ações</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -253,26 +253,26 @@ const TeamSettings = () => {
                                 ) : rows.length > 0 ? (
                                     rows.map(member => (
                                         <TableRow key={member.id}>
-                                            <TableCell>
-                                                <div className="flex items-center gap-3">
+                                            <TableCell className="text-center">
+                                                <div className="flex items-center justify-center gap-3 text-center">
                                                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                                         <Mail className="h-4 w-4" />
                                                     </div>
-                                                    <div>
+                                                    <div className="text-center">
                                                         <p className="font-medium">{member.email}</p>
                                                         {member.isOwner && <p className="text-xs text-muted-foreground">Conta principal</p>}
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="text-center">
                                                 <Badge variant={roleMeta[member.permission_level]?.badge || 'outline'}>
                                                     {roleMeta[member.permission_level]?.label || member.permission_level}
                                                 </Badge>
                                             </TableCell>
-                                            <TableCell>
+                                            <TableCell className="text-center">
                                                 <span className="text-green-500 text-xs font-medium px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">Ativo</span>
                                             </TableCell>
-                                            <TableCell className="text-right">
+                                            <TableCell className="text-center">
                                                 {member.isOwner ? (
                                                     <span className="text-xs text-muted-foreground">Protegido</span>
                                                 ) : (
@@ -303,19 +303,19 @@ const TeamSettings = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Matriz de Permissoes</CardTitle>
-                    <CardDescription>Resumo rapido do que cada papel pode acessar.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Matriz de Permissões</CardTitle>
+                    <CardDescription>Resumo rápido do que cada papel pode acessar.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="rounded-md border border-surface-strong overflow-hidden">
                         <Table>
                             <TableHeader className="bg-surface-strong">
                                 <TableRow>
-                                    <TableHead>Funcionalidade</TableHead>
-                                    <TableHead>Proprietario</TableHead>
-                                    <TableHead>Admin</TableHead>
-                                    <TableHead>Editor</TableHead>
-                                    <TableHead>Visualizador</TableHead>
+                                    <TableHead className="text-center">Funcionalidade</TableHead>
+                                    <TableHead className="text-center">Proprietário</TableHead>
+                                    <TableHead className="text-center">Admin</TableHead>
+                                    <TableHead className="text-center">Editor</TableHead>
+                                    <TableHead className="text-center">Visualizador</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -338,13 +338,13 @@ const TeamSettings = () => {
                 <Dialog open={!!editingMember} onOpenChange={() => setEditingMember(null)}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Editar Permissao</DialogTitle>
+                            <DialogTitle>Editar Permissão</DialogTitle>
                             <DialogDescription>
-                                Altere o nivel de acesso para {editingMember.email}.
+                                Altere o nível de acesso para {editingMember.email}.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4 space-y-2">
-                            <Label>Nivel de Acesso</Label>
+                            <Label>Nível de Acesso</Label>
                             <Select 
                                 value={editingMember.permission_level} 
                                 onValueChange={(value) => setEditingMember(prev => ({...prev, permission_level: value}))}
@@ -375,3 +375,11 @@ const TeamSettings = () => {
 };
 
 export default TeamSettings;
+
+
+
+
+
+
+
+

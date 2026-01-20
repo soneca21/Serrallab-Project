@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 const ACTION_LABELS = {
   create: 'Criado',
   update: 'Atualizado',
-  delete: 'Excluido',
+  delete: 'Exclu\u00eddo',
   login: 'Login',
   logout: 'Logout',
 };
@@ -18,10 +18,10 @@ const ACTION_LABELS = {
 const ENTITY_LABELS = {
   cliente: 'Cliente',
   fornecedor: 'Fornecedor',
-  orcamento: 'Orcamento',
+  orcamento: 'Or\u00e7amento',
   pedido: 'Pedido',
   lead: 'Lead',
-  usuario: 'Usuario',
+  usuario: 'Usu\u00e1rio',
 };
 
 const formatRelativeDate = (dateString) => {
@@ -66,24 +66,24 @@ const DashboardAtividadesRecentes = ({ logs }) => {
             <Table>
               <TableHeader>
                 <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="w-[35%]">{'A\u00e7\u00e3o'}</TableHead>
-                  <TableHead>Entidade</TableHead>
-                  <TableHead className="text-right">{'Quando'}</TableHead>
+                  <TableHead className="w-[35%] text-center">{'A\u00e7\u00e3o'}</TableHead>
+                  <TableHead className="text-center">Entidade</TableHead>
+                  <TableHead className="text-center">{'Quando'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {logs && logs.length > 0 ? (
                   logs.map((log) => (
                     <TableRow key={log.id} className="border-border hover:bg-muted/50 transition-colors">
-                      <TableCell>
-                        <Badge variant="outline" className="text-[10px] uppercase">
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-[10px] uppercase inline-flex mx-auto">
                           {ACTION_LABELS[log.action] || log.action}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-center text-sm text-muted-foreground">
                         {ENTITY_LABELS[log.entity] || log.entity || '-'}
                       </TableCell>
-                      <TableCell className="text-right text-sm text-muted-foreground">
+                      <TableCell className="text-center text-sm text-muted-foreground">
                         {formatRelativeDate(log.created_at)}
                       </TableCell>
                     </TableRow>
@@ -105,3 +105,6 @@ const DashboardAtividadesRecentes = ({ logs }) => {
 };
 
 export default DashboardAtividadesRecentes;
+
+
+

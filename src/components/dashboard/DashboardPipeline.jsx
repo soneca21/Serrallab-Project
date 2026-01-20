@@ -1,5 +1,4 @@
-
-import React from 'react';
+﻿import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { formatCurrency } from '@/lib/utils';
@@ -24,10 +23,33 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const DashboardPipeline = ({ data }) => {
   const colors = {
-    'Proposta': '#3b82f6',    // Blue
-    'Negociação': '#f59e0b',  // Amber
-    'Ganho': '#10b981',       // Emerald
-    'Perdido': '#ef4444'      // Red
+    Novo: '#3b82f6',
+    Atendimento: '#f59e0b',
+    Enviado: '#8b5cf6',
+    'Em Producao': '#f97316',
+    'Em Produ\u00e7\u00e3o': '#f97316',
+    Entregue: '#14b8a6',
+    Ganho: '#10b981',
+    Perdido: '#ef4444',
+    Proposta: '#3b82f6',
+    'Negociacao': '#f59e0b',
+    'Negocia\u00e7\u00e3o': '#f59e0b',
+  };
+  const colorTokens = {
+    blue: '#3b82f6',
+    yellow: '#f59e0b',
+    purple: '#8b5cf6',
+    orange: '#f97316',
+    teal: '#14b8a6',
+    green: '#10b981',
+    red: '#ef4444',
+  };
+
+  const resolveColor = (entry) => {
+    if (entry.color) {
+      return colorTokens[entry.color] || entry.color;
+    }
+    return colors[entry.name] || '#8884d8';
   };
 
   return (
@@ -38,7 +60,7 @@ const DashboardPipeline = ({ data }) => {
     >
       <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-border bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-xl font-heading text-foreground">Pipeline de Vendas</CardTitle>
+          <CardTitle className="text-xl font-heading text-foreground">Pipeline em andamento</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[350px] w-full">
@@ -48,30 +70,30 @@ const DashboardPipeline = ({ data }) => {
                 margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#888" 
-                  tickLine={false} 
+                <XAxis
+                  dataKey="name"
+                  stroke="#888"
+                  tickLine={false}
                   axisLine={false}
                   fontSize={14}
                   tickMargin={10}
                 />
-                <YAxis 
-                  stroke="#888" 
-                  tickLine={false} 
-                  axisLine={false} 
+                <YAxis
+                  stroke="#888"
+                  tickLine={false}
+                  axisLine={false}
                   allowDecimals={false}
                 />
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                 <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={60}>
                   {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={colors[entry.name] || '#8884d8'} />
+                    <Cell key={`cell-${index}`} fill={resolveColor(entry)} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="grid grid-cols-4 gap-4 mt-6 pt-4 border-t border-border">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-6 pt-4 border-t border-border">
             {data.map((item) => (
               <div key={item.name} className="text-center">
                 <p className="text-sm font-medium text-muted-foreground">{item.name}</p>

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Hammer as Anvil, Home, LogIn, DollarSign, Menu, X, Layers, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/SupabaseAuthContext';
 
 const navItems = [
     { label: 'Início', path: '/#home', type: 'scroll', icon: Home },
@@ -11,7 +12,7 @@ const navItems = [
     { label: 'Contato', path: '/#contact', type: 'scroll', icon: Mail },
 ];
 
-const Header = () => {
+const Header = ({ isAuthenticated }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
@@ -36,14 +37,14 @@ const Header = () => {
         // Scroll Spy
         const handleScroll = () => {
             if (location.pathname !== '/') return;
-            
+
             const scrollPosition = window.scrollY + 150; // Offset
             const homeSection = document.getElementById('home');
             const featuresSection = document.getElementById('features');
             const contactSection = document.getElementById('contact');
-            
+
             let current = 'Início';
-            
+
             if (contactSection && scrollPosition >= contactSection.offsetTop) {
                 current = 'Contato';
             } else if (featuresSection && scrollPosition >= featuresSection.offsetTop) {
@@ -56,7 +57,7 @@ const Header = () => {
 
         window.addEventListener('scroll', handleScroll);
         handleScroll(); // Initial check
-        
+
         return () => window.removeEventListener('scroll', handleScroll);
     }, [location]);
 
@@ -71,7 +72,7 @@ const Header = () => {
 
         if (item.type === 'scroll') {
             const targetId = item.path.replace('/#', '');
-            
+
             if (location.pathname === '/') {
                 const element = document.getElementById(targetId);
                 if (element) {
@@ -96,7 +97,7 @@ const Header = () => {
     };
 
     return (
-        <motion.header 
+        <motion.header
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -107,7 +108,7 @@ const Header = () => {
                     <Anvil className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(218,105,11,0.6)]" />
                     <span className="text-foreground">Serral<span className="text-primary">lab</span></span>
                 </NavLink>
-                
+
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-8">
                     {navItems.map((item) => {
@@ -131,24 +132,26 @@ const Header = () => {
                         );
                     })}
                     <div className="flex items-center gap-4 ml-4">
-                         <NavLink 
-                            to="/login" 
-                            className={({ isActive }) => 
+                         <NavLink
+                            to={isAuthenticated ? '/app' : '/login'}
+                            className={({ isActive }) =>
                                 `font-medium text-sm transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`
                             }
                         >
-                            Login
+                            {isAuthenticated ? 'Dashboard' : 'Entrar'}
                         </NavLink>
-                        <NavLink to="/cadastro">
-                            <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 font-bold shadow-[0_0_15px_rgba(218,105,11,0.3)] hover:shadow-[0_0_20px_rgba(218,105,11,0.5)]">
-                                Criar Conta Grátis
-                            </Button>
-                        </NavLink>
+                        {!isAuthenticated && (
+                            <NavLink to="/cadastro">
+                                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 font-bold shadow-[0_0_15px_rgba(218,105,11,0.3)] hover:shadow-[0_0_20px_rgba(218,105,11,0.5)]">
+                                    Criar Conta Grátis
+                                </Button>
+                            </NavLink>
+                        )}
                     </div>
                 </nav>
 
                 {/* Mobile Menu Button */}
-                <button 
+                <button
                     className="md:hidden p-2 text-muted-foreground hover:text-primary transition-colors"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
@@ -174,8 +177,8 @@ const Header = () => {
                                         href={item.path}
                                         onClick={(e) => handleNavClick(e, item)}
                                         className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all
-                                        ${isActive 
-                                          ? 'bg-primary/10 text-primary border border-primary/30 shadow-[0_0_10px_rgba(218,105,11,0.2)]' 
+                                        ${isActive
+                                          ? 'bg-primary/10 text-primary border border-primary/30 shadow-[0_0_10px_rgba(218,105,11,0.2)]'
                                           : 'text-gray-300 hover:bg-surface hover:text-white border border-transparent'
                                         }`}
                                     >
@@ -186,20 +189,22 @@ const Header = () => {
                             })}
                             <div className="h-px bg-border my-2" />
                             <NavLink
-                                to="/login"
+                                to={isAuthenticated ? '/app' : '/login'}
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-gray-300 hover:bg-surface hover:text-white transition-all"
                             >
                                 <LogIn className="h-5 w-5" />
-                                Login
+                                {isAuthenticated ? 'Dashboard' : 'Entrar'}
                             </NavLink>
-                            <div className="pt-2">
-                                <NavLink to="/cadastro" onClick={() => setIsMobileMenuOpen(false)}>
-                                    <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold shadow-lg py-3.5">
-                                        Criar Conta Grátis
-                                    </Button>
-                                </NavLink>
-                            </div>
+                            {!isAuthenticated && (
+                                <div className="pt-2">
+                                    <NavLink to="/cadastro" onClick={() => setIsMobileMenuOpen(false)}>
+                                        <Button className="w-full bg-primary hover:bg-primary/90 text-white font-bold shadow-lg py-3.5">
+                                            Criar Conta Grátis
+                                        </Button>
+                                    </NavLink>
+                                </div>
+                            )}
                         </nav>
                     </motion.div>
                 )}
@@ -208,7 +213,7 @@ const Header = () => {
     );
 }
 
-const Footer = () => (
+const Footer = ({ isAuthenticated }) => (
     <footer className="bg-surface border-t border-border py-12">
         <div className="container">
             <div className="grid md:grid-cols-4 gap-8 mb-12">
@@ -232,7 +237,14 @@ const Footer = () => (
                         <li><NavLink to="/" className="hover:text-primary transition-colors">Início</NavLink></li>
                         <li><NavLink to="/precos" className="hover:text-primary transition-colors">Preços</NavLink></li>
                         <li><NavLink to="/cadastro" className="hover:text-primary transition-colors">Cadastro</NavLink></li>
-                        <li><NavLink to="/login" className="hover:text-primary transition-colors">Login</NavLink></li>
+                        <li>
+                            <NavLink
+                                to={isAuthenticated ? '/app' : '/login'}
+                                className="hover:text-primary transition-colors"
+                            >
+                                {isAuthenticated ? 'Dashboard' : 'Entrar'}
+                            </NavLink>
+                        </li>
                     </ul>
                 </div>
                 <div>
@@ -254,13 +266,16 @@ const Footer = () => (
 
 
 const PublicLayout = () => {
+  const { user } = useAuth();
+  const isAuthenticated = Boolean(user);
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Header />
+      <Header isAuthenticated={isAuthenticated} />
       <main className="flex-grow">
         <Outlet />
       </main>
-      <Footer />
+      <Footer isAuthenticated={isAuthenticated} />
     </div>
   );
 };

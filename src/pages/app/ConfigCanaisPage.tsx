@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import SenderChannelsForm from '@/features/messaging/components/SenderChannelsForm.tsx';
 import MessageOutboxList from '@/features/messaging/components/MessageOutboxList.tsx';
@@ -163,3 +163,4 @@ const ConfigCanaisPage = () => {
 };
 
 export default ConfigCanaisPage;
+

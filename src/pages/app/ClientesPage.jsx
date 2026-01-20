@@ -191,12 +191,12 @@ const ClientesPage = () => {
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                             {filtered.map((client) => (
                                 <Card key={client.id} className="rounded-xl hover:border-primary/50 transition-colors">
-                                    <CardContent className="p-6">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                                    <CardContent className="p-4">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-base">
                                                 {client.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="flex gap-1">
@@ -208,8 +208,8 @@ const ClientesPage = () => {
                                                 </Button>
                                             </div>
                                         </div>
-                                        <h3 className="font-bold text-lg mb-1 truncate">{client.name}</h3>
-                                        <div className="space-y-2 text-sm text-muted-foreground">
+                                        <h3 className="font-bold text-base mb-1 truncate">{client.name}</h3>
+                                        <div className="space-y-1.5 text-sm text-muted-foreground">
                                             {client.email && (
                                                 <div className="flex items-center gap-2">
                                                     <Mail className="h-3 w-3" /> {client.email}

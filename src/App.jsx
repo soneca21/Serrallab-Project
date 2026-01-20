@@ -59,6 +59,12 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return children;
 };
 
+const AdminSectionRoute = ({ tab }) => (
+  <ProtectedRoute adminOnly={true}>
+    <SiteManagementPage initialTab={tab} hideTabs />
+  </ProtectedRoute>
+);
+
 // Routes Definition
 function AppRoutes() {
   return (
@@ -96,21 +102,20 @@ function AppRoutes() {
         {/* Config Routes */}
         <Route path="config" element={<ConfigPage />} />
         <Route path="config/canais" element={<ConfigCanaisPage />} />
-        <Route path="config/integrações" element={<IntegracoesPage />} />
+        <Route path="config/integracoes" element={<IntegracoesPage />} />
         <Route path="config/security-2fa" element={<Security2FAPage />} />
 
         <Route path="planos" element={<PlanosPage />} />
         <Route path="notificacoes" element={<NotificacoesPage />} />
         <Route path="webhooks" element={<WebhooksPage />} />
         
-        <Route 
-          path="admin/site" 
-          element={
-            <ProtectedRoute adminOnly={true}>
-              <SiteManagementPage />
-            </ProtectedRoute>
-          } 
-        />
+        <Route path="admin/site" element={<Navigate to="/app/admin/visao-geral" replace />} />
+        <Route path="admin/visao-geral" element={<AdminSectionRoute tab="overview" />} />
+        <Route path="admin/contas" element={<AdminSectionRoute tab="users" />} />
+        <Route path="admin/clientes" element={<AdminSectionRoute tab="clients" />} />
+        <Route path="admin/planos" element={<AdminSectionRoute tab="plans" />} />
+        <Route path="admin/financeiro" element={<AdminSectionRoute tab="billing" />} />
+        <Route path="admin/auditoria" element={<AdminSectionRoute tab="audit" />} />
       </Route>
 
       {/* Fallback for 404 - Redirect to Home */}

@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
@@ -89,7 +89,7 @@ const FornecedoresPage = () => {
         <>
             <Helmet><title>Fornecedores - Serrallab</title></Helmet>
             <div className="w-full space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div>
                         <h2 className="text-3xl font-heading font-bold">Fornecedores</h2>
                         <p className="text-muted-foreground">{'Gerencie seus parceiros de neg\u00f3cio.'}</p>
@@ -97,7 +97,7 @@ const FornecedoresPage = () => {
                     <Button onClick={() => { setFormData({}); setIsDialogOpen(true); }} className="rounded-xl w-full sm:w-auto">
                         <PlusCircle className="mr-2 h-4 w-4" /> Novo Fornecedor
                     </Button>
-                </div>
+                </div><div className="h-px bg-border mb-4" /></div>
 
                 <Card className="rounded-xl border-surface-strong">
                     <CardContent className="p-0">
@@ -244,4 +244,5 @@ const FornecedoresPage = () => {
 };
 
 export default FornecedoresPage;
+
 

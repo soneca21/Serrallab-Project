@@ -1,10 +1,11 @@
-
+﻿
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
     Hammer, LayoutDashboard, FileText, Users, Settings, LogOut, Wrench, 
     BookCopy, Menu, Truck, MessageSquare, CalendarClock, Home, Columns,
-    ChevronDown, ChevronRight, User, Building, CreditCard, Bell, Shield, ClipboardList, Database, Link
+    ChevronDown, ChevronRight, User, Building, CreditCard, Bell, Shield, ClipboardList, Database, Link,
+    BarChart2, Activity, DollarSign
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
@@ -23,26 +24,34 @@ import { cn } from '@/lib/utils';
 // Main Navigation Items
 const mainNavItems = [
     { path: '/app', label: 'Dashboard', icon: LayoutDashboard, roles: ['client', 'admin'] },
-    { path: '/app/orcamentos', label: 'Orçamentos', icon: FileText, roles: ['client', 'admin'] },
+    { path: '/app/orcamentos', label: 'Or\u00e7amentos', icon: FileText, roles: ['client', 'admin'] },
     { path: '/app/pipeline', label: 'Pipeline', icon: Columns, roles: ['client', 'admin'] },
     { path: '/app/clientes', label: 'Clientes', icon: Users, roles: ['client', 'admin'] },
     { path: '/app/agendamentos', label: 'Agendamentos', icon: CalendarClock, roles: ['client', 'admin'] },
     { path: '/app/materiais', label: 'Meus Materiais', icon: Wrench, roles: ['client', 'admin'] },
     { path: '/app/fornecedores', label: 'Fornecedores', icon: Truck, roles: ['client', 'admin'] },
-    { path: '/app/catalogo-global', label: 'Catálogo Global', icon: BookCopy, roles: ['client', 'admin'] },
+    { path: '/app/catalogo-global', label: 'Cat\u00e1logo Global', icon: BookCopy, roles: ['client', 'admin'] },
+];
+
+const adminNavItems = [
+    { path: '/app/admin/visao-geral', label: 'Vis\u00e3o Geral', icon: BarChart2, roles: ['admin'] },
+    { path: '/app/admin/contas', label: 'Contas', icon: Users, roles: ['admin'] },
+    { path: '/app/admin/clientes', label: 'Clientes', icon: Users, roles: ['admin'] },
+    { path: '/app/admin/planos', label: 'Planos & Pacotes', icon: Settings, roles: ['admin'] },
+    { path: '/app/admin/financeiro', label: 'Financeiro', icon: DollarSign, roles: ['admin'] },
+    { path: '/app/admin/auditoria', label: 'Auditoria', icon: Activity, roles: ['admin'] },
 ];
 
 // Settings Sub-items
 const configItems = [
     { path: '/app/config?tab=profile', label: 'Minha Conta', icon: User },
-    { path: '/app/config?tab=company', label: 'Organização', icon: Building },
+    { path: '/app/config?tab=company', label: 'Organiza\u00e7\u00e3o', icon: Building },
     { path: '/app/config/canais', label: 'Canais', icon: MessageSquare },
-    { path: '/app/config/integrações', label: 'Integrações', icon: Database },
+    { path: '/app/config/integracoes', label: 'Integra\u00e7\u00f5es', icon: Database },
     { path: '/app/config?tab=team', label: 'Equipe', icon: Users },
     { path: '/app/config?tab=billing', label: 'Planos', icon: CreditCard },
-    { path: '/app/config?tab=notifications', label: 'Notificações', icon: Bell },
-    { path: '/app/config?tab=security', label: 'Segurança', icon: Shield },
-    { path: '/app/config?tab=audit', label: 'Auditoria', icon: ClipboardList },
+    { path: '/app/config?tab=notifications', label: 'Notifica\u00e7\u00f5es', icon: Bell },
+    { path: '/app/config?tab=security', label: 'Seguran\u00e7a', icon: Shield },
 ];
 
 const SidebarContent = ({ onLinkClick }) => {
@@ -66,12 +75,13 @@ const SidebarContent = ({ onLinkClick }) => {
 
     const currentRole = profile?.role === 'admin' ? viewMode : 'client';
     const currentTab = searchParams.get('tab');
+    const navItems = currentRole === 'admin' ? adminNavItems : mainNavItems;
 
     const handleLogout = async () => {
         await signOut();
         toast({
-            title: "Até logo!",
-            description: "Você foi desconectado com sucesso.",
+            title: "At\u00e9 logo!",
+            description: "Voc\u00ea foi desconectado com sucesso.",
         });
         navigate('/');
     };
@@ -88,7 +98,7 @@ const SidebarContent = ({ onLinkClick }) => {
                 <ViewSelector />
 
                 <nav className="flex flex-col gap-1">
-                    {mainNavItems.filter(item => item.roles.includes(currentRole)).map((item) => (
+                    {navItems.filter(item => item.roles.includes(currentRole)).map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
@@ -108,75 +118,57 @@ const SidebarContent = ({ onLinkClick }) => {
                         </NavLink>
                     ))}
 
-                    {/* Expandable Config Section */}
-                    <div className="pt-2">
-                        <button
-                            onClick={toggleConfig}
-                            className={cn(
-                                "w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group hover:bg-surface hover:text-white border-l-4 border-transparent hover:border-primary",
-                                location.pathname.includes('/app/config') ? "text-white" : "text-muted-foreground"
-                            )}
-                        >
-                            <div className="flex items-center gap-3">
-                                <Settings className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
-                                <span>Configurações</span>
-                            </div>
-                            {isConfigExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </button>
-                        
-                        <AnimatePresence initial={false}>
-                            {isConfigExpanded && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: "auto", opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="overflow-hidden ml-4 pl-4 border-l border-border mt-1 space-y-1"
-                                    >
-                                        {configItems.map((item) => {
-                                            // Simple logic to detect active state for submenu items
-                                            const isTabMatch = item.path.includes('?tab') && location.pathname === '/app/config' && item.path.includes(`tab=${currentTab}`);
-                                            const isPathMatch = !item.path.includes('?tab') && location.pathname === item.path;
-                                            const isActive = isTabMatch || isPathMatch;
+                    {currentRole === 'client' && (
+                        <div className="pt-2">
+                            <button
+                                onClick={toggleConfig}
+                                className={cn(
+                                    "w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group hover:bg-surface hover:text-white border-l-4 border-transparent hover:border-primary",
+                                    location.pathname.includes('/app/config') ? "text-white" : "text-muted-foreground"
+                                )}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Settings className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
+                                    <span>{'Configura\u00e7\u00f5es'}</span>
+                                </div>
+                                {isConfigExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            </button>
+                            
+                            <AnimatePresence initial={false}>
+                                {isConfigExpanded && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: "auto", opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="overflow-hidden ml-4 pl-4 border-l border-border mt-1 space-y-1"
+                                        >
+                                            {configItems.map((item) => {
+                                                const isTabMatch = item.path.includes('?tab') && location.pathname === '/app/config' && item.path.includes(`tab=${currentTab}`);
+                                                const isPathMatch = !item.path.includes('?tab') && location.pathname === item.path;
+                                                const isActive = isTabMatch || isPathMatch;
 
-                                            return (
-                                                <NavLink
-                                                    key={item.label}
-                                                    to={item.path}
-                                                    onClick={onLinkClick}
-                                                    className={cn(
-                                                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 border-l-2 border-transparent hover:border-l-primary group hover:bg-surface hover:text-white",
-                                                        isActive
-                                                            ? 'text-primary font-medium bg-primary/5'
-                                                            : 'text-muted-foreground'
-                                                    )}
-                                               >
-                                                <item.icon className="h-4 w-4" />
-                                                <span>{item.label}</span>
-                                            </NavLink>
-                                        );
-                                    })}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    {profile?.role === 'admin' && (
-                        <NavLink
-                            to="/app/admin/site"
-                            onClick={onLinkClick}
-                            className={({ isActive }) =>
-                                cn(
-                                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group mt-4",
-                                    isActive
-                                        ? 'bg-primary/10 text-primary border-l-4 border-transparent hover:border-primary hover:shadow-[0_0_10px_rgba(218,105,11,0.1)]'
-                                        : 'text-muted-foreground hover:bg-surface hover:text-white border-l-4 border-transparent hover:border-primary'
-                                )
-                            }
-                        >
-                            <Settings className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
-                            <span>Admin Site</span>
-                        </NavLink>
+                                                return (
+                                                    <NavLink
+                                                        key={item.label}
+                                                        to={item.path}
+                                                        onClick={onLinkClick}
+                                                        className={cn(
+                                                            "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 border-l-2 border-transparent hover:border-l-primary group hover:bg-surface hover:text-white",
+                                                            isActive
+                                                                ? 'text-primary font-medium bg-primary/5'
+                                                                : 'text-muted-foreground'
+                                                        )}
+                                                   >
+                                                    <item.icon className="h-4 w-4" />
+                                                    <span>{item.label}</span>
+                                                </NavLink>
+                                            );
+                                        })}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     )}
                 </nav>
             </div>
@@ -208,15 +200,19 @@ const Header = () => {
     let pageTitle = "Painel";
     const currentTab = searchParams.get('tab');
 
-    if (location.pathname.includes('orcamentos/novo')) pageTitle = 'Novo Orçamento';
-    else if (location.pathname.includes('orcamentos/editar')) pageTitle = 'Editar Orçamento';
+    if (location.pathname.includes('orcamentos/novo')) pageTitle = 'Novo Or\u00e7amento';
+    else if (location.pathname.includes('orcamentos/editar')) pageTitle = 'Editar Or\u00e7amento';
+    else if (location.pathname.startsWith('/app/admin')) {
+        const adminItem = adminNavItems.find((item) => location.pathname === item.path);
+        pageTitle = adminItem?.label || 'Painel Admin';
+    }
     else if (location.pathname.includes('config')) {
-        if (location.pathname.includes('canais')) pageTitle = 'Configurações > Canais';
-        else if (location.pathname.includes('integrações')) pageTitle = 'Configurações > Integrações';
-        else if (location.pathname.includes('security-2fa')) pageTitle = 'Configurações > Segurança 2FA'; // Added for 2FA page
+        if (location.pathname.includes('canais')) pageTitle = 'Configura\u00e7\u00f5es > Canais';
+        else if (location.pathname.includes('integracoes')) pageTitle = 'Configura\u00e7\u00f5es > Integra\u00e7\u00f5es';
+        else if (location.pathname.includes('security-2fa')) pageTitle = 'Configura\u00e7\u00f5es > Seguran\u00e7a 2FA'; // Added for 2FA page
         else {
             const configItem = configItems.find(c => c.path.includes(`tab=${currentTab}`));
-            pageTitle = configItem ? `Configurações > ${configItem.label}` : 'Configurações';
+            pageTitle = configItem ? `Configura\u00e7\u00f5es > ${configItem.label}` : 'Configura\u00e7\u00f5es';
         }
     }
     else if (location.pathname.includes('agendamentos')) pageTitle = 'Agendamentos';
@@ -235,7 +231,7 @@ const Header = () => {
     return (
         <header className="bg-background/80 backdrop-blur-lg p-4 border-b border-border flex items-center gap-4 sticky top-0 z-30">
             <h1 className="text-xl sm:text-2xl font-heading text-white flex items-center gap-2">
-                <span className="bg-primary/20 w-2 h-6 rounded-full"></span>
+                <span className="bg-primary/20 w-2 h-6 rounded-full mb-1"></span>
                 {pageTitle}
             </h1>
         </header>
@@ -245,6 +241,9 @@ const Header = () => {
 const AppLayout = () => {
     const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
+    const { profile } = useAuth();
+    const { viewMode } = useViewMode();
 
     useEffect(() => {
         const checkMobile = () => {
@@ -254,6 +253,18 @@ const AppLayout = () => {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useEffect(() => {
+        if (profile?.role !== 'admin') return;
+
+        const isAdminRoute = location.pathname.startsWith('/app/admin');
+        if (viewMode === 'admin' && !isAdminRoute) {
+            navigate('/app/admin/visao-geral', { replace: true });
+        }
+        if (viewMode === 'client' && isAdminRoute) {
+            navigate('/app', { replace: true });
+        }
+    }, [profile?.role, viewMode, location.pathname, navigate]);
 
     if (isMobile) {
         let MobileContent = <Outlet />;
@@ -271,10 +282,10 @@ const AppLayout = () => {
 
     return (
         <div className="flex min-h-screen bg-background text-white">
-            <aside className="hidden md:block w-64 flex-shrink-0 fixed h-full z-40">
+            <aside className="hidden md:block w-56 flex-shrink-0 fixed h-full z-40">
                 <SidebarContent />
             </aside>
-            <div className="hidden md:block w-64 flex-shrink-0" />
+            <div className="hidden md:block w-56 flex-shrink-0" />
             <div className="flex-1 flex flex-col min-w-0">
                 <Header />
                 <main className="flex-1 p-6 overflow-y-auto overflow-x-auto scrollbar-visible bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background">
@@ -295,3 +306,15 @@ const AppLayout = () => {
 };
 
 export default AppLayout;
+
+
+
+
+
+
+
+
+
+
+
+

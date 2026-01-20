@@ -71,22 +71,22 @@ const NotificacoesPage = () => {
 
   const handleDeleteAll = () => {
     if (!notifications.length) return;
-    if (window.confirm('Deseja apagar todas as notificacoes? Esta acao nao pode ser desfeita.')) {
+    if (window.confirm('Deseja apagar todas as notificações? Esta ação não pode ser desfeita.')) {
       deleteAllNotifications();
     }
   };
 
   return (
     <HelmetProvider>
-      <Helmet><title>Notificacoes - Serrallab</title></Helmet>
+      <Helmet><title>Notificações - Serrallab</title></Helmet>
       <div className="container mx-auto max-w-5xl p-4 space-y-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-2"><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <Bell className="h-6 w-6 text-primary" />
-              <h1 className="text-3xl font-bold tracking-tight">Notificacoes</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Notificações</h1>
             </div>
-            <p className="text-muted-foreground">Acompanhe alertas, eventos e atualizacoes do sistema.</p>
+            <p className="text-muted-foreground">Acompanhe alertas, eventos e atualizações do sistema.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs text-muted-foreground flex items-center gap-2">
@@ -95,7 +95,7 @@ const NotificacoesPage = () => {
             </span>
             <Button variant="outline" size="sm" onClick={() => navigate('/app/config?tab=notifications')}>
               <Settings2 className="mr-2 h-4 w-4" />
-              Configurar notificacoes
+              Configurar notificações
             </Button>
             <Button variant="default" size="sm" onClick={markAllAsRead} disabled={unreadCount === 0}>
               <CheckCheck className="mr-2 h-4 w-4" />
@@ -110,18 +110,18 @@ const NotificacoesPage = () => {
               Limpar tudo
             </Button>
           </div>
-        </div>
+        </div><div className="h-px bg-border mb-4" /></div>
 
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <CardTitle className="text-base">Historico</CardTitle>
-                <CardDescription>Selecione uma notificacao para abrir o item relacionado.</CardDescription>
+                <CardTitle className="text-base">Histórico</CardTitle>
+                <CardDescription>Selecione uma notificação para abrir o item relacionado.</CardDescription>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Input
-                  placeholder="Buscar por titulo ou mensagem"
+                  placeholder="Buscar por título ou mensagem"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="sm:w-[240px]"
@@ -146,7 +146,7 @@ const NotificacoesPage = () => {
               <div className="px-4 pt-4">
                 <TabsList>
                   <TabsTrigger value="all">Todas ({counts.all})</TabsTrigger>
-                  <TabsTrigger value="unread">Nao lidas ({counts.unread})</TabsTrigger>
+                  <TabsTrigger value="unread">Não lidas ({counts.unread})</TabsTrigger>
                   <TabsTrigger value="read">Lidas ({counts.read})</TabsTrigger>
                 </TabsList>
               </div>
@@ -169,7 +169,7 @@ const NotificacoesPage = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center h-64 text-center p-8 text-muted-foreground">
                   <BellOff className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-lg font-medium">Nenhuma notificacao encontrada</p>
+                  <p className="text-lg font-medium">Nenhuma notificação encontrada</p>
                   <p className="text-sm">Ajuste filtros ou volte mais tarde.</p>
                 </div>
               )}
@@ -182,3 +182,5 @@ const NotificacoesPage = () => {
 };
 
 export default NotificacoesPage;
+
+

@@ -15,11 +15,11 @@ import { Loader2, CheckCircle, Check, X, CreditCard, ArrowRight, PackagePlus } f
 
 const featureRows = [
   { key: 'clientes', label: 'Clientes', type: 'quota' },
-  { key: 'orcamentos', label: 'Orcamentos', type: 'quota' },
-  { key: 'usuarios', label: 'Usuarios na equipe', type: 'quota' },
+  { key: 'orcamentos', label: 'Orçamentos', type: 'quota' },
+  { key: 'usuarios', label: 'Usuários na equipe', type: 'quota' },
   { key: 'pipeline', label: 'Pipeline de vendas', type: 'boolean' },
-  { key: 'catalogo', label: 'Catalogo global', type: 'boolean' },
-  { key: 'relatorios', label: 'Relatorios avancados', type: 'boolean' }
+  { key: 'catalogo', label: 'Catálogo global', type: 'boolean' },
+  { key: 'relatorios', label: 'Relatórios avançados', type: 'boolean' }
 ];
 
 const PlanosPage = () => {
@@ -89,7 +89,7 @@ const PlanosPage = () => {
     },
     {
       key: 'automacoes',
-      label: 'Automacoes executadas',
+      label: 'Automações executadas',
       used: usage.automations_executed,
       limit: limits.automations,
       pct: percentages.automations_pct
@@ -103,8 +103,8 @@ const PlanosPage = () => {
       <Helmet><title>Planos - Serrallab</title></Helmet>
       <div className="w-full space-y-12 py-10">
         <div className="text-center space-y-4">
-            <h1 className="text-4xl font-heading font-bold">Planos e Precos</h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Escolha o plano ideal para o momento da sua operacao.</p>
+            <h1 className="text-4xl font-heading font-bold">Planos e Preços</h1>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Escolha o plano ideal para o momento da sua operação.</p>
         </div>
 
         <Card className="max-w-5xl mx-auto">
@@ -112,7 +112,7 @@ const PlanosPage = () => {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5 text-primary" /> Plano atual</CardTitle>
-                <CardDescription>Resumo da sua assinatura e proxima cobranca.</CardDescription>
+                <CardDescription>Resumo da sua assinatura e próxima cobrança.</CardDescription>
               </div>
               <Badge variant="outline" className="w-fit">{statusLabel}</Badge>
             </div>
@@ -120,10 +120,10 @@ const PlanosPage = () => {
           <CardContent className="grid gap-6 md:grid-cols-3">
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">Plano</p>
-              <p className="text-lg font-semibold text-foreground">{currentPlan?.name || 'Plano basico'}</p>
+              <p className="text-lg font-semibold text-foreground">{currentPlan?.name || 'Plano básico'}</p>
             </div>
             <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Renovacao</p>
+              <p className="text-xs text-muted-foreground">Renovação</p>
               <p className="text-lg font-semibold text-foreground">{renewalDate}</p>
             </div>
             <div className="flex flex-col gap-3 md:items-end">
@@ -177,8 +177,8 @@ const PlanosPage = () => {
 
         <Card className="max-w-6xl mx-auto">
           <CardHeader>
-            <CardTitle>Comparacao rapida</CardTitle>
-            <CardDescription>Veja as diferencas principais entre os planos disponiveis.</CardDescription>
+            <CardTitle>Comparação rápida</CardTitle>
+            <CardDescription>Veja as diferenças principais entre os planos disponíveis.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border border-surface-strong overflow-hidden">
@@ -223,7 +223,7 @@ const PlanosPage = () => {
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Gerenciar cobranca</CardTitle>
+                <CardTitle className="text-lg">Gerenciar cobrança</CardTitle>
                 <CardDescription>Atualize forma de pagamento e dados fiscais.</CardDescription>
               </CardHeader>
               <CardContent>
@@ -236,7 +236,7 @@ const PlanosPage = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Pacotes extras</CardTitle>
-                <CardDescription>Adicione mais orcamentos quando precisar.</CardDescription>
+                <CardDescription>Adicione mais orçamentos quando precisar.</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button variant="outline" className="w-full" onClick={() => navigate('/app/config?tab=billing')}>

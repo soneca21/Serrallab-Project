@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { use2FA } from '@/hooks/use2FA';
@@ -88,3 +88,4 @@ const Security2FAPage = () => {
 };
 
 export default Security2FAPage;
+

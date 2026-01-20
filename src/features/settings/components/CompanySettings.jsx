@@ -35,6 +35,71 @@ const CompanySettings = () => {
     const fileInputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
     const [fetching, setFetching] = useState(true);
+    const maxImageSizeBytes = 2 * 1024 * 1024;
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+    const resetFileInput = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const resolveImageType = (file) => {
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'png';
+        const normalizedExt = fileExt === 'jpg' ? 'jpeg' : fileExt;
+        const contentType = file.type || `image/${normalizedExt}`;
+        return { contentType, extension: normalizedExt };
+    };
+
+    const validateImageFile = (file) => {
+        const { contentType } = resolveImageType(file);
+        const normalizedType = contentType === 'image/jpg' ? 'image/jpeg' : contentType;
+        if (!allowedImageTypes.includes(normalizedType)) {
+            throw new Error('Formato inválido. Use PNG, JPG, GIF ou WEBP.');
+        }
+        if (file.size > maxImageSizeBytes) {
+            throw new Error('O arquivo deve ter no máximo 2MB.');
+        }
+        return contentType;
+    };
+
+    const uploadImageToBucket = async (bucket, filePath, file, contentType) => {
+        const { error: uploadError } = await supabase.storage
+            .from(bucket)
+            .upload(filePath, file, {
+                upsert: true,
+                cacheControl: '3600',
+                contentType
+            });
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(filePath);
+
+        if (!data?.publicUrl) {
+            throw new Error('Não foi possível gerar a URL da imagem.');
+        }
+
+        return data.publicUrl;
+    };
+
+    const uploadImage = async ({ file, bucket, fallbackBucket, pathPrefix, fileBase }) => {
+        const { contentType, extension } = resolveImageType(file);
+        const filePath = `${pathPrefix}/${fileBase}.${extension}`;
+
+        try {
+            return await uploadImageToBucket(bucket, filePath, file, contentType);
+        } catch (error) {
+            const message = (error?.message || '').toLowerCase();
+            const shouldTryFallback = fallbackBucket && (message.includes('bucket') || error?.statusCode === 404);
+            if (shouldTryFallback) {
+                return await uploadImageToBucket(fallbackBucket, filePath, file, contentType);
+            }
+            throw error;
+        }
+    };
 
     useEffect(() => {
         const fetchCompany = async () => {
@@ -98,24 +163,22 @@ const CompanySettings = () => {
     }, [profile]);
 
     const handleLogoUpload = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
+        const file = event.target.files?.[0];
+        if (!file || !user?.id) {
+            resetFileInput();
+            return;
+        }
 
         setUploading(true);
         try {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `company-${profile?.company_id || user?.id}-${Date.now()}.${fileExt}`;
-            const filePath = `logos/${fileName}`;
-
-            const { error: uploadError } = await supabase.storage
-                .from('logos')
-                .upload(filePath, file, { upsert: true });
-
-            if (uploadError) throw uploadError;
-
-            const { data: { publicUrl } } = supabase.storage
-                .from('logos')
-                .getPublicUrl(filePath);
+            validateImageFile(file);
+            const publicUrl = await uploadImage({
+                file,
+                bucket: 'logos',
+                fallbackBucket: 'avatars',
+                pathPrefix: 'logos',
+                fileBase: `logo-${profile?.company_id || user.id}-${Date.now()}`
+            });
 
             if (company) {
                 await saveCompany(company.id, { logo_url: publicUrl });
@@ -123,10 +186,12 @@ const CompanySettings = () => {
                 await saveProfile({ logo_url: publicUrl });
             }
             setFormData(prev => ({ ...prev, logo_url: publicUrl }));
+            toast({ title: 'Logo atualizado', description: 'O logo da empresa foi enviado.' });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Erro no upload', description: error.message });
         } finally {
             setUploading(false);
+            resetFileInput();
         }
     };
 
@@ -160,7 +225,7 @@ const CompanySettings = () => {
 
         if (!company?.id && !profile?.company_id) {
             toast({
-                title: 'Organizacao atualizada',
+                title: 'Organização atualizada',
                 description: 'Alguns dados foram salvos no perfil. Para vincular uma empresa completa, fale com o suporte.'
             });
         }
@@ -175,8 +240,8 @@ const CompanySettings = () => {
             <div className="grid gap-6 lg:grid-cols-3">
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Building className="h-5 w-5 text-primary" /> Organizacao</CardTitle>
-                        <CardDescription>Dados que aparecem nos orcamentos, PDFs e paginas publicas.</CardDescription>
+                        <CardTitle className="flex items-center gap-2"><Building className="h-5 w-5 text-primary" /> Organização</CardTitle>
+                        <CardDescription>Dados que aparecem nos orçamentos, PDFs e páginas públicas.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex flex-col gap-6 md:flex-row md:items-center p-4 bg-surface border border-surface-strong rounded-lg">
@@ -196,7 +261,7 @@ const CompanySettings = () => {
                                     ref={fileInputRef}
                                     type="file" 
                                     className="hidden" 
-                                    accept="image/*" 
+                                    accept="image/png,image/jpeg,image/gif,image/webp"
                                     onChange={handleLogoUpload}
                                 />
                                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -210,7 +275,7 @@ const CompanySettings = () => {
                                         {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4" />}
                                         Carregar Logo
                                     </Button>
-                                    <p className="text-xs text-muted-foreground">PNG/JPG com fundo transparente recomendado.</p>
+                                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF ou WEBP. Máx 2MB.</p>
                                 </div>
                             </div>
                         </div>
@@ -288,7 +353,7 @@ const CompanySettings = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
-                                    <Label htmlFor="company_address">Endereco Completo</Label>
+                                    <Label htmlFor="company_address">Endereço Completo</Label>
                                     <div className="relative">
                                         <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                         <Input 
@@ -379,11 +444,11 @@ const CompanySettings = () => {
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                     <FileText className="h-4 w-4 text-primary" />
-                                    Os dados acima alimentam PDFs, mensagens e paginas publicas.
+                                    Os dados acima alimentam PDFs, mensagens e páginas públicas.
                                 </div>
                                 <Button type="submit" disabled={loading} className="w-full sm:w-auto">
                                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                    Salvar Organizacao
+                                    Salvar Organização
                                 </Button>
                             </div>
                         </form>
@@ -393,32 +458,32 @@ const CompanySettings = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><BadgeCheck className="h-5 w-5 text-primary" /> Resumo</CardTitle>
-                        <CardDescription>Checklist rapido da organizacao.</CardDescription>
+                        <CardDescription>Checklist rápido da organização.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-3 rounded-xl border border-border/40 bg-background/30 p-4">
                             <div className="flex items-center gap-2 text-sm text-foreground">
                                 <Building className="h-4 w-4 text-primary" />
-                                {formData.name || 'Nome da empresa nao definido'}
+                                {formData.name || 'Nome da empresa não definido'}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Globe className="h-4 w-4 text-primary" />
-                                {orgPrefs.org_website || 'Site nao informado'}
+                                {orgPrefs.org_website || 'Site não informado'}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Phone className="h-4 w-4 text-primary" />
-                                {formData.phone || 'Telefone nao informado'}
+                                {formData.phone || 'Telefone não informado'}
                             </div>
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Mail className="h-4 w-4 text-primary" />
-                                {formData.email || 'Email nao informado'}
+                                {formData.email || 'Email não informado'}
                             </div>
                         </div>
 
                         {!profile?.company_id && !company?.id && (
                             <div className="flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs text-amber-200">
                                 <AlertTriangle className="h-4 w-4" />
-                                Organizacao sem vinculo de empresa. Salve os dados e, se precisar, solicite ao suporte a vinculacao completa.
+                                Organização sem vínculo de empresa. Salve os dados e, se precisar, solicite ao suporte a vinculação completa.
                             </div>
                         )}
                     </CardContent>

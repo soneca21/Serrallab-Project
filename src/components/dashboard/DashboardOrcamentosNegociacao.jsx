@@ -1,4 +1,4 @@
-
+﻿
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ const DashboardOrcamentosNegociacao = ({ orders }) => {
     >
       <Card className="h-full shadow-lg hover:shadow-xl transition-shadow duration-300 border-border bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-heading text-foreground">Em Negociação</CardTitle>
+          <CardTitle className="text-lg font-heading text-foreground">{'Em Negocia\u00e7\u00e3o'}</CardTitle>
           <Button 
             variant="ghost" 
             size="sm" 
@@ -34,23 +34,23 @@ const DashboardOrcamentosNegociacao = ({ orders }) => {
             <Table>
               <TableHeader>
                 <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="w-[50%]">Cliente</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead className="text-right">Ação</TableHead>
+                  <TableHead className="w-[50%] text-center">Cliente</TableHead>
+                  <TableHead className="text-center">Valor</TableHead>
+                  <TableHead className="text-center">{'A\u00e7\u00e3o'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {orders && orders.length > 0 ? (
                   orders.map((order) => (
                     <TableRow key={order.id} className="border-border hover:bg-muted/50 transition-colors">
-                      <TableCell>
-                        <div className="flex items-center gap-2">
+                      <TableCell className="text-center">
+                        <div className="mx-auto flex w-fit items-center gap-2">
                           <div className="h-8 w-8 rounded-full bg-orange-500/10 flex items-center justify-center">
                             <FileText className="h-4 w-4 text-orange-500" />
                           </div>
                           <div className="flex flex-col">
                              <span className="font-medium text-foreground truncate max-w-[140px]">
-                              {order.title || 'Sem título'}
+                              {order.title || 'Sem t\u00edtulo'}
                             </span>
                             <span className="text-xs text-muted-foreground truncate max-w-[140px]">
                               {new Date(order.created_at).toLocaleDateString('pt-BR')}
@@ -58,12 +58,12 @@ const DashboardOrcamentosNegociacao = ({ orders }) => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1 font-medium text-emerald-500">
+                      <TableCell className="text-center">
+                        <div className="mx-auto flex w-fit items-center gap-1 font-medium text-emerald-500">
                           {formatCurrency(order.final_price || order.total_cost || 0)}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-center">
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -78,7 +78,7 @@ const DashboardOrcamentosNegociacao = ({ orders }) => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
-                      Nenhuma negociação ativa
+                      {'Nenhuma negocia\u00e7\u00e3o ativa'}
                     </TableCell>
                   </TableRow>
                 )}
@@ -92,3 +92,6 @@ const DashboardOrcamentosNegociacao = ({ orders }) => {
 };
 
 export default DashboardOrcamentosNegociacao;
+
+
+

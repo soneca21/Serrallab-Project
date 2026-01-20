@@ -12,7 +12,6 @@ const TAB_LABELS = {
     channels: 'Canais',
     notifications: 'Notifica\u00e7\u00f5es',
     security: 'Seguran\u00e7a',
-    audit: 'Auditoria',
 };
 
 const ConfigPage = () => {

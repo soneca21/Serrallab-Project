@@ -1,6 +1,16 @@
-
-import { supabase } from '@/lib/customSupabaseClient';
+﻿import { supabase } from '@/lib/customSupabaseClient';
 import { saveLeadsOffline, saveOrcamentosOffline, savePipelineOffline } from './offline';
+
+const STATUS_STAGE_FALLBACK = {
+    Rascunho: 'Novo',
+    Enviado: 'Enviado',
+    Aprovado: 'Em Producao',
+    'Proposta Aceita': 'Em Producao',
+    'Conclu\u00eddo': 'Entregue',
+    Concluido: 'Entregue',
+    Ganho: 'Entregue',
+    Rejeitado: 'Perdido',
+};
 
 export async function syncLeads() {
     const { data, error } = await supabase.from('leads').select('*');
@@ -10,40 +20,48 @@ export async function syncLeads() {
 }
 
 export async function syncOrcamentos() {
-    // Syncing orders as orcamentos
-    const { data, error } = await supabase.from('orders').select('*, clients(*)').order('created_at', { ascending: false });
-    if (error) throw error;
-    if (data) await saveOrcamentosOffline(data);
-    return data;
+    const [ordersRes, stagesRes] = await Promise.all([
+        supabase.from('orders').select('*, clients(*)').order('created_at', { ascending: false }),
+        supabase.from('pipeline_stages').select('id, name'),
+    ]);
+
+    if (ordersRes.error) throw ordersRes.error;
+    if (stagesRes.error) throw stagesRes.error;
+
+    const stageMap = (stagesRes.data || []).reduce((acc, stage) => {
+        acc[stage.id] = stage.name;
+        return acc;
+    }, {});
+
+    const normalized = (ordersRes.data || []).map((order) => ({
+        ...order,
+        pipeline_stage_name: stageMap[order.pipeline_stage_id] || STATUS_STAGE_FALLBACK[order.status] || 'Novo',
+    }));
+
+    await saveOrcamentosOffline(normalized);
+    return normalized;
 }
 
-export async function syncPipeline() {
-    // For pipeline, we fetch orders and group them client-side or use a view
-    // Here we reuse the order fetch but process it for pipeline structure storage if needed
-    // Or fetch a specific view. Let's assume we store the raw orders and process on read,
-    // but the prompt asks to sync pipeline data.
-    const { data, error } = await supabase.from('orders').select('*, clients(*)');
-    if (error) throw error;
-    
-    // Process pipeline data structure
-    const pipelineData = {
-        'Proposta': data?.filter(o => o.status === 'Proposta') || [],
-        'Negociação': data?.filter(o => o.status === 'Negociação') || [],
-        'Aprovado': data?.filter(o => o.status === 'Aprovado') || [], // Won
-        'Rejeitado': data?.filter(o => o.status === 'Rejeitado') || [], // Lost
-    };
-    
-    if (pipelineData) await savePipelineOffline(pipelineData);
+export async function syncPipeline(ordersData) {
+    const data = ordersData || await syncOrcamentos();
+    const pipelineData = data.reduce((acc, order) => {
+        const stage = order.pipeline_stage_name || 'Novo';
+        if (!acc[stage]) acc[stage] = [];
+        acc[stage].push(order);
+        return acc;
+    }, {});
+
+    await savePipelineOffline(pipelineData);
     return pipelineData;
 }
 
 export async function syncAll() {
     try {
-        await Promise.all([
+        const [leads, orcamentos] = await Promise.all([
             syncLeads(),
             syncOrcamentos(),
-            syncPipeline()
         ]);
+        await syncPipeline(orcamentos);
         return { success: true, timestamp: new Date() };
     } catch (error) {
         console.error('Sync failed:', error);
