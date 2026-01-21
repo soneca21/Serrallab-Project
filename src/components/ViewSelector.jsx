@@ -25,7 +25,7 @@ const ViewSelector = () => {
       type="button"
       onClick={handleToggle}
       className={`flex items-center justify-between gap-3 px-3 py-2 rounded-[14px] border bg-[#050505] transition-all duration-200 ${
-        isAdminView ? 'border-[#f6a15b]' : 'border-[#626262]'
+        isAdminView ? 'border-[#f97316]' : 'border-[#f97316]/50'
       }`}
     >
       <div className="flex items-center gap-2 text-sm font-semibold text-white whitespace-nowrap">
