@@ -1,28 +1,26 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
-import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '../theme';
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { ClientsScreen } from '../screens/ClientsScreen';
 import { QuotesScreen } from '../screens/QuotesScreen';
 import { AgendaScreen } from '../screens/AgendaScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const Tab = createBottomTabNavigator();
 
-const icons = {
-  Dashboard: '🏠',
-  Clients: '👥',
-  Quotes: '📄',
-  Agenda: '📆',
-  Notifications: '🔔',
+const tabIcons: Record<string, string> = {
+  Dashboard: 'speedometer-outline',
+  Clients: 'people-outline',
+  Quotes: 'document-text-outline',
+  Agenda: 'calendar-outline',
+  Notifications: 'notifications-outline',
 };
 
 const TabIcon = ({ name, focused }: { name: string; focused: boolean }) => (
-  <View style={styles.icon}>
-    <Text style={{ color: focused ? Colors.primary : Colors.muted }}>{icons[name]}</Text>
-  </View>
+  <Ionicons name={tabIcons[name]} size={20} color={focused ? Colors.primary : Colors.muted} />
 );
 
 export const AppNavigator = () => (
@@ -44,10 +42,3 @@ export const AppNavigator = () => (
     </Tab.Navigator>
   </NavigationContainer>
 );
-
-const styles = StyleSheet.create({
-  icon: {
-    width: 24,
-    alignItems: 'center',
-  },
-});
