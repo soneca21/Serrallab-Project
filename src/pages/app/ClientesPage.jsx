@@ -191,7 +191,7 @@ const ClientesPage = () => {
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                             {filtered.map((client) => (
                                 <Card key={client.id} className="rounded-xl hover:border-primary/50 transition-colors">
                                     <CardContent className="p-4">

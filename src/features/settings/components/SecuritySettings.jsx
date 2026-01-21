@@ -30,14 +30,14 @@ const SecuritySettings = () => {
         if (newPassword.length < 6) {
             toast({
                 title: 'Senha muito curta',
-                description: 'A senha deve ter no m\u00ednimo 6 caracteres.',
+                description: 'A senha deve ter no mínimo 6 caracteres.',
                 variant: 'destructive'
             });
             return;
         }
         if (newPassword !== confirmPassword) {
             toast({
-                title: 'Senhas n\u00e3o conferem',
+                title: 'Senhas não conferem',
                 description: 'Digite a mesma senha nos dois campos.',
                 variant: 'destructive'
             });
@@ -51,7 +51,7 @@ const SecuritySettings = () => {
         if (error) {
             toast({ title: 'Erro ao alterar senha', description: error.message, variant: 'destructive' });
         } else {
-            toast({ title: 'Senha atualizada', description: 'Sua senha foi atualizada com seguran\u00e7a.' });
+            toast({ title: 'Senha atualizada', description: 'Sua senha foi atualizada com segurança.' });
             setNewPassword('');
             setConfirmPassword('');
         }
@@ -63,7 +63,7 @@ const SecuritySettings = () => {
             await navigator.clipboard?.writeText(user.email);
             toast({ title: 'Copiado', description: 'Email copiado.' });
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Erro', description: 'N\u00e3o foi poss\u00edvel copiar o email.' });
+            toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível copiar o email.' });
         }
     };
 
@@ -83,9 +83,9 @@ const SecuritySettings = () => {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <ShieldCheck className="h-5 w-5 text-primary" />
-                            {'Central de Seguran\u00e7a'}
+                            {'Central de Segurança'}
                         </CardTitle>
-                        <CardDescription>{'Status, autentica\u00e7\u00e3o e prote\u00e7\u00e3o do acesso.'}</CardDescription>
+                        <CardDescription>{'Status, autenticação e proteção do acesso.'}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="grid gap-4 md:grid-cols-2">
@@ -102,7 +102,7 @@ const SecuritySettings = () => {
                                 </div>
                             </div>
                             <div className="rounded-xl border border-border/40 bg-background/30 p-4">
-                                <div className="text-xs text-muted-foreground">Verifica\u00e7\u00e3o do email</div>
+                                <div className="text-xs text-muted-foreground">Verificação do email</div>
                                 <div className={`mt-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${emailVerified ? 'border-emerald-500/40 text-emerald-400' : 'border-amber-500/40 text-amber-400'}`}>
                                     <CheckCircle2 className="h-3.5 w-3.5" />
                                     {emailVerified ? 'Email verificado' : 'Email pendente'}
@@ -121,7 +121,7 @@ const SecuritySettings = () => {
                             </span>
                             <span className="inline-flex items-center gap-2 rounded-full border border-border/50 px-3 py-1 text-xs text-muted-foreground">
                                 <Clock className="h-3.5 w-3.5" />
-                                {'\u00daltimo login '}{lastSignIn}
+                                {'Último login '}{lastSignIn}
                             </span>
                         </div>
 
@@ -142,7 +142,7 @@ const SecuritySettings = () => {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <KeyRound className="h-5 w-5 text-primary" />
-                            Autentica\u00e7\u00e3o em Dois Fatores
+                            Autenticação em Dois Fatores
                         </CardTitle>
                         <CardDescription>{'Camada extra para proteger sua conta.'}</CardDescription>
                     </CardHeader>
@@ -159,7 +159,7 @@ const SecuritySettings = () => {
                                     {is2FAEnabled ? 'Protegido' : 'Recomendado'}
                                 </div>
                             </div>
-                            <p className="mt-3 text-xs text-muted-foreground">Use Google Authenticator ou Authy para gerar c\u00f3digos tempor\u00e1rios.</p>
+                            <p className="mt-3 text-xs text-muted-foreground">Use Google Authenticator ou Authy para gerar códigos temporários.</p>
                         </div>
                         <Button onClick={() => navigate('/app/config/security-2fa')} className="w-full">
                             Configurar 2FA
@@ -197,11 +197,11 @@ const SecuritySettings = () => {
                                 />
                             </div>
                             <div className="rounded-xl border border-border/40 bg-background/30 p-4 text-xs text-muted-foreground">
-                                <p className="font-medium text-foreground mb-2">Boas pr\u00e1ticas</p>
+                                <p className="font-medium text-foreground mb-2">Boas práticas</p>
                                 <ul className="space-y-1">
-                                    <li>Use pelo menos 8 caracteres e um s\u00edmbolo.</li>
-                                    <li>Evite reutilizar senhas de outros servi\u00e7os.</li>
-                                    <li>Ative o 2FA para maior seguran\u00e7a.</li>
+                                    <li>Use pelo menos 8 caracteres e um símbolo.</li>
+                                    <li>Evite reutilizar senhas de outros serviços.</li>
+                                    <li>Ative o 2FA para maior segurança.</li>
                                 </ul>
                             </div>
                             <Button type="submit" disabled={isChangingPassword}>
@@ -214,8 +214,8 @@ const SecuritySettings = () => {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Smartphone className="h-5 w-5 text-primary" /> Sess\u00f5es Ativas</CardTitle>
-                        <CardDescription>{'Dispositivos conectados \u00e0 sua conta.'}</CardDescription>
+                        <CardTitle className="flex items-center gap-2"><Smartphone className="h-5 w-5 text-primary" /> Sessões Ativas</CardTitle>
+                        <CardDescription>{'Dispositivos conectados à sua conta.'}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex flex-col gap-3 rounded-xl border border-border/40 bg-background/30 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -224,14 +224,14 @@ const SecuritySettings = () => {
                                     <Smartphone className="h-5 w-5 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="font-medium text-foreground">Sess\u00e3o atual</p>
+                                    <p className="font-medium text-foreground">Sessão atual</p>
                                     <p className="text-xs text-muted-foreground">{`Acesso em ${lastSignIn}`}</p>
                                 </div>
                             </div>
                             <div className="text-xs text-emerald-400 font-medium bg-emerald-500/10 px-2 py-1 rounded w-fit">Ativo</div>
                         </div>
                         <div className="rounded-xl border border-border/40 bg-background/30 p-4 text-xs text-muted-foreground">
-                            Para encerrar outras sess\u00f5es, altere sua senha ou entre em contato com o suporte.
+                            Para encerrar outras sessões, altere sua senha ou entre em contato com o suporte.
                         </div>
                     </CardContent>
                 </Card>
@@ -240,13 +240,13 @@ const SecuritySettings = () => {
             <Card className="border-red-900/50 bg-red-950/10">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-red-500"><AlertTriangle className="h-5 w-5" /> Zona de Perigo</CardTitle>
-                    <CardDescription className="text-red-300/70">A\u00e7\u00f5es irrevers\u00edveis que afetam sua conta.</CardDescription>
+                    <CardDescription className="text-red-300/70">Ações irreversíveis que afetam sua conta.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h4 className="font-medium text-red-400">Excluir conta</h4>
-                            <p className="text-sm text-red-300/50">Todos os seus dados, or\u00e7amentos e clientes ser\u00e3o apagados permanentemente.</p>
+                            <p className="text-sm text-red-300/50">Todos os seus dados, orçamentos e clientes serão apagados permanentemente.</p>
                         </div>
                         <Button variant="destructive" onClick={() => setIsDeleteDialogOpen(true)}>Excluir conta</Button>
                     </div>
@@ -258,12 +258,12 @@ const SecuritySettings = () => {
                     <DialogHeader>
                         <DialogTitle className="text-red-500">Excluir conta permanentemente?</DialogTitle>
                         <DialogDescription>
-                            Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita. Isso excluir\u00e1 permanentemente sua conta e remover\u00e1 seus dados de nossos servidores.
+                            Esta ação não pode ser desfeita. Isso excluirá permanentemente sua conta e removerá seus dados de nossos servidores.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancelar</Button>
-                        <Button variant="destructive" onClick={handleDeleteAccount}>Confirmar exclus\u00e3o</Button>
+                        <Button variant="destructive" onClick={handleDeleteAccount}>Confirmar exclusão</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

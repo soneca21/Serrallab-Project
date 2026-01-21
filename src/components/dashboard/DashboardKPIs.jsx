@@ -35,10 +35,10 @@ const DashboardKPIs = ({ data }) => {
         title="Leads de hoje"
         value={leadsToday}
         icon={UserPlus}
-        subtext="Novos contatos nas \u00faltimas 24h"
+        subtext="Novos contatos nas últimas 24h"
       />
       <KPICard
-        title="Or\u00e7amentos em aberto"
+        title="Orçamentos em aberto"
         value={openOrdersCount}
         icon={FileText}
         subtext={`Valor pendente: ${formatCurrency(openOrdersValue)}`}
@@ -50,10 +50,10 @@ const DashboardKPIs = ({ data }) => {
         subtext="Mensagens e lembretes programados"
       />
       <KPICard
-        title="Receita do m\u00eas"
+        title="Receita do mês"
         value={formatCurrency(revenueMonth)}
         icon={DollarSign}
-        subtext="Pedidos confirmados no per\u00edodo"
+        subtext="Pedidos confirmados no período"
       />
     </div>
   );

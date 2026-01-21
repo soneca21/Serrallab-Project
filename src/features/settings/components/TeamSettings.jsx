@@ -15,22 +15,22 @@ import { Check, X, Loader2, Users, UserPlus, Pencil, Trash2, ShieldCheck, Mail, 
 const roleMeta = {
     owner: {
         label: 'Proprietário',
-        description: 'Controle total da organização, faturamento e equipe.',
+        description: 'Controle total da organização, faturamento e usuários.',
         badge: 'default'
     },
     admin: {
-        label: 'Admin',
-        description: 'Administra operação e configurações (sem faturamento).',
+        label: 'Administrador',
+        description: 'Gerencia operações e configurações, sem acesso ao faturamento.',
         badge: 'secondary'
     },
     editor: {
         label: 'Editor',
-        description: 'Cria e edita clientes, orçamentos e agendamentos.',
+        description: 'Cria e atualiza clientes, orçamentos e agendamentos.',
         badge: 'outline'
     },
     viewer: {
         label: 'Visualizador',
-        description: 'Acesso somente leitura aos dados principais.',
+        description: 'Acesso somente leitura aos dados essenciais.',
         badge: 'outline'
     }
 };
@@ -80,7 +80,7 @@ const TeamSettings = () => {
 
     const handleInvite = async () => {
         if (!inviteEmail) {
-            toast({ title: 'Email obrigatório', description: 'Informe um email para convite.', variant: 'destructive'});
+            toast({ title: 'E-mail obrigatório', description: 'Informe um e-mail para convite.', variant: 'destructive'});
             return;
         }
         setIsSubmitting(true);
@@ -95,7 +95,7 @@ const TeamSettings = () => {
 
             if (error) throw error;
 
-            toast({ title: 'Convite enviado', description: `Email enviado para ${inviteEmail}.` });
+            toast({ title: 'Convite enviado', description: `Convite enviado para ${inviteEmail}.` });
             setInviteEmail('');
             fetchTeamMembers();
         } catch (error) {
@@ -116,7 +116,7 @@ const TeamSettings = () => {
             
             if (error) throw error;
             
-            toast({ title: 'Permissão atualizada', description: 'Nível de acesso alterado.' });
+            toast({ title: 'Permissão atualizada', description: 'Nível de acesso atualizado.' });
             setEditingMember(null);
             fetchTeamMembers();
         } catch (error) {
@@ -157,8 +157,8 @@ const TeamSettings = () => {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Equipe e Permissões</CardTitle>
-                    <CardDescription>Defina quem pode acessar o que dentro da sua organização.</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> Gestão de Equipe e Permissões</CardTitle>
+                    <CardDescription>Defina papéis, controle acessos e responsabilidades dentro da organização.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -182,22 +182,22 @@ const TeamSettings = () => {
                         <div className="grid gap-3 text-xs text-muted-foreground md:grid-cols-3">
                             <div className="space-y-1">
                                 <p className="text-foreground font-medium">1. Convite</p>
-                                <p>Convide por email e defina o papel inicial.</p>
+                                <p>Convide por e-mail e defina o papel inicial.</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-foreground font-medium">2. Ativação</p>
-                                <p>O usuário cria senha e entra com o papel definido.</p>
+                                <p>O usuário define a senha e entra com o papel aprovado.</p>
                             </div>
                             <div className="space-y-1">
                                 <p className="text-foreground font-medium">3. Ajustes</p>
-                                <p>Altere permissão a qualquer momento.</p>
+                                <p>Atualize permissões e revogue acessos quando necessário.</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-xs text-amber-200 flex items-start gap-3">
                         <AlertTriangle className="h-4 w-4" />
-                        Recomendamos ativar 2FA para administradores e proprietário.
+                        Recomendamos ativar 2FA para administradores e proprietários.
                     </div>
                 </CardContent>
             </Card>
@@ -205,18 +205,18 @@ const TeamSettings = () => {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><UserPlus className="h-5 w-5 text-primary" /> Membros da Equipe</CardTitle>
-                    <CardDescription>Convide e gerencie membros ativos.</CardDescription>
+                    <CardDescription>Convide, controle acessos e acompanhe o status da equipe.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="p-4 rounded-lg bg-surface border border-surface-strong space-y-4">
                         <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-                            <UserPlus className="h-4 w-4 text-primary" /> Convidar Novo Membro
+                            <UserPlus className="h-4 w-4 text-primary" /> Convidar novo membro
                         </h3>
                         <div className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-grow">
                                 <Input 
                                     type="email" 
-                                    placeholder="email@exemplo.com" 
+                                    placeholder="email@empresa.com" 
                                     value={inviteEmail}
                                     onChange={(e) => setInviteEmail(e.target.value)}
                                 />
@@ -226,11 +226,11 @@ const TeamSettings = () => {
                                 <SelectContent>
                                     <SelectItem value="editor">Editor</SelectItem>
                                     <SelectItem value="viewer">Visualizador</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
+                                    <SelectItem value="admin">Administrador</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Button onClick={handleInvite} disabled={isSubmitting}>
-                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Enviar Convite"}
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : "Enviar convite"}
                             </Button>
                         </div>
                     </div>
@@ -338,13 +338,13 @@ const TeamSettings = () => {
                 <Dialog open={!!editingMember} onOpenChange={() => setEditingMember(null)}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Editar Permissão</DialogTitle>
+                            <DialogTitle>Editar permissão</DialogTitle>
                             <DialogDescription>
-                                Altere o nível de acesso para {editingMember.email}.
+                                Atualize o nível de acesso para {editingMember.email}.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4 space-y-2">
-                            <Label>Nível de Acesso</Label>
+                            <Label>Nível de acesso</Label>
                             <Select 
                                 value={editingMember.permission_level} 
                                 onValueChange={(value) => setEditingMember(prev => ({...prev, permission_level: value}))}

@@ -91,11 +91,13 @@ const ConfigCanaisPage = () => {
                 />
                 <div className="space-y-6 max-w-5xl">
                     <Tabs defaultValue="config" className="w-full">
-                        <TabsList className="mb-4">
-                            <TabsTrigger value="config">Configuração</TabsTrigger>
-                            <TabsTrigger value="history">Histórico</TabsTrigger>
-                            <TabsTrigger value="automation">Automações</TabsTrigger>
-                        </TabsList>
+                        <div className="inline-flex rounded-xl border border-surface-strong bg-surface p-1 shadow-sm mb-4">
+                            <TabsList className="bg-transparent p-0">
+                                <TabsTrigger value="config">Configuração</TabsTrigger>
+                                <TabsTrigger value="history">Histórico</TabsTrigger>
+                                <TabsTrigger value="automation">Automações</TabsTrigger>
+                            </TabsList>
+                        </div>
                         
                         <TabsContent value="config">
                             <div className="grid grid-cols-1 gap-6">

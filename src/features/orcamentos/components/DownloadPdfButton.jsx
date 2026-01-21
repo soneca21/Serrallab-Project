@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Loader2, Lock } from 'lucide-react';
+import { Download, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { generatePdf } from '@/features/orcamentos/api/generatePdf';
+import { downloadPdf } from '@/features/orcamentos/api/generatePdf';
 import { getPdfFileName } from '@/lib/pdf';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,21 +25,14 @@ const DownloadPdfButton = ({
 
         setIsLoading(true);
         try {
-            const { pdf_url } = await generatePdf(orcamento_id);
-            
-            // Trigger download via hidden link to force name if possible, 
-            // though signed URLs usually handle content-disposition
-            const link = document.createElement('a');
-            link.href = pdf_url;
-            link.download = getPdfFileName(orcamento_numero || orcamento_id.slice(0, 8));
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
+            await downloadPdf(
+                orcamento_id,
+                getPdfFileName(orcamento_numero || orcamento_id.slice(0, 8))
+            );
+
             toast({
                 title: "PDF Gerado",
-                description: "O download começará em instantes."
+                description: "O download comecara em instantes."
             });
 
         } catch (error) {

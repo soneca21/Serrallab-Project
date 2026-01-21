@@ -6,12 +6,12 @@ import AppSectionHeader from '@/components/AppSectionHeader';
 
 const TAB_LABELS = {
     profile: 'Perfil',
-    company: 'Organiza\u00e7\u00e3o',
+    company: 'Organização',
     team: 'Equipe',
     billing: 'Planos',
     channels: 'Canais',
-    notifications: 'Notifica\u00e7\u00f5es',
-    security: 'Seguran\u00e7a',
+    notifications: 'Notificações',
+    security: 'Segurança',
 };
 
 const ConfigPage = () => {
@@ -22,12 +22,12 @@ const ConfigPage = () => {
     return (
         <>
             <Helmet>
-                <title>Configura\u00e7\u00f5es - Serrallab</title>
+                <title>Configurações - Serrallab</title>
             </Helmet>
             <div className="w-full space-y-6">
                 <AppSectionHeader
                     title={label}
-                    description={'Ajuste sua conta, equipe, notifica\u00e7\u00f5es e integra\u00e7\u00f5es em um s\u00f3 lugar.'}
+                    description={'Ajuste sua conta, equipe, notificações e integrações em um só lugar.'}
                 />
                 <SettingsLayout />
             </div>

@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, ExternalLink } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.jsx";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.jsx';
 
 interface ConnectModalProps {
     isOpen: boolean;
@@ -17,34 +16,52 @@ interface ConnectModalProps {
 }
 
 const INSTRUCTIONS: Record<string, string> = {
-    whatsapp: 'Insira seu token de API do WhatsApp Business ou provedor parceiro (ex: Twilio, Gupshup).',
+    whatsapp: 'Informe o Account SID e o Auth Token da Twilio para WhatsApp.',
+    sms: 'Informe o Account SID e o Auth Token da Twilio para SMS.',
     telegram: 'Insira o token do seu Bot obtido com o @BotFather.',
-    stripe: 'Insira sua chave secreta (Secret Key) do Stripe. Começa geralmente com "sk_".',
+    stripe: 'Insira sua chave secreta (Secret Key) do Stripe. Comeca geralmente com "sk_".',
     zapier: 'Gere um Webhook Key no painel do Zapier e cole aqui.',
     email: 'Configure suas credenciais SMTP ou API Key do provedor (SendGrid, AWS SES).',
-    sms: 'Insira suas credenciais do provedor de SMS (Twilio Account SID & Auth Token).',
     default: 'Insira o token de acesso ou chave de API para conectar.'
 };
 
 const ConnectModal = ({ isOpen, onClose, type, label, category, onConnect }: ConnectModalProps) => {
     const [token, setToken] = useState('');
+    const [accountSid, setAccountSid] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const isTwilio = type === 'whatsapp' || type === 'sms';
+    const instruction = INSTRUCTIONS[type] || INSTRUCTIONS.default;
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setToken('');
+        setAccountSid('');
+        setError(null);
+    }, [isOpen, type]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        
+
+        if (isTwilio && !accountSid.trim()) {
+            setError('O Account SID e obrigatorio.');
+            return;
+        }
+
         if (!token.trim()) {
-            setError('O token/chave é obrigatório.');
+            setError('O Auth Token e obrigatorio.');
             return;
         }
 
         setLoading(true);
         try {
-            const success = await onConnect(token, {}); // Extend for complex creds if needed
+            const credentials = isTwilio ? { provider: 'twilio', account_sid: accountSid.trim() } : {};
+            const success = await onConnect(token.trim(), credentials);
             if (success) {
                 setToken('');
+                setAccountSid('');
                 onClose();
             }
         } catch (err) {
@@ -69,13 +86,27 @@ const ConnectModal = ({ isOpen, onClose, type, label, category, onConnect }: Con
                         <ExternalLink className="h-4 w-4 text-primary" />
                         <AlertTitle className="text-primary font-semibold ml-2">Como obter?</AlertTitle>
                         <AlertDescription className="ml-2 text-muted-foreground mt-1">
-                            {INSTRUCTIONS[type] || INSTRUCTIONS.default}
+                            {instruction}
                         </AlertDescription>
                     </Alert>
 
                     <form id="connect-form" onSubmit={handleSubmit} className="space-y-4">
+                        {isTwilio && (
+                            <div className="space-y-2">
+                                <Label htmlFor="accountSid">Account SID</Label>
+                                <Input
+                                    id="accountSid"
+                                    type="text"
+                                    value={accountSid}
+                                    onChange={(e) => setAccountSid(e.target.value)}
+                                    placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                                    className="font-mono text-sm"
+                                    disabled={loading}
+                                />
+                            </div>
+                        )}
                         <div className="space-y-2">
-                            <Label htmlFor="token">Token de Acesso / API Key</Label>
+                            <Label htmlFor="token">Auth Token / API Key</Label>
                             <Input
                                 id="token"
                                 type="password"

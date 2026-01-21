@@ -10,7 +10,7 @@ import { motion } from 'framer-motion';
 const ACTION_LABELS = {
   create: 'Criado',
   update: 'Atualizado',
-  delete: 'Exclu\u00eddo',
+  delete: 'Excluído',
   login: 'Login',
   logout: 'Logout',
 };
@@ -18,10 +18,10 @@ const ACTION_LABELS = {
 const ENTITY_LABELS = {
   cliente: 'Cliente',
   fornecedor: 'Fornecedor',
-  orcamento: 'Or\u00e7amento',
+  orcamento: 'Orçamento',
   pedido: 'Pedido',
   lead: 'Lead',
-  usuario: 'Usu\u00e1rio',
+  usuario: 'Usuário',
 };
 
 const formatRelativeDate = (dateString) => {
@@ -33,7 +33,7 @@ const formatRelativeDate = (dateString) => {
 
   if (diffDays === 1) return 'Hoje';
   if (diffDays === 2) return 'Ontem';
-  if (diffDays <= 7) return `H\u00e1 ${diffDays} dias`;
+  if (diffDays <= 7) return `Há ${diffDays} dias`;
 
   return date.toLocaleDateString('pt-BR');
 };
@@ -65,8 +65,8 @@ const DashboardAtividadesRecentes = ({ logs }) => {
           <div className="overflow-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="w-[35%] text-center">{'A\u00e7\u00e3o'}</TableHead>
+                <TableRow className="border-surface-strong/70 hover:bg-transparent">
+                  <TableHead className="w-[35%] text-center">{'Ação'}</TableHead>
                   <TableHead className="text-center">Entidade</TableHead>
                   <TableHead className="text-center">{'Quando'}</TableHead>
                 </TableRow>
@@ -74,7 +74,7 @@ const DashboardAtividadesRecentes = ({ logs }) => {
               <TableBody>
                 {logs && logs.length > 0 ? (
                   logs.map((log) => (
-                    <TableRow key={log.id} className="border-border hover:bg-muted/50 transition-colors">
+                    <TableRow key={log.id} className="border-surface-strong/70 hover:bg-muted/50 transition-colors">
                       <TableCell className="text-center">
                         <Badge variant="outline" className="text-[10px] uppercase inline-flex mx-auto">
                           {ACTION_LABELS[log.action] || log.action}
@@ -105,6 +105,3 @@ const DashboardAtividadesRecentes = ({ logs }) => {
 };
 
 export default DashboardAtividadesRecentes;
-
-
-

@@ -1,5 +1,4 @@
-﻿
-import React from 'react';
+﻿import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,11 +15,11 @@ const DashboardUltimosLeads = ({ leads }) => {
     const now = new Date();
     const diffTime = Math.abs(now - date);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return 'Hoje';
     if (diffDays === 2) return 'Ontem';
-    if (diffDays <= 7) return `H\u00e1 ${diffDays} dias`;
-    
+    if (diffDays <= 7) return `Há ${diffDays} dias`;
+
     return date.toLocaleDateString('pt-BR');
   };
 
@@ -32,10 +31,10 @@ const DashboardUltimosLeads = ({ leads }) => {
     >
       <Card className="h-full shadow-lg hover:shadow-xl transition-shadow duration-300 border-border bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-heading text-foreground">{'\u00daltimos Leads'}</CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <CardTitle className="text-lg font-heading text-foreground">{'Últimos Leads'}</CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
             className="text-primary hover:text-primary/80 gap-1"
             onClick={() => navigate('/app/leads')}
           >
@@ -46,7 +45,7 @@ const DashboardUltimosLeads = ({ leads }) => {
           <div className="overflow-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-border hover:bg-transparent">
+                <TableRow className="border-surface-strong/70 hover:bg-transparent">
                   <TableHead className="w-[40%] text-center">Lead</TableHead>
                   <TableHead className="text-center">Contato</TableHead>
                   <TableHead className="text-center">Data</TableHead>
@@ -55,7 +54,7 @@ const DashboardUltimosLeads = ({ leads }) => {
               <TableBody>
                 {leads && leads.length > 0 ? (
                   leads.map((lead) => (
-                    <TableRow key={lead.id} className="border-border hover:bg-muted/50 transition-colors">
+                    <TableRow key={lead.id} className="border-surface-strong/70 hover:bg-muted/50 transition-colors">
                       <TableCell className="text-center">
                         <div className="mx-auto flex w-fit items-center gap-2">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -96,6 +95,3 @@ const DashboardUltimosLeads = ({ leads }) => {
 };
 
 export default DashboardUltimosLeads;
-
-
-

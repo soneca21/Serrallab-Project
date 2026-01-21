@@ -15,8 +15,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { v4 as uuidv4 } from 'uuid';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { createOrcamentoPdf, generatePdf } from '@/features/orcamentos/api/generatePdf';
 import MaterialSelectorDialog from '@/components/MaterialSelectorDialog';
 import DownloadPdfButton from '@/features/orcamentos/components/DownloadPdfButton';
 import { createAuditLog } from '@/features/audit/api/auditLog';
@@ -148,10 +147,11 @@ const OrcamentoFormPage = () => {
     const [isSelectorOpen, setIsSelectorOpen] = useState(false);
     const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
     const [currentItemId, setCurrentItemId] = useState(null);
+    const [pipelineStages, setPipelineStages] = useState([]);
 
     const [formData, setFormData] = useState({
         title: '',
-        client_id: null,
+        client_id: '',
         description: '',
         items: [{ id: uuidv4(), material_id: '', name: 'Selecione um material', quantity: 1, cost: 0, unit: 'un' }],
         total_cost: 0,
@@ -162,20 +162,31 @@ const OrcamentoFormPage = () => {
         transport_cost: 0,
         other_costs: 0,
     });
+    const [previousStatus, setPreviousStatus] = useState('Rascunho');
     
     const [companyInfo, setCompanyInfo] = useState({ name: 'Sua Empresa', phone: 'Seu Telefone', email: 'seu@email.com' });
 
-    const config = useMemo(() => ({ margin: 20, tax: 5, waste: 5 }), []);
+    const marginPreference = Number(profile?.preferences?.org_margin);
+    const config = useMemo(() => {
+        const safeMargin = Number.isFinite(marginPreference) && marginPreference > 0 ? marginPreference : 20;
+        return { margin: safeMargin, tax: 5, waste: 5 };
+    }, [marginPreference]);
+
+    const currentStage = useMemo(() => {
+        if (!pipelineStages.length) return null;
+        return pipelineStages.find(stage => stage.id === formData.pipeline_stage_id);
+    }, [pipelineStages, formData.pipeline_stage_id]);
     
     const fetchData = useCallback(async () => {
         if (!user) return;
         setLoading(true);
         try {
             // Changed from 'quotes' to 'orders'
-            const [clientsRes, userMaterialsRes, globalMaterialsRes, quoteRes] = await Promise.all([
+            const [clientsRes, userMaterialsRes, globalMaterialsRes, pipelineStagesRes, quoteRes] = await Promise.all([
                 supabase.from('clients').select('*').eq('user_id', user.id),
                 supabase.from('user_materials').select('*').eq('user_id', user.id).order('category', { ascending: true }).order('name', { ascending: true }),
                 supabase.from('global_materials').select('*').order('category', { ascending: true }).order('name', { ascending: true }),
+                supabase.from('pipeline_stages').select('*').order('"order"', { ascending: true }),
                 id ? supabase.from('orders').select('*, clients(*)').eq('id', id).single() : Promise.resolve({ data: null }),
             ]);
 
@@ -187,6 +198,7 @@ const OrcamentoFormPage = () => {
             setClients(clientsRes.data);
             setUserMaterials(userMaterialsRes.data);
             setGlobalMaterials(globalMaterialsRes.data);
+            setPipelineStages(pipelineStagesRes.data || []);
             if(profile) {
                 setCompanyInfo(prev => ({
                     ...prev, 
@@ -201,6 +213,7 @@ const OrcamentoFormPage = () => {
                     ...quoteRes.data,
                     items: quoteRes.data.items && quoteRes.data.items.length > 0 ? quoteRes.data.items : [{ id: uuidv4(), material_id: '', name: 'Selecione um material', quantity: 1, cost: 0, unit: 'un' }]
                 });
+                setPreviousStatus(quoteRes.data.status || 'Rascunho');
             }
 
         } catch (error) {
@@ -214,83 +227,90 @@ const OrcamentoFormPage = () => {
         fetchData();
     }, [fetchData]);
 
+    const parseNumber = (value) => {
+        if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+        const raw = String(value ?? '').trim();
+        if (!raw) return 0;
+        const hasComma = raw.includes(',');
+        const hasDot = raw.includes('.');
+        let normalized = raw;
+        if (hasComma && hasDot) {
+            normalized = raw.replace(/\./g, '').replace(',', '.');
+        } else if (hasComma) {
+            normalized = raw.replace(',', '.');
+        }
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
     const calculations = useMemo(() => {
-        const materialsCost = formData.items.reduce((total, item) => {
-            const itemQty = parseFloat(item.quantity) || 0;
-            const itemCost = (parseFloat(item.cost) || 0) * itemQty; // Garantir que item.cost seja um número
-            const wasteCost = itemCost * (config.waste / 100);
-            return total + itemCost + wasteCost;
+        const materialsSubtotal = formData.items.reduce((total, item) => {
+            const itemQty = parseNumber(item.quantity);
+            const itemCost = parseNumber(item.cost);
+            return total + (itemCost * itemQty);
         }, 0);
 
-        const laborCost = parseFloat(formData.labor_cost || 0);
-        const paintingCost = parseFloat(formData.painting_cost || 0);
-        const transportCost = parseFloat(formData.transport_cost || 0);
-        const otherCosts = parseFloat(formData.other_costs || 0);
-        
-        const baseCost = materialsCost + laborCost + paintingCost + transportCost + otherCosts;
-        const profitMargin = baseCost * (config.margin / 100);
-        const taxAmount = (baseCost + profitMargin) * (config.tax / 100);
-        const finalPrice = baseCost + profitMargin + taxAmount;
-        const netProfit = finalPrice - baseCost - taxAmount;
+        const wasteCost = materialsSubtotal * (config.waste / 100);
+        const laborCost = parseNumber(formData.labor_cost);
+        const paintingCost = parseNumber(formData.painting_cost);
+        const transportCost = parseNumber(formData.transport_cost);
+        const otherCosts = parseNumber(formData.other_costs);
 
-        return { materialsCost, baseCost, finalPrice, netProfit };
+        const baseCost = materialsSubtotal + wasteCost + laborCost + paintingCost + transportCost + otherCosts;
+        const marginAmount = baseCost * (config.margin / 100);
+        const taxAmount = (baseCost + marginAmount) * (config.tax / 100);
+        const finalPrice = baseCost + marginAmount + taxAmount;
+
+        return {
+            materialsCost: materialsSubtotal,
+            wasteCost,
+            baseCost,
+            finalPrice,
+            netProfit: marginAmount,
+        };
     }, [formData.items, formData.labor_cost, formData.painting_cost, formData.transport_cost, formData.other_costs, config]);
 
 
-    useEffect(() => {
-        setFormData(prev => {
-            if (prev.total_cost !== calculations.baseCost || prev.final_price !== calculations.finalPrice) {
-                return {
-                    ...prev,
-                    total_cost: calculations.baseCost,
-                    final_price: calculations.finalPrice
-                };
-            }
-            return prev;
-        });
-    }, [calculations.baseCost, calculations.finalPrice]);
-
     // Client-side PDF backup
-    const handleGenerateClientPdf = () => {
-        const doc = new jsPDF();
+    const handleGenerateClientPdf = async () => {
         const client = clients.find(c => c.id === formData.client_id);
-        
-        doc.setFontSize(20);
-        doc.text("Proposta de Orçamento", 14, 22);
-        doc.setFontSize(12);
-        doc.text(formData.title, 14, 30);
-        
-        doc.setFontSize(10);
-        doc.text(`Data: ${new Date().toLocaleDateString()}`, 14, 40);
-        doc.line(14, 45, 196, 45);
-        doc.setFontSize(12);
-        doc.text("Empresa:", 14, 55);
-        doc.setFontSize(10);
-        doc.text(companyInfo.name, 14, 61);
-        doc.setFontSize(12);
-        doc.text("Cliente:", 110, 55);
-        doc.setFontSize(10);
-        doc.text(client?.name || 'Não especificado', 110, 61);
-        doc.text(client?.email || '', 110, 66);
-        doc.text(client?.phone || '', 110, 71);
-        doc.autoTable({ startY: 85, head: [['Item', 'Unidade', 'Qtd', 'Custo Unit.', 'Custo Total']], body: formData.items.map(item => [item.name, item.unit, item.quantity, `R$ ${parseFloat(item.cost || 0).toFixed(2)}`, `R$ ${(parseFloat(item.cost || 0) * parseFloat(item.quantity || 0)).toFixed(2)}`]), theme: 'striped', headStyles: { fillColor: [41, 128, 185] }, });
-        let finalY = doc.lastAutoTable.finalY + 10;
-        doc.setFontSize(10);
-        doc.text(`Custo Mão de Obra: R$ ${parseFloat(formData.labor_cost || 0).toFixed(2)}`, 14, finalY);
-        doc.text(`Custo Pintura: R$ ${parseFloat(formData.painting_cost || 0).toFixed(2)}`, 14, finalY + 5);
-        doc.text(`Custo Transporte: R$ ${parseFloat(formData.transport_cost || 0).toFixed(2)}`, 14, finalY + 10);
-        doc.text(`Outros Custos: R$ ${parseFloat(formData.other_costs || 0).toFixed(2)}`, 14, finalY + 15);
-        doc.text(`Subtotal (Custo Base): R$ ${calculations.baseCost.toFixed(2)}`, 14, finalY + 20);
-        doc.setFontSize(14);
-        doc.setFont(undefined, 'bold');
-        doc.text(`Preço Final: R$ ${calculations.finalPrice.toFixed(2)}`, 130, finalY + 25);
-        doc.setFont(undefined, 'normal');
-        finalY = doc.lastAutoTable.finalY + 55;
-        doc.setFontSize(10);
-        doc.text("Descrição do Projeto:", 14, finalY);
-        const splitDescription = doc.splitTextToSize(formData.description || 'Nenhuma descrição fornecida.', 180);
-        doc.text(splitDescription, 14, finalY + 5);
+        const orcamentoData = {
+            ...formData,
+            created_at: new Date().toISOString(),
+            total_cost: calculations.baseCost,
+            final_price: calculations.finalPrice,
+        };
+        const profileData = {
+            company_name: companyInfo?.name,
+            company_phone: companyInfo?.phone,
+            company_email: companyInfo?.email,
+        };
+
+        const doc = await createOrcamentoPdf({
+            orcamento: orcamentoData,
+            client,
+            profile: profileData,
+        });
+
         doc.save(`orcamento_${formData.title.replace(/\s/g, '_')}.pdf`);
+    };
+
+    const handleViewPdf = async () => {
+        if (!id) {
+            await handleGenerateClientPdf();
+            return;
+        }
+
+        try {
+            const { pdf_url } = await generatePdf(id);
+            if (pdf_url) {
+                window.open(pdf_url, '_blank', 'noopener,noreferrer');
+            } else {
+                toast({ title: 'PDF indisponivel', description: 'Nao foi possivel abrir o PDF.', variant: 'destructive' });
+            }
+        } catch (error) {
+            toast({ title: 'Erro ao abrir PDF', description: error.message || 'Tente novamente mais tarde.', variant: 'destructive' });
+        }
     };
 
     const handleInputChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -299,22 +319,30 @@ const OrcamentoFormPage = () => {
     
     const handleMaterialSelect = (material) => {
         if (!currentItemId) return;
-        setFormData(prev => ({...prev, items: prev.items.map(item => item.id === currentItemId ? {...item, material_id: material.id, name: material.name, cost: material.cost, unit: material.unit} : item)}));
+        setFormData(prev => ({
+            ...prev,
+            items: prev.items.map(item => item.id === currentItemId ? {
+                ...item,
+                material_id: material.id,
+                name: material.name,
+                cost: parseNumber(material.cost),
+                unit: material.unit || 'un'
+            } : item)
+        }));
         setCurrentItemId(null);
     };
 
-    const handleApplySuggestion = (suggestion) => {
+        const handleApplySuggestion = (suggestion) => {
         const newItems = suggestion.items.map(suggItem => {
             const foundMaterial = userMaterials.find(m => m.id === suggItem.material_id);
-            // Este IF é uma dupla garantia, mas a validação já acontece no AiSuggestionDialog.
             if (foundMaterial) {
                 return {
                     id: uuidv4(),
                     material_id: foundMaterial.id,
                     name: foundMaterial.name,
-                    quantity: suggItem.quantity || 1,
-                    cost: foundMaterial.cost,
-                    unit: foundMaterial.unit,
+                    quantity: parseNumber(suggItem.quantity) || 1,
+                    cost: parseNumber(foundMaterial.cost),
+                    unit: foundMaterial.unit || 'un',
                 };
             }
             return null;
@@ -322,17 +350,18 @@ const OrcamentoFormPage = () => {
 
         setFormData(prev => ({
             ...prev,
-            title: suggestion.title,
-            description: suggestion.description,
+            title: suggestion.title || prev.title,
+            description: suggestion.description || prev.description,
             items: newItems.length > 0 ? newItems : prev.items.filter(i => i.name !== 'Selecione um material'),
-            labor_cost: suggestion.labor_cost || 0,
-            painting_cost: suggestion.painting_cost || 0,
-            transport_cost: suggestion.transport_cost || 0,
+            labor_cost: parseNumber(suggestion.labor_cost),
+            painting_cost: parseNumber(suggestion.painting_cost),
+            transport_cost: parseNumber(suggestion.transport_cost),
         }));
-        toast({ title: "Sugestão Aplicada!", description: "O orçamento foi preenchido com os dados da IA." });
+        toast({ title: 'Sugestao aplicada', description: 'O orcamento foi preenchido com os dados da IA.' });
     };
 
     const openMaterialSelector = (itemId) => { setCurrentItemId(itemId); setIsSelectorOpen(true); };
+
     const addItem = () => setFormData(prev => ({ ...prev, items: [...prev.items, { id: uuidv4(), material_id: '', name: 'Selecione um material', quantity: 1, cost: 0, unit: 'un' }] }));
     const removeItem = (itemId) => {
       setFormData(prev => {
@@ -346,30 +375,67 @@ const OrcamentoFormPage = () => {
     };
     
     const handleSave = async (showToast = true) => {
-        setIsSaving(true);
-        // Filtra itens vazios antes de salvar
-        const validItems = formData.items.filter(item => item.material_id);
-        const quoteData = { ...formData, user_id: user.id, items: validItems };
-        let result;
-        // Changed from 'quotes' to 'orders'
-        if (id) { 
-            result = await supabase.from('orders').update(quoteData).eq('id', id); 
-        } else { 
-            result = await supabase.from('orders').insert(quoteData).select('id').single(); 
+        if (!formData.title.trim()) {
+            toast({ title: 'Titulo obrigatorio', description: 'Informe um titulo para o orcamento.', variant: 'destructive' });
+            return { success: false };
         }
-        
+
+        if (!formData.client_id) {
+            toast({ title: 'Cliente obrigatorio', description: 'Selecione um cliente para o orcamento.', variant: 'destructive' });
+            return { success: false };
+        }
+
+        const normalizedItems = formData.items
+            .filter(item => item.material_id)
+            .map(item => ({
+                id: item.id || uuidv4(),
+                material_id: item.material_id,
+                name: item.name,
+                quantity: parseNumber(item.quantity) || 1,
+                cost: parseNumber(item.cost),
+                unit: item.unit || 'un',
+            }))
+            .filter(item => item.quantity > 0);
+
+        if (normalizedItems.length === 0) {
+            toast({ title: 'Itens obrigatorios', description: 'Adicione ao menos um material.', variant: 'destructive' });
+            return { success: false };
+        }
+
+        setIsSaving(true);
+        const quoteData = {
+            ...formData,
+            user_id: user.id,
+            title: formData.title.trim(),
+            description: formData.description?.trim() || '',
+            items: normalizedItems,
+            labor_cost: parseNumber(formData.labor_cost),
+            painting_cost: parseNumber(formData.painting_cost),
+            transport_cost: parseNumber(formData.transport_cost),
+            other_costs: parseNumber(formData.other_costs),
+            total_cost: calculations.baseCost,
+            final_price: calculations.finalPrice,
+            status: formData.status || 'Rascunho',
+        };
+        const statusChanged = id && previousStatus && previousStatus !== quoteData.status;
+        let result;
+        if (id) {
+            result = await supabase.from('orders').update(quoteData).eq('id', id);
+        } else {
+            result = await supabase.from('orders').insert(quoteData).select('id').single();
+        }
+
         setIsSaving(false);
-        
-        if (result.error) { 
-            if(showToast) toast({ title: 'Erro ao salvar', description: result.error.message, variant: 'destructive' }); 
-            return { success: false, error: result.error }; 
-        } else { 
-            if(showToast) toast({ title: 'Sucesso!', description: 'Orçamento salvo.' }); 
-            
-            // --- WEBHOOK TRIGGER: orcamento.created / orcamento.updated ---
-            const webhookEvent = id ? 'orcamento.updated' : 'orcamento.created';
+
+        if (result.error) {
+            if(showToast) toast({ title: 'Erro ao salvar', description: result.error.message, variant: 'destructive' });
+            return { success: false, error: result.error };
+        } else {
             const orcamentoId = id || result.data.id;
-            
+            if(showToast) toast({ title: 'Sucesso!', description: 'Orcamento salvo.' });
+
+            const webhookEvent = id ? 'orcamento.updated' : 'orcamento.created';
+
             supabase.functions.invoke('dispatch-webhook-event', {
                 body: {
                     user_id: user.id,
@@ -383,7 +449,6 @@ const OrcamentoFormPage = () => {
                     }
                 }
             }).catch(err => console.error('Webhook dispatch failed', err));
-            // -------------------------------------------------------------
 
             createAuditLog(
                 'orcamento',
@@ -398,33 +463,88 @@ const OrcamentoFormPage = () => {
                 }
             );
 
-            if (!id && result.data) { navigate(`/app/orcamentos/editar/${result.data.id}`, { replace: true }); } 
-            return { success: true }; 
+            const notifyEvent = id
+                ? (statusChanged ? 'status_changed' : 'updated')
+                : 'created';
+
+            supabase.functions.invoke('send-orcamento-notifications', {
+                body: {
+                    orcamento_id: orcamentoId,
+                    event: notifyEvent,
+                    old_status: previousStatus,
+                    new_status: quoteData.status,
+                }
+            }).catch(err => console.error('Orcamento notify failed', err));
+
+            setPreviousStatus(quoteData.status || previousStatus);
+
+            if (!id && result.data) {
+                navigate('/app/orcamentos/editar/' + result.data.id, { replace: true });
+            }
+            return { success: true, id: orcamentoId };
         }
     };
-    
+
     const handleSend = async (method, targetType) => {
         const client = clients.find(c => c.id === formData.client_id);
-        if (!id) { const saveResult = await handleSave(false); if (!saveResult.success) { toast({ title: 'Falha no Envio', description: 'Primeiro salve o orçamento para poder enviá-lo.', variant: 'destructive' }); return; }}
-        if (targetType === 'cliente' && !client) { toast({ title: 'Atenção', description: 'Selecione um cliente para enviar o orçamento.', variant: 'destructive' }); return; }
-        if (targetType === 'fornecedor') { toast({ title: 'Em breve', description: 'Envio para fornecedores ainda não implementado.' }); return; }
-        const messageBody = `Olá, ${client.name}!\n\nSegue a proposta de orçamento para o projeto "${formData.title}".\n\n*Resumo:*\n${formData.description || ''}\n\n*Valor Total: R$ ${calculations.finalPrice.toFixed(2)}*\n\nQualquer dúvida, estou à disposição!\n\nAtenciosamente,\n${companyInfo.name}`;
-        if (method === 'whatsapp') { const whatsappNumber = client.phone?.replace(/\D/g, ''); if (!whatsappNumber) { toast({ title: 'Erro', description: 'O cliente não possui um número de telefone válido.', variant: 'destructive' }); return; } window.open(`https://wa.me/55${whatsappNumber}?text=${encodeURIComponent(messageBody)}`, '_blank'); } 
-        else if (method === 'email') { if (!client.email) { toast({ title: 'Erro', description: 'O cliente não possui um email válido.', variant: 'destructive' }); return; } window.open(`mailto:${client.email}?subject=${encodeURIComponent(`Proposta de Orçamento: ${formData.title}`)}&body=${encodeURIComponent(messageBody)}`, '_blank'); }
-        // Changed from 'quotes' to 'orders'
-        const { error } = await supabase.from('orders').update({ status: 'Enviado' }).eq('id', id);
-        if (!error) {
-            setFormData(prev => ({ ...prev, status: 'Enviado' }));
-            toast({ title: 'Proposta Enviada!', description: `A proposta foi aberta no ${method} para envio.` });
-            createAuditLog(
-                'orcamento',
-                id,
-                'update',
-                { status: 'Enviado', method }
-            );
+        let orcamentoId = id;
+
+        if (!orcamentoId) {
+            const saveResult = await handleSave(false);
+            if (!saveResult.success) {
+                toast({ title: 'Falha no Envio', description: 'Primeiro salve o orcamento para poder envia-lo.', variant: 'destructive' });
+                return;
+            }
+            orcamentoId = saveResult.id;
         }
+
+        if (targetType === 'cliente' && !client) {
+            toast({ title: 'Atencao', description: 'Selecione um cliente para enviar o orcamento.', variant: 'destructive' });
+            return;
+        }
+
+        if (targetType === 'fornecedor') {
+            toast({ title: 'Em breve', description: 'Envio para fornecedores ainda nao implementado.' });
+            return;
+        }
+
+        if ((method === 'whatsapp' || method === 'sms') && !client?.phone) {
+            toast({ title: 'Erro', description: 'O cliente nao possui um numero de telefone valido.', variant: 'destructive' });
+            return;
+        }
+
+        if (method === 'email' && !client?.email) {
+            toast({ title: 'Erro', description: 'O cliente nao possui um email valido.', variant: 'destructive' });
+            return;
+        }
+
+        const { error } = await supabase.from('orders').update({ status: 'Enviado' }).eq('id', orcamentoId);
+        if (error) {
+            toast({ title: 'Erro ao enviar', description: error.message, variant: 'destructive' });
+            return;
+        }
+
+        setFormData(prev => ({ ...prev, status: 'Enviado' }));
+        setPreviousStatus('Enviado');
+
+        supabase.functions.invoke('send-orcamento-notifications', {
+            body: {
+                orcamento_id: orcamentoId,
+                event: 'sent',
+                new_status: 'Enviado',
+                channels: [method]
+            }
+        }).catch(err => console.error('Orcamento notify failed', err));
+
+        toast({ title: 'Proposta Enviada!', description: `A proposta foi enviada por ${method}.` });
+        createAuditLog(
+            'orcamento',
+            orcamentoId,
+            'update',
+            { status: 'Enviado', method }
+        );
     };
-    
+
     if (loading) return <div className="flex justify-center items-center h-full"><Loader2 className="h-16 w-16 animate-spin text-metallic-orange" /></div>;
 
     return (
@@ -449,11 +569,36 @@ const OrcamentoFormPage = () => {
                 </div>
                 <div className="lg:w-80 flex-shrink-0 space-y-6">
                      <Card>
-                        <CardHeader className="flex-row items-center justify-between"><CardTitle>Ações</CardTitle><span className={`px-2 py-1 text-xs font-semibold rounded-full border ${formData.status === 'Rascunho' ? 'border-gray-500/30 bg-gray-500/20 text-gray-400' : 'border-green-500/30 bg-green-500/20 text-green-400'}`}>{formData.status}</span></CardHeader>
+                        <CardHeader className="flex-row items-center justify-between">
+                            <CardTitle>Ações</CardTitle>
+                            <span
+                                className="px-3 py-1 text-xs font-semibold rounded-full border"
+                                style={{
+                                    borderColor: currentStage?.color || '#94a3b8',
+                                    backgroundColor: currentStage?.color ? `${currentStage.color}33` : '#0000001a',
+                                    color: currentStage?.color || '#94a3b8'
+                                }}
+                            >
+                                {currentStage?.name || 'Rascunho'}
+                            </span>
+                        </CardHeader>
                         <CardContent className="grid grid-cols-2 gap-2">
                             <Button onClick={() => handleSave()} disabled={isSaving}>{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />} Salvar</Button>
                             
-                            {/* Download PDF Button */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="secondary" className="col-span-1"><Send className="mr-2 h-4 w-4" /> Enviar Proposta</Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem onClick={() => handleSend('whatsapp', 'cliente')}><MessageSquare className="mr-2 h-4 w-4" /><span>Via WhatsApp (Cliente)</span></DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleSend('sms', 'cliente')}><MessageSquare className="mr-2 h-4 w-4" /><span>Via SMS (Cliente)</span></DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleSend('email', 'cliente')}><Mail className="mr-2 h-4 w-4" /><span>Via Email (Cliente)</span></DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleSend('whatsapp', 'fornecedor')}><Truck className="mr-2 h-4 w-4" /><span>Via WhatsApp (Fornecedor)</span></DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <Button variant="secondary" className="col-span-1" onClick={handleViewPdf}><FileText className="mr-2 h-4 w-4" /> Ver PDF</Button>
+
                             {id ? (
                                 <DownloadPdfButton 
                                     orcamento_id={id} 
@@ -462,10 +607,8 @@ const OrcamentoFormPage = () => {
                                     className="col-span-1"
                                 />
                             ) : (
-                                <Button variant="secondary" onClick={handleGenerateClientPdf}><FileText className="mr-2 h-4 w-4" /> PDF</Button>
+                                <Button variant="secondary" className="col-span-1" onClick={handleGenerateClientPdf}><FileText className="mr-2 h-4 w-4" /> Exportar PDF</Button>
                             )}
-
-                            <DropdownMenu><DropdownMenuTrigger asChild><Button variant="secondary" className="col-span-2"><Send className="mr-2 h-4 w-4" /> Enviar Proposta</Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem onClick={() => handleSend('whatsapp', 'cliente')}><MessageSquare className="mr-2 h-4 w-4" /><span>Via WhatsApp (Cliente)</span></DropdownMenuItem><DropdownMenuItem onClick={() => handleSend('email', 'cliente')}><Mail className="mr-2 h-4 w-4" /><span>Via Email (Cliente)</span></DropdownMenuItem><DropdownMenuItem onClick={() => handleSend('whatsapp', 'fornecedor')}><Truck className="mr-2 h-4 w-4" /><span>Via WhatsApp (Fornecedor)</span></DropdownMenuItem></DropdownMenuContent></DropdownMenu>
                             <Button variant="outline" className="border-metallic-orange text-metallic-orange col-span-2" onClick={() => setIsAiDialogOpen(true)}><Bot className="mr-2 h-4 w-4" /> Sugestão IA</Button>
                         </CardContent>
                     </Card>

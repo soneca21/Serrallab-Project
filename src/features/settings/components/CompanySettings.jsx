@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Building, MapPin, Globe, Phone, Upload, Mail, Link, BadgeCheck, AlertTriangle, Hash, Clock, FileText } from 'lucide-react';
+import { Loader2, Building, MapPin, Globe, Phone, Upload, Mail, Link, BadgeCheck, AlertTriangle, Hash, Clock, FileText, Percent } from 'lucide-react';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -30,7 +30,10 @@ const CompanySettings = () => {
         org_support_email: '',
         org_hours_weekdays: '08:00-18:00',
         org_hours_weekend: '',
-        org_invoice_footer: ''
+        org_invoice_footer: '',
+        org_margin: '20',
+        org_term_days: '30',
+        org_conditions: ''
     });
     const fileInputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
@@ -340,6 +343,46 @@ const CompanySettings = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
+                                    <Label htmlFor="org_term_days">Prazo padrão (dias)</Label>
+                                    <div className="relative">
+                                        <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            id="org_term_days"
+                                            className="pl-9"
+                                            type="number"
+                                            min="0"
+                                            value={orgPrefs.org_term_days}
+                                            onChange={(e) => setOrgPrefs({ ...orgPrefs, org_term_days: e.target.value })}
+                                            placeholder="30"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="org_conditions">Condições padrão</Label>
+                                    <Textarea
+                                        id="org_conditions"
+                                        value={orgPrefs.org_conditions}
+                                        onChange={(e) => setOrgPrefs({ ...orgPrefs, org_conditions: e.target.value })}
+                                        placeholder="Ex: 50% na contratação e 50% na entrega"
+                                        className="min-h-[80px]"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="org_margin">Margem de lucro (%)</Label>
+                                    <div className="relative">
+                                        <Percent className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            id="org_margin"
+                                            className="pl-9"
+                                            type="number"
+                                            min="0"
+                                            value={orgPrefs.org_margin}
+                                            onChange={(e) => setOrgPrefs({ ...orgPrefs, org_margin: e.target.value })}
+                                            placeholder="20"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
                                     <Label htmlFor="company_website">Site</Label>
                                     <div className="relative">
                                         <Link className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -478,6 +521,20 @@ const CompanySettings = () => {
                                 <Mail className="h-4 w-4 text-primary" />
                                 {formData.email || 'Email não informado'}
                             </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Percent className="h-4 w-4 text-primary" />
+                                Margem de lucro: {orgPrefs.org_margin || '20'}%
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="h-4 w-4 text-primary" />
+                                Prazo padrão: {orgPrefs.org_term_days || '30'} dias
+                            </div>
+                            {orgPrefs.org_conditions && (
+                                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                    <FileText className="h-4 w-4 text-primary" />
+                                    <span className="text-[11px]">{orgPrefs.org_conditions}</span>
+                                </div>
+                            )}
                         </div>
 
                         {!profile?.company_id && !company?.id && (

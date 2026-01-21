@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Search, Building, Star, Clock, Shield, Ban, Users, BarChart2, Settings, DollarSign, PlusCircle, Edit, Trash2, ArrowUpRight, ArrowDownRight, Activity, FileText } from 'lucide-react';
+import { Loader2, Search, Building, Star, Clock, Shield, Ban, Users, BarChart2, Settings, DollarSign, PlusCircle, Edit, Trash2, ArrowUpRight, ArrowDownRight, Activity, FileText, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -111,12 +111,13 @@ const buildMonthBuckets = (now) => {
 
 // --- Sub-componentes para cada aba ---
 
-const OverviewTab = () => {
+const OverviewTab = ({ onHealthCheck }) => {
     const { toast } = useToast();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [chartData, setChartData] = useState([]);
     const [activity, setActivity] = useState([]);
+    const [alerts, setAlerts] = useState([]);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -217,6 +218,9 @@ const OverviewTab = () => {
                 const conversionRate = leadsCurrent > 0 ? (newUsersCurrent / leadsCurrent) * 100 : 0;
                 const conversionPrev = leadsPrev > 0 ? (newUsersPrev / leadsPrev) * 100 : 0;
 
+                const pipelineTrend = buildTrend(ordersCurrent, ordersPrev);
+                const leadsPipelineTrend = buildTrend(leadsCurrent, leadsPrev);
+
                 const mrrTrend = buildTrend(currentRevenue, prevRevenue);
                 const activeUsersTrend = buildTrend(activeUsers, activeUsersPrev);
                 const newUsersTrend = buildTrend(newUsersCurrent, newUsersPrev);
@@ -224,6 +228,16 @@ const OverviewTab = () => {
                 const arpaTrend = buildTrend(arpa, arpaPrev);
                 const ltvTrend = buildTrend(ltv, ltvPrev);
                 const conversionTrend = buildTrend(conversionRate, conversionPrev);
+                const newAlerts = [];
+                if (churnRate > 5) {
+                    newAlerts.push('Churn acima de 5% — verificar ofertas de retenção.');
+                }
+                if (prevRevenue > 0 && currentRevenue < prevRevenue * 0.9) {
+                    newAlerts.push('Receita caiu mais de 10% em relação ao mês anterior — revisar cobranças e propostas.');
+                }
+                if (ordersCurrent < Math.max(5, ordersPrev * 0.8)) {
+                    newAlerts.push('Fluxo de orçamentos diminuiu — incentive follow-ups e automações.');
+                }
 
                 setStats({
                     mrr: currentRevenue,
@@ -245,6 +259,14 @@ const OverviewTab = () => {
                             automations: buildTrend(automationsCurrent, automationsPrev),
                         },
                     },
+                    pipeline: {
+                        openQuotes: ordersCurrent,
+                        newLeads: leadsCurrent,
+                        trends: {
+                            openQuotes: pipelineTrend,
+                            leads: leadsPipelineTrend,
+                        },
+                    },
                     trends: {
                         mrr: mrrTrend,
                         activeUsers: activeUsersTrend,
@@ -257,6 +279,8 @@ const OverviewTab = () => {
                 });
                 setChartData(months.map(({ key, ...rest }) => rest));
                 setActivity(activityRes.data || []);
+                setAlerts(newAlerts);
+                onHealthCheck?.(true);
             } catch (error) {
                 console.error('Erro ao carregar estatísticas:', error);
                 toast({
@@ -285,6 +309,14 @@ const OverviewTab = () => {
                             automations: { value: '0%', up: true },
                         },
                     },
+                    pipeline: {
+                        openQuotes: 0,
+                        newLeads: 0,
+                        trends: {
+                            openQuotes: { value: '0%', up: true },
+                            leads: { value: '0%', up: true },
+                        },
+                    },
                     trends: {
                         mrr: { value: '0%', up: true },
                         activeUsers: { value: '0%', up: true },
@@ -297,13 +329,15 @@ const OverviewTab = () => {
                 });
                 setChartData(fallbackMonths.map(({ key, ...rest }) => rest));
                 setActivity([]);
+                setAlerts([]);
+                onHealthCheck?.(false);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchStats();
-    }, [toast]);
+    }, [toast, onHealthCheck]);
 
     if (loading || !stats) return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
@@ -398,6 +432,21 @@ const OverviewTab = () => {
         },
     ];
 
+    const pipelineCards = [
+        {
+            title: 'Orçamentos em pipeline',
+            value: stats.pipeline?.openQuotes ?? 0,
+            description: 'Propostas aguardando decisão.',
+            trend: stats.pipeline?.trends?.openQuotes || { value: '0%', up: true },
+        },
+        {
+            title: 'Leads qualificados',
+            value: stats.pipeline?.newLeads ?? 0,
+            description: 'Leads captados no mês.',
+            trend: stats.pipeline?.trends?.leads || { value: '0%', up: true },
+        },
+    ];
+
     const formatActivityTitle = (log) => {
         const action = ACTION_LABELS[log.action] || log.action || 'Atualização';
         const entity = ENTITY_LABELS[log.entity] || log.entity || '';
@@ -414,6 +463,16 @@ const OverviewTab = () => {
 
     return (
         <div className="space-y-6">
+            {alerts.length > 0 && (
+                <div className="space-y-2">
+                    {alerts.map((alert, index) => (
+                        <div key={index} className="flex items-center gap-2 rounded-lg border border-orange-600 bg-orange-500/10 px-4 py-2 text-sm text-orange-100">
+                            <Shield className="h-4 w-4 text-orange-400" />
+                            <span>{alert}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {statsCards.map((card) => (
                     <Card key={card.title} className="border-l-4 border-l-transparent hover:border-l-primary shadow-sm hover:shadow-md transition-all">
@@ -459,6 +518,27 @@ const OverviewTab = () => {
                             <div className="text-2xl font-bold text-foreground">{card.value}</div>
                             <p className="text-xs text-muted-foreground flex items-center mt-1">
                                 {card.trend.up ? <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" /> : <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />}
+                                <span className={card.trend.up ? 'text-green-500' : 'text-red-500'}>{card.trend.value}</span>
+                                <span className="ml-1">{card.description}</span>
+                            </p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            <div className="grid gap-6 md:grid-cols-3">
+                {pipelineCards.map((card) => (
+                    <Card key={card.title} className="border border-surface-strong">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">{card.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-foreground">{card.value}</div>
+                            <p className="text-xs text-muted-foreground flex items-center mt-1">
+                                {card.trend.up ? (
+                                    <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                                ) : (
+                                    <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />
+                                )}
                                 <span className={card.trend.up ? 'text-green-500' : 'text-red-500'}>{card.trend.value}</span>
                                 <span className="ml-1">{card.description}</span>
                             </p>
@@ -546,7 +626,7 @@ const OverviewTab = () => {
     );
 };
 
-const UserManagementTab = () => {
+const UserManagementTab = ({ onHealthCheck }) => {
     const { toast } = useToast();
     const [users, setUsers] = useState([]);
     const [plans, setPlans] = useState([]);
@@ -578,6 +658,7 @@ const UserManagementTab = () => {
 
             if (!usersRes.error && usersRes.data) {
                 setUsers(usersRes.data || []);
+                onHealthCheck?.(true);
             } else {
                 const [profilesRes, companiesRes, subscriptionsRes] = await Promise.all([
                     supabase.from('profiles').select('id, company_name, email, company_id, created_at'),
@@ -607,14 +688,16 @@ const UserManagementTab = () => {
                 });
 
                 setUsers(fallbackUsers);
+                onHealthCheck?.(true);
             }
         } catch (error) {
             console.error('Erro inesperado no admin:', error);
             toast({ title: 'Erro ao carregar contas', variant: 'destructive' });
+            onHealthCheck?.(false);
         } finally {
             setLoading(false);
         }
-    }, [toast]);
+    }, [toast, onHealthCheck]);
 
     useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -848,7 +931,7 @@ const UserManagementTab = () => {
             {loading ? (
                 <div className="flex justify-center p-12"><Loader2 className="h-10 w-10 animate-spin text-primary" /></div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                     {sortedUsers.length > 0 ? sortedUsers.map((user) => {
                         const statusProps = getStatusProps(user.subscription_status);
                         const planName = plansById.get(user.plan_id)?.name;
@@ -912,12 +995,13 @@ const UserManagementTab = () => {
     );
 };
 
-const ClientsTab = () => {
+const ClientsTab = ({ onHealthCheck }) => {
     const { toast } = useToast();
     const [clients, setClients] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [summary, setSummary] = useState({ total: 0, newMonth: 0, withEmail: 0, withPhone: 0 });
+    const [summary, setSummary] = useState({ total: 0, newMonth: 0, withEmail: 0, withPhone: 0, uniqueCompanies: 0, noOwner: 0, avgPerCompany: '0' });
+    const [topCompanies, setTopCompanies] = useState([]);
 
     const fetchClients = useCallback(async () => {
         setLoading(true);
@@ -943,19 +1027,37 @@ const ClientsTab = () => {
             const newMonth = normalized.filter((client) => new Date(client.created_at) >= monthStart).length;
             const withEmail = normalized.filter((client) => client.email).length;
             const withPhone = normalized.filter((client) => client.phone).length;
+            const companyCounts = normalized.reduce((acc, client) => {
+                const name = client.owner?.company_name?.trim() || 'Sem empresa vinculada';
+                acc[name] = (acc[name] || 0) + 1;
+                return acc;
+            }, {});
+            const uniqueCompanies = Object.keys(companyCounts).length;
+            const noOwner = normalized.filter((client) => !client.owner?.company_name).length;
+            const avgPerCompany = uniqueCompanies ? (normalized.length / uniqueCompanies).toFixed(1) : '0';
+            const topCompaniesList = Object.entries(companyCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .map(([company, count]) => ({ company, count }));
             setSummary({
                 total: normalized.length,
                 newMonth,
                 withEmail,
                 withPhone,
+                uniqueCompanies,
+                noOwner,
+                avgPerCompany,
             });
+            setTopCompanies(topCompaniesList);
+            onHealthCheck?.(true);
         } catch (error) {
             console.error('Erro ao carregar clientes:', error);
             toast({ title: 'Erro ao carregar clientes', variant: 'destructive' });
+            onHealthCheck?.(false);
         } finally {
             setLoading(false);
         }
-    }, [toast]);
+    }, [toast, onHealthCheck]);
 
     useEffect(() => { fetchClients(); }, [fetchClients]);
 
@@ -967,6 +1069,16 @@ const ClientsTab = () => {
         (client.owner?.company_name?.toLowerCase() || '').includes(normalizedSearch)
     );
 
+    const summaryCards = [
+        { title: 'Total', value: summary.total },
+        { title: 'Novos no mês', value: summary.newMonth },
+        { title: 'Com email', value: summary.withEmail },
+        { title: 'Com telefone', value: summary.withPhone },
+        { title: 'Empresas representadas', value: summary.uniqueCompanies },
+        { title: 'Clientes sem empresa', value: summary.noOwner },
+        { title: 'Média por empresa', value: summary.avgPerCompany },
+    ];
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -977,32 +1089,31 @@ const ClientsTab = () => {
                 <Button variant="outline" size="sm" onClick={fetchClients}>Atualizar dados</Button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Card className="border border-surface-strong">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-xs text-muted-foreground">Total</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">{summary.total}</CardContent>
-                </Card>
-                <Card className="border border-surface-strong">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-xs text-muted-foreground">Novos no mês</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">{summary.newMonth}</CardContent>
-                </Card>
-                <Card className="border border-surface-strong">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-xs text-muted-foreground">Com email</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">{summary.withEmail}</CardContent>
-                </Card>
-                <Card className="border border-surface-strong">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-xs text-muted-foreground">Com telefone</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">{summary.withPhone}</CardContent>
-                </Card>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                {summaryCards.map((card) => (
+                    <Card key={card.title} className="border border-surface-strong">
+                        <CardContent className="space-y-2">
+                            <p className="text-xs text-muted-foreground">{card.title}</p>
+                            <p className="text-2xl font-bold text-foreground">{card.value}</p>
+                        </CardContent>
+                    </Card>
+                ))}
             </div>
+            {topCompanies.length > 0 && (
+                <div className="grid gap-3 md:grid-cols-3">
+                    {topCompanies.map((company) => (
+                        <Card key={company.company} className="border border-surface-strong">
+                            <CardHeader className="pb-1">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Top empresa</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-lg font-semibold text-foreground">{company.company}</p>
+                                <p className="text-xs text-muted-foreground">Clientes cadastrados: {company.count}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             <div className="flex items-center gap-3">
                 <div className="relative w-full sm:w-96">
@@ -1016,28 +1127,50 @@ const ClientsTab = () => {
             ) : (
                 <div className="rounded-md border border-surface-strong overflow-hidden">
                     <Table>
-                        <TableHeader className="bg-surface-strong">
-                            <TableRow>
-                                <TableHead>Cliente</TableHead>
-                                <TableHead>Contato</TableHead>
-                                <TableHead>Empresa</TableHead>
-                                <TableHead className="text-right">Criado em</TableHead>
+                    <TableHeader className="bg-surface-strong">
+                        <TableRow>
+                            <TableHead>Cliente</TableHead>
+                            <TableHead>Contato</TableHead>
+                            <TableHead>Empresa</TableHead>
+                            <TableHead className="text-right">Criado em</TableHead>
+                            <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredClients.length > 0 ? filteredClients.map((client) => (
+                            <TableRow key={client.id}>
+                                <TableCell>
+                                    <div className="font-medium text-foreground">{client.name || '-'}</div>
+                                </TableCell>
+                                <TableCell className="space-y-1">
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <Mail className="h-3 w-3 text-muted-foreground" />
+                                        <span>{client.email || '-'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                        <Phone className="h-3 w-3 text-muted-foreground" />
+                                        <span>{client.phone || '-'}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="text-sm">
+                                    <div className="font-medium text-foreground">{client.owner?.company_name || 'Sem empresa'}</div>
+                                    <div className="text-xs text-muted-foreground">{client.owner?.email || '-'}</div>
+                                </TableCell>
+                                <TableCell className="text-right text-sm text-muted-foreground">{formatShortDate(client.created_at)}</TableCell>
+                                <TableCell className="text-right">
+                                    {client.email ? (
+                                        <Button variant="outline" size="sm" className="flex items-center gap-1" asChild>
+                                            <a href={`mailto:${client.email}`} title={`Enviar email para ${client.email}`}>
+                                                <Mail className="h-3 w-3" />
+                                                <span className="text-xs">Email</span>
+                                            </a>
+                                        </Button>
+                                    ) : (
+                                        <span className="text-xs text-muted-foreground">Sem email</span>
+                                    )}
+                                </TableCell>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredClients.length > 0 ? filteredClients.map((client) => (
-                                <TableRow key={client.id}>
-                                    <TableCell>
-                                        <div className="font-medium text-foreground">{client.name || '-'}</div>
-                                    </TableCell>
-                                    <TableCell className="text-sm text-muted-foreground">
-                                        <div>{client.email || '-'}</div>
-                                        <div>{client.phone || '-'}</div>
-                                    </TableCell>
-                                    <TableCell className="text-sm">{client.owner?.company_name || '-'}</TableCell>
-                                    <TableCell className="text-right text-sm text-muted-foreground">{formatShortDate(client.created_at)}</TableCell>
-                                </TableRow>
-                            )) : (
+                        )) : (
                                 <TableRow>
                                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                                         Nenhum cliente encontrado com os filtros atuais.
@@ -1052,7 +1185,7 @@ const ClientsTab = () => {
     );
 };
 
-const PlansManagementTab = () => {
+const PlansManagementTab = ({ onHealthCheck }) => {
     const { toast } = useToast();
     const [plans, setPlans] = useState([]);
     const [packages, setPackages] = useState([]);
@@ -1061,6 +1194,65 @@ const PlansManagementTab = () => {
     const [isPackageFormOpen, setPackageFormOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [selectedPackage, setSelectedPackage] = useState(null);
+
+    const totalQuoteCap = plans.reduce((acc, plan) => acc + (plan.quote_limit || 0), 0);
+    const activePackages = packages.filter((pkg) => pkg.is_active).length;
+    const totalPackageQuotes = packages.reduce((acc, pkg) => acc + (pkg.quote_amount || 0), 0);
+    const avgUsersPerPlan = plans.length ? (plans.reduce((acc, plan) => acc + (plan.user_limit || 0), 0) / plans.length).toFixed(1) : '0';
+
+    const formatPlanLimit = (plan) => {
+        const parts = [];
+        if (plan.quote_limit === 0) parts.push('Orçamentos ilimitados');
+        else parts.push(`${plan.quote_limit} orçamentos`);
+        if (plan.user_limit) parts.push(`${plan.user_limit} usuários`);
+        return parts.join(' • ');
+    };
+
+    const PlanCard = ({ plan }) => (
+        <Card className="overflow-hidden border-l-4 border-l-transparent hover:border-l-primary hover:shadow-lg transition-shadow">
+            <div className="flex justify-between items-start p-6">
+                <div>
+                    <h4 className="font-bold text-lg">{plan.name}</h4>
+                    <p className="text-2xl font-bold text-primary mt-1">{formatCurrency(plan.price)} <span className="text-sm text-muted-foreground font-normal">/mês</span></p>
+                    <p className="text-sm text-muted-foreground mt-2">{formatPlanLimit(plan)}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => { setSelectedPlan(plan); setPlanFormOpen(true); }}>
+                        <Edit className="h-5 w-5 text-muted-foreground hover:text-primary" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeletePlan(plan)}>
+                        <Trash2 className="h-5 w-5 text-muted-foreground hover:text-red-500" />
+                    </Button>
+                </div>
+            </div>
+        </Card>
+    );
+
+    const PackageCard = ({ pkg }) => (
+        <Card className={`overflow-hidden border-l-4 border-l-transparent hover:shadow-lg transition-shadow ${pkg.is_active ? 'hover:border-l-primary' : 'opacity-70'}`}>
+            <div className="flex justify-between items-center p-6">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-lg">{pkg.name}</h4>
+                        {!pkg.is_active && <span className="text-xs bg-gray-700 px-2 py-0.5 rounded">Inativo</span>}
+                    </div>
+                    <p className="text-2xl font-bold text-primary mt-1">{formatCurrency(pkg.price)}</p>
+                    <p className="text-sm text-muted-foreground mt-2">+{pkg.quote_amount} orçamentos extras</p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                    <Button variant="ghost" size="icon" onClick={() => { setSelectedPackage(pkg); setPackageFormOpen(true); }}>
+                        <Edit className="h-5 w-5 text-muted-foreground hover:text-primary" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeletePackage(pkg)}>
+                        <Trash2 className="h-5 w-5 text-muted-foreground hover:text-red-500" />
+                    </Button>
+                </div>
+            </div>
+            <CardContent className="pt-0 text-xs text-muted-foreground">
+                Franqueamento: {pkg.quote_limit || '---'} / {pkg.user_limit || '---'}
+            </CardContent>
+        </Card>
+    );
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -1075,8 +1267,10 @@ const PlansManagementTab = () => {
 
             setPlans(plansRes.data || []);
             setPackages(packagesRes.data || []);
+            onHealthCheck?.(true);
         } catch (error) {
             console.error('Erro ao carregar planos/pacotes:', error);
+            onHealthCheck?.(false);
         } finally {
             setLoading(false);
         }
@@ -1122,56 +1316,75 @@ const PlansManagementTab = () => {
         fetchData();
     };
 
+    const planSummaryTiles = [
+        { label: 'Planos cadastrados', value: plans.length },
+        { label: 'Orçamentos mensais', value: totalQuoteCap === 0 ? 'Ilimitado' : totalQuoteCap },
+        { label: 'Usuários por plano', value: avgUsersPerPlan },
+    ];
+
+    const packageSummaryTiles = [
+        { label: 'Pacotes ativos', value: activePackages },
+        { label: 'Pacotes totais', value: packages.length },
+        { label: 'Orçamentos extras', value: totalPackageQuotes },
+    ];
+
     return (
-        <div className="grid lg:grid-cols-2 gap-8">
-            <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Star className="text-primary h-5 w-5"/> Planos de Assinatura</h3>
-                    <Button size="sm" onClick={() => { setSelectedPlan(null); setPlanFormOpen(true); }}><PlusCircle className="mr-2 h-4 w-4" /> Novo</Button>
-                </div>
-                <div className="grid gap-4">
-                    {loading ? <Loader2 className="animate-spin" /> : plans.length > 0 ? plans.map((plan) => (
-                        <Card key={plan.id} className="overflow-hidden border-l-4 border-l-transparent hover:border-l-primary hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-center p-6">
-                                <div>
-                                    <h4 className="font-bold text-lg">{plan.name}</h4>
-                                    <p className="text-2xl font-bold text-primary mt-1">R$ {plan.price} <span className="text-sm text-muted-foreground font-normal">/mês</span></p>
-                                    <p className="text-sm text-muted-foreground mt-2">{plan.quote_limit === 0 ? 'Ilimitado' : plan.quote_limit} orçamentos • {plan.user_limit} usuários</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="icon" onClick={() => { setSelectedPlan(plan); setPlanFormOpen(true); }}><Edit className="h-5 w-5 text-muted-foreground hover:text-primary" /></Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDeletePlan(plan)}><Trash2 className="h-5 w-5 text-muted-foreground hover:text-red-500" /></Button>
-                                </div>
-                            </div>
-                        </Card>
-                    )) : <div className="text-muted-foreground text-sm">Nenhum plano cadastrado.</div>}
-                </div>
+        <div className="space-y-8">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {planSummaryTiles.map((tile) => (
+                    <Card key={tile.label} className="border border-surface-strong">
+                        <CardContent className="space-y-1">
+                            <p className="text-xs text-muted-foreground">{tile.label}</p>
+                            <p className="text-3xl font-semibold text-foreground">{tile.value}</p>
+                        </CardContent>
+                    </Card>
+                ))}
             </div>
 
-            <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Activity className="text-primary h-5 w-5"/> Pacotes Avulsos</h3>
-                    <Button size="sm" onClick={() => { setSelectedPackage(null); setPackageFormOpen(true); }}><PlusCircle className="mr-2 h-4 w-4" /> Novo</Button>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {packageSummaryTiles.map((tile) => (
+                    <Card key={tile.label} className="border border-surface-strong">
+                        <CardContent className="space-y-1">
+                            <p className="text-xs text-muted-foreground">{tile.label}</p>
+                            <p className="text-3xl font-semibold text-foreground">{tile.value}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Star className="text-primary h-5 w-5"/> Planos de Assinatura</h3>
+                        <Button size="sm" onClick={() => { setSelectedPlan(null); setPlanFormOpen(true); }}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Novo
+                        </Button>
+                    </div>
+                    <div className="grid gap-4">
+                        {loading ? <Loader2 className="animate-spin" /> : plans.length > 0 ? (
+                            plans.map((plan) => <PlanCard key={plan.id} plan={plan} />)
+                        ) : (
+                            <div className="text-muted-foreground text-sm">Nenhum plano cadastrado.</div>
+                        )}
+                    </div>
                 </div>
-                <div className="grid gap-4">
-                    {loading ? <Loader2 className="animate-spin" /> : packages.length > 0 ? packages.map((pkg) => (
-                        <Card key={pkg.id} className={`overflow-hidden hover:shadow-md transition-shadow border-l-4 border-l-transparent ${pkg.is_active ? 'hover:border-l-green-500' : 'hover:border-l-gray-500 opacity-60'}`}>
-                            <div className="flex justify-between items-center p-6">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="font-bold text-lg">{pkg.name}</h4>
-                                        {!pkg.is_active && <span className="text-xs bg-gray-700 px-2 py-0.5 rounded">Inativo</span>}
-                                    </div>
-                                    <p className="text-2xl font-bold text-primary mt-1">R$ {pkg.price}</p>
-                                    <p className="text-sm text-muted-foreground mt-2">+{pkg.quote_amount} orçamentos extras</p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="icon" onClick={() => { setSelectedPackage(pkg); setPackageFormOpen(true); }}><Edit className="h-5 w-5 text-muted-foreground hover:text-primary" /></Button>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDeletePackage(pkg)}><Trash2 className="h-5 w-5 text-muted-foreground hover:text-red-500" /></Button>
-                                </div>
-                            </div>
-                        </Card>
-                    )) : <div className="text-muted-foreground text-sm">Nenhum pacote cadastrado.</div>}
+
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-foreground flex items-center gap-2"><Activity className="text-primary h-5 w-5"/> Pacotes Avulsos</h3>
+                        <Button size="sm" onClick={() => { setSelectedPackage(null); setPackageFormOpen(true); }}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Novo
+                        </Button>
+                    </div>
+                    <div className="space-y-4">
+                        {loading ? <Loader2 className="animate-spin" /> : packages.length > 0 ? (
+                            packages.map((pkg) => <PackageCard key={pkg.id} pkg={pkg} />)
+                        ) : (
+                            <div className="text-muted-foreground text-sm">Nenhum pacote cadastrado.</div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -1186,11 +1399,13 @@ const PlansManagementTab = () => {
     );
 };
 
-const BillingTab = () => {
+const BillingTab = ({ onHealthCheck }) => {
     const { toast } = useToast();
     const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [monthTotal, setMonthTotal] = useState(0);
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [periodFilter, setPeriodFilter] = useState('month');
 
     useEffect(() => {
         const fetchInvoices = async () => {
@@ -1219,18 +1434,20 @@ const BillingTab = () => {
 
                 setInvoices(list);
                 setMonthTotal(total);
+                onHealthCheck?.(true);
             } catch (error) {
                 console.error('Erro ao carregar faturas:', error);
                 toast({ title: 'Erro ao carregar faturas', variant: 'destructive' });
                 setInvoices([]);
                 setMonthTotal(0);
+                onHealthCheck?.(false);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchInvoices();
-    }, [toast]);
+    }, [toast, onHealthCheck]);
 
     const formatInvoiceStatus = (status) => {
         const normalized = (status || '').toLowerCase();
@@ -1240,59 +1457,148 @@ const BillingTab = () => {
         return status || 'Indefinido';
     };
 
+    const matchesPeriod = (createdAt) => {
+        if (!createdAt) return false;
+        const invoiceDate = new Date(createdAt);
+        const now = new Date();
+        if (periodFilter === 'month') {
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            return invoiceDate >= monthStart;
+        }
+        if (periodFilter === 'quarter') {
+            const monthStart = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+            return invoiceDate >= monthStart;
+        }
+        if (periodFilter === 'year') {
+            const yearStart = new Date(now.getFullYear(), 0, 1);
+            return invoiceDate >= yearStart;
+        }
+        return true;
+    };
+
+    const normalizedStatus = (status) => (status || '').toLowerCase();
+
+    const filteredInvoices = invoices.filter((invoice) => {
+        if (!matchesPeriod(invoice.created_at)) return false;
+        if (statusFilter === 'all') return true;
+        return normalizedStatus(invoice.status) === statusFilter;
+    });
+
+    const openAmount = invoices
+        .filter((invoice) => normalizedStatus(invoice.status) === 'open')
+        .reduce((sum, invoice) => sum + (Number(invoice.amount) || 0), 0);
+
+    const avgInvoice = invoices.length
+        ? (invoices.reduce((sum, invoice) => sum + (Number(invoice.amount) || 0), 0) / invoices.length).toFixed(2)
+        : '0';
+
+    const exportCsv = () => {
+        if (!filteredInvoices.length) return;
+        const headers = ['Data', 'Empresa', 'Valor', 'Status', 'Arquivo'];
+        const rows = filteredInvoices.map((invoice) => [
+            new Date(invoice.created_at).toLocaleDateString('pt-BR'),
+            invoice.companies?.name || 'Sem empresa',
+            invoice.amount,
+            formatInvoiceStatus(invoice.status),
+            invoice.pdf_url || '',
+        ]);
+        const csvContent = [headers, ...rows]
+            .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `faturas-${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+    };
+
     const paidCount = invoices.filter((invoice) => (invoice.status || '').toLowerCase() === 'paid').length;
     const openCount = invoices.filter((invoice) => (invoice.status || '').toLowerCase() === 'open').length;
     const failedCount = invoices.filter((invoice) => (invoice.status || '').toLowerCase() === 'failed').length;
 
+    const summaryCards = [
+        { title: 'Faturamento do mês', value: formatCurrency(monthTotal) },
+        { title: 'Faturas emitidas', value: invoices.length },
+        { title: 'Pagas', value: paidCount },
+        { title: 'Em aberto', value: openCount },
+        { title: 'Falhas', value: failedCount },
+        { title: 'Valor em aberto', value: formatCurrency(openAmount) },
+        { title: 'Ticket médio', value: `R$ ${avgInvoice}` },
+    ];
+
     return (
         <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <Card className="border-l-4 border-l-primary">
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground">Faturamento do mês</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">
-                        {formatCurrency(monthTotal)}
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground">Faturas emitidas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">
-                        {invoices.length}
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground">Pagas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">
-                        {paidCount}
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground">Em aberto</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">
-                        {openCount}
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="pb-2">
-                        <CardTitle className="text-sm text-muted-foreground">Falhas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-2xl font-bold text-foreground">
-                        {failedCount}
-                    </CardContent>
-                </Card>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+                {summaryCards.map((card) => (
+                    <Card key={card.title} className="border border-surface-strong">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-xs text-muted-foreground">{card.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-2xl font-bold text-foreground">{card.value}</p>
+                        </CardContent>
+                    </Card>
+                ))}
             </div>
 
+            <div className="flex flex-wrap items-center gap-3">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-48"><SelectValue placeholder="Todos os status" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Todos os status</SelectItem>
+                        <SelectItem value="paid">Pagas</SelectItem>
+                        <SelectItem value="open">Em aberto</SelectItem>
+                        <SelectItem value="failed">Falhas</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                    <SelectTrigger className="w-48"><SelectValue placeholder="Periodo" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="month">Este mês</SelectItem>
+                        <SelectItem value="quarter">Últimos 3 meses</SelectItem>
+                        <SelectItem value="year">Este ano</SelectItem>
+                        <SelectItem value="all">Tudo</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Button variant="secondary" size="sm" onClick={exportCsv} disabled={!filteredInvoices.length}>
+                    Exportar CSV
+                </Button>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                {summaryCards.map((card) => (
+                    <Card key={card.title} className="border border-surface-strong">
+                        <CardContent className="space-y-1">
+                            <p className="text-xs text-muted-foreground">{card.title}</p>
+                            <p className="text-2xl font-bold text-foreground">{card.value}</p>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+
+            {topActions.length > 0 && (
+                <div className="grid gap-3 md:grid-cols-3">
+                    {topActions.map((item) => (
+                        <Card key={item.action} className="border border-surface-strong">
+                            <CardHeader className="pb-1">
+                                <CardTitle className="text-xs text-muted-foreground">Top ação</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-lg font-semibold text-foreground">{item.action}</p>
+                                <p className="text-xs text-muted-foreground">{item.count} registros</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+
             <Card>
-                <CardHeader>
-                    <CardTitle>Histórico de Faturamento</CardTitle>
-                    <CardDescription>Faturas recentes geradas na plataforma.</CardDescription>
+                <CardHeader className="flex items-center justify-between">
+                    <div>
+                        <CardTitle>Histórico de Faturamento</CardTitle>
+                        <CardDescription>Lista filtrada com base nos filtros selecionados.</CardDescription>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => setStatusFilter('all') & setPeriodFilter('month')}>Limpar filtros</Button>
                 </CardHeader>
                 <CardContent>
                     {loading ? (
@@ -1310,12 +1616,14 @@ const BillingTab = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {invoices.length > 0 ? invoices.map((invoice) => (
+                                    {filteredInvoices.length > 0 ? filteredInvoices.map((invoice) => (
                                         <TableRow key={invoice.id}>
                                             <TableCell className="text-xs text-muted-foreground">{new Date(invoice.created_at).toLocaleDateString('pt-BR')}</TableCell>
                                             <TableCell className="text-sm">{invoice.companies?.name || '-'}</TableCell>
                                             <TableCell className="text-sm font-medium">{formatCurrency(invoice.amount)}</TableCell>
-                                            <TableCell className="text-sm">{formatInvoiceStatus(invoice.status)}</TableCell>
+                                            <TableCell className="text-sm">
+                                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-surface-strong">{formatInvoiceStatus(invoice.status)}</span>
+                                            </TableCell>
                                             <TableCell className="text-right">
                                                 {invoice.pdf_url ? (
                                                     <Button variant="ghost" size="icon" asChild>
@@ -1331,7 +1639,7 @@ const BillingTab = () => {
                                     )) : (
                                         <TableRow>
                                             <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                                Nenhuma fatura encontrada.
+                                                Nenhuma fatura encontrada com os filtros aplicados.
                                             </TableCell>
                                         </TableRow>
                                     )}
@@ -1345,7 +1653,7 @@ const BillingTab = () => {
     );
 };
 
-const AuditTab = () => {
+const AuditTab = ({ onHealthCheck }) => {
     const { toast } = useToast();
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -1378,13 +1686,15 @@ const AuditTab = () => {
                 actor: profilesById.get(log.user_id),
             }));
             setLogs(normalized);
+            onHealthCheck?.(true);
         } catch (error) {
             console.error('Erro ao carregar auditoria:', error);
             toast({ title: 'Erro ao carregar auditoria', variant: 'destructive' });
+            onHealthCheck?.(false);
         } finally {
             setLoading(false);
         }
-    }, [toast]);
+    }, [toast, onHealthCheck]);
 
     useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
@@ -1400,6 +1710,23 @@ const AuditTab = () => {
         const matchesEntity = entityFilter === 'all' ? true : log.entity === entityFilter;
         return matchesSearch && matchesAction && matchesEntity;
     });
+
+    const summaryCards = [
+        { title: 'Registros filtrados', value: filteredLogs.length },
+        { title: 'Usuários/compras', value: new Set(filteredLogs.map((log) => log.user_id)).size },
+        { title: 'Última ação', value: filteredLogs[0] ? formatAuditDetails(filteredLogs[0].details).slice(0, 30) : '—' },
+    ];
+
+    const actionCounts = filteredLogs.reduce((acc, log) => {
+        const key = log.action || 'outro';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+    }, {});
+
+    const topActions = Object.entries(actionCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([action, count]) => ({ action: ACTION_LABELS[action] || action, count }));
 
     return (
         <div className="space-y-6">
@@ -1494,6 +1821,7 @@ const AuditTab = () => {
 
 const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
     const [activeTab, setActiveTab] = useState(initialTab);
+    const [supabaseOnline, setSupabaseOnline] = useState(true);
 
     useEffect(() => {
         setActiveTab(initialTab);
@@ -1552,11 +1880,22 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
                         <p className="text-muted-foreground mt-1">{pageMeta.description}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="flex h-3 w-3">
-                            <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        <span className="flex h-3 w-3 relative">
+                            {supabaseOnline ? (
+                                <>
+                                    <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="animate-pulse absolute inline-flex h-3 w-3 rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                                </>
+                            )}
                         </span>
-                        <span className="text-sm text-green-500 font-medium">Sistema Operacional</span>
+                        <span className={`text-sm font-medium ${supabaseOnline ? 'text-green-500' : 'text-red-500'}`}>
+                            {supabaseOnline ? 'Supabase Operacional' : 'Supabase Desativado'}
+                        </span>
                     </div>
                 </div>
                 <div className="h-px bg-border mb-4" />
@@ -1576,12 +1915,12 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
                     </div>
                     )}
 
-                    <TabsContent value="overview" className="mt-0"><OverviewTab /></TabsContent>
-                    <TabsContent value="users" className="mt-0"><UserManagementTab /></TabsContent>
-                    <TabsContent value="clients" className="mt-0"><ClientsTab /></TabsContent>
-                    <TabsContent value="plans" className="mt-0"><PlansManagementTab /></TabsContent>
-                    <TabsContent value="billing" className="mt-0"><BillingTab /></TabsContent>
-                    <TabsContent value="audit" className="mt-0"><AuditTab /></TabsContent>
+                    <TabsContent value="overview" className="mt-0"><OverviewTab onHealthCheck={setSupabaseOnline} /></TabsContent>
+                    <TabsContent value="users" className="mt-0"><UserManagementTab onHealthCheck={setSupabaseOnline} /></TabsContent>
+                    <TabsContent value="clients" className="mt-0"><ClientsTab onHealthCheck={setSupabaseOnline} /></TabsContent>
+                    <TabsContent value="plans" className="mt-0"><PlansManagementTab onHealthCheck={setSupabaseOnline} /></TabsContent>
+                    <TabsContent value="billing" className="mt-0"><BillingTab onHealthCheck={setSupabaseOnline} /></TabsContent>
+                    <TabsContent value="audit" className="mt-0"><AuditTab onHealthCheck={setSupabaseOnline} /></TabsContent>
                 </Tabs>
             </motion.div>
         </HelmetProvider>

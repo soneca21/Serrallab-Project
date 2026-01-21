@@ -27,7 +27,7 @@ const DashboardReceitaMeses = ({ data }) => {
     >
       <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-border bg-card">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-xl font-heading text-foreground">Evolu\u00e7\u00e3o da receita (6 meses)</CardTitle>
+          <CardTitle className="text-xl font-heading text-foreground">Evolução da receita (6 meses)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px] w-full">

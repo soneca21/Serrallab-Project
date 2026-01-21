@@ -1,18 +1,22 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { CreditCard, Calendar, Slack, Database, Mail } from 'lucide-react';
+import { MessageSquare, Smartphone, CreditCard, Calendar, FileSpreadsheet, Building2, Mail, Workflow } from 'lucide-react';
 import { useConnections } from '@/features/connections/hooks/useConnections.ts';
 import ConnectionCard from '@/features/connections/components/ConnectionCard.tsx';
 import ConnectModal from '@/features/connections/components/ConnectModal.tsx';
 import DisconnectConfirm from '@/features/connections/components/DisconnectConfirm.tsx';
 import { Skeleton } from '@/components/ui/skeleton';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const INTEGRATIONS = [
-    { id: 'stripe', label: 'Stripe', icon: CreditCard, description: 'Processamento de pagamentos e faturas automatizadas.' },
-    { id: 'google_calendar', label: 'Google Calendar', icon: Calendar, description: 'Sincronize agendamentos e visitas técnicas.' },
-    { id: 'slack', label: 'Slack', icon: Slack, description: 'Notificações de equipe em tempo real.' },
-    { id: 'zapier', label: 'Zapier', icon: Database, description: 'Conecte com mais de 5000 apps via webhooks.' },
-    { id: 'mailchimp', label: 'Mailchimp', icon: Mail, description: 'Sincronize contatos para campanhas de marketing.' },
+    { id: 'whatsapp', label: 'WhatsApp (Twilio)', provider: 'twilio', icon: MessageSquare, description: 'Envie alertas, follow-ups e confirmacoes via WhatsApp Business.' },
+    { id: 'sms', label: 'SMS (Twilio)', provider: 'twilio', icon: Smartphone, description: 'Dispare avisos e lembretes por SMS em escala.' },
+    { id: 'sendgrid', label: 'Email (SendGrid)', icon: Mail, description: 'Emails transacionais e comunicados automaticos.' },
+    { id: 'mercado_pago', label: 'Mercado Pago', icon: CreditCard, description: 'Receba via PIX e cartao com links de pagamento.' },
+    { id: 'google_calendar', label: 'Google Calendar', icon: Calendar, description: 'Sincronize agendamentos da equipe em tempo real.' },
+    { id: 'google_sheets', label: 'Google Sheets', icon: FileSpreadsheet, description: 'Exporte leads e orcamentos para planilhas.' },
+    { id: 'conta_azul', label: 'Conta Azul', icon: Building2, description: 'Integre financeiro e emissao de cobrancas.' },
+    { id: 'zapier_make', label: 'Zapier/Make', icon: Workflow, description: 'Automatize integracoes com outros sistemas.' },
 ];
 
 const IntegracoesPage = () => {
@@ -25,7 +29,8 @@ const IntegracoesPage = () => {
     const handleConnect = async (token, creds) => {
         const integration = INTEGRATIONS.find(c => c.id === connectModal.type);
         if (!integration) return;
-        return await connect(integration.id, 'integration', token, creds);
+        const nextCreds = integration.provider ? { ...creds, provider: integration.provider } : creds;
+        return await connect(integration.id, 'integration', token, nextCreds);
     };
 
     const handleDisconnect = async () => {
@@ -38,16 +43,17 @@ const IntegracoesPage = () => {
 
     return (
         <>
-            <Helmet><title>Integrações - Serrallab</title></Helmet>
-            <div className="space-y-6 w-full max-w-6xl mx-auto">
-                 <div>
-                    <h2 className="text-3xl font-heading font-bold">Integrações</h2>
-                    <p className="text-muted-foreground">Conecte ferramentas externas para turbinar sua serralheria.</p>
-                </div>
+            <Helmet><title>Integracoes - Serrallab</title></Helmet>
+            <div className="space-y-6 w-full max-w-full">
+                <AppSectionHeader
+                    title={<span className="pl-3 border-l-4 border-primary">Integracoes</span>}
+                    description="Conecte ferramentas essenciais para cobranca, comunicacao e operacao diaria."
+                    actions={null}
+                />
 
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                         {[1, 2, 3].map(i => (
+                        {[1, 2, 3].map(i => (
                             <div key={i} className="h-64 rounded-xl border border-surface-strong bg-surface p-6 space-y-4">
                                 <Skeleton className="h-10 w-10 rounded-lg" />
                                 <Skeleton className="h-6 w-3/4" />
@@ -78,7 +84,6 @@ const IntegracoesPage = () => {
                     </div>
                 )}
 
-                {/* Modals */}
                 <ConnectModal 
                     isOpen={connectModal.isOpen}
                     onClose={() => setConnectModal({ isOpen: false, type: null })}

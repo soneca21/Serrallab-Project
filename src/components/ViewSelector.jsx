@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyRound } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useViewMode } from '@/contexts/ViewModeContext';
 
@@ -11,9 +10,7 @@ const ViewSelector = () => {
   const navigate = useNavigate();
 
   const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
-  if (!isAdmin) {
-    return null;
-  }
+  if (!isAdmin) return null;
 
   const isAdminView = viewMode === 'admin';
 
@@ -24,24 +21,27 @@ const ViewSelector = () => {
   };
 
   return (
-    <div className="flex items-center justify-between gap-3 bg-surface p-3 rounded-xl border border-border mb-4 transition-all duration-200 hover:bg-surface-hover">
-      <div className="flex flex-col">
-        <span className="text-sm font-medium text-gray-200">{'Vis\u00e3o Admin'}</span>
-        <span className="text-xs text-muted-foreground">
-          {isAdminView ? 'Painel administrativo ativo.' : 'Alternar para o painel administrativo.'}
-        </span>
+    <button
+      type="button"
+      onClick={handleToggle}
+      className={`flex items-center justify-between gap-3 px-3 py-2 rounded-[14px] border bg-[#050505] transition-all duration-200 ${
+        isAdminView ? 'border-[#f6a15b]' : 'border-[#626262]'
+      }`}
+    >
+      <div className="flex items-center gap-2 text-sm font-semibold text-white whitespace-nowrap">
+        <KeyRound className="h-4 w-4 text-primary" />
+        <span>Visão Admin</span>
       </div>
-      <Button
-        type="button"
-        variant={isAdminView ? 'default' : 'secondary'}
-        size="sm"
-        onClick={handleToggle}
-        className="rounded-full"
-      >
-        <KeyRound className="mr-2 h-4 w-4" />
-        {'Vis\u00e3o Admin'}
-      </Button>
-    </div>
+      <div className="relative h-6 w-11 rounded-full border border-[#1b1b1b] bg-[#090909]">
+        <div
+          className={`absolute inset-0 flex items-center ${
+            isAdminView ? 'justify-end' : 'justify-start'
+          } px-[2px] transition-all duration-200`}
+        >
+          <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+        </div>
+      </div>
+    </button>
   );
 };
 

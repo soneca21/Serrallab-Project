@@ -1,8 +1,7 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
-import { generatePdf } from '../_shared/pdf.ts'
+import { calculateChecksum, generatePdf, generateSignedUrl, uploadPdfToStorage } from '../_shared/pdf.ts'
 import { rateLimit } from '../middleware-rate-limit/index.ts'
 
 serve(async (req) => {
@@ -27,7 +26,7 @@ serve(async (req) => {
     }
 
     // Rate limiting
-    const allowed = await rateLimit(req, user.id, 20, 60) // Stricter limit for PDF generation
+    const allowed = await rateLimit(req, user.id, 20, 60)
     if (!allowed) {
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded' }),
@@ -35,7 +34,15 @@ serve(async (req) => {
       )
     }
 
-    const { orcamentoId } = await req.json()
+    const payload = await req.json()
+    const orcamentoId = payload?.orcamento_id || payload?.orcamentoId
+
+    if (!orcamentoId) {
+      return new Response(
+        JSON.stringify({ error: 'Missing orcamento_id' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     // Fetch orcamento data
     const { data: orcamento, error: fetchError } = await supabase
@@ -45,23 +52,15 @@ serve(async (req) => {
       .single()
 
     if (fetchError || !orcamento) {
-      throw new Error('Orçamento not found')
+      throw new Error('Orcamento not found')
     }
 
     // Generate PDF
     const pdfBuffer = await generatePdf(orcamento)
+    const checksum = await calculateChecksum(pdfBuffer)
 
     // Upload to storage
-    const fileName = `${orcamentoId}_${Date.now()}.pdf`
-    const { data: uploadData, error: uploadError } = await supabase
-      .storage
-      .from('orcamento-pdfs')
-      .upload(`${user.id}/${fileName}`, pdfBuffer, {
-        contentType: 'application/pdf',
-        upsert: true
-      })
-
-    if (uploadError) throw uploadError
+    const { path, size } = await uploadPdfToStorage(user.id, orcamentoId, pdfBuffer, supabase)
 
     // Record in database
     const { error: dbError } = await supabase
@@ -69,23 +68,19 @@ serve(async (req) => {
       .insert({
         user_id: user.id,
         orcamento_id: orcamentoId,
-        storage_path: uploadData.path,
-        file_size: pdfBuffer.byteLength,
+        storage_path: path,
+        file_size: size,
         generated_from_status: orcamento.status,
-        checksum: 'sha256-placeholder', // In real app, calculate actual checksum
+        checksum,
         generated_at: new Date().toISOString()
       })
 
     if (dbError) throw dbError
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase
-      .storage
-      .from('orcamento-pdfs')
-      .getPublicUrl(uploadData.path)
+    const signedUrl = await generateSignedUrl(path, 60, supabase)
 
     return new Response(
-      JSON.stringify({ url: publicUrl }),
+      JSON.stringify({ pdf_url: signedUrl }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

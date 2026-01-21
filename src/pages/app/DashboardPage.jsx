@@ -41,7 +41,7 @@ const DashboardPage = () => {
             <div className="w-full space-y-6">
                 <AppSectionHeader
                     title="Painel do Dia"
-                    description="Prioridades, pr\u00f3ximas a\u00e7\u00f5es e desempenho do m\u00eas em um s\u00f3 lugar."
+                    description="Prioridades, próximas ações e desempenho do mês em um só lugar."
                     actions={null}
                 />
 
@@ -55,14 +55,14 @@ const DashboardPage = () => {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <PlusCircle className="h-5 w-5 text-primary" />
-                                    Atalhos r\u00e1pidos
+                                    Atalhos rápidos
                                 </CardTitle>
-                                <CardDescription>A\u00e7\u00f5es usadas no dia a dia para manter tudo em movimento.</CardDescription>
+                                <CardDescription>Ações usadas no dia a dia para manter tudo em movimento.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex flex-col gap-2">
                                 <Button className="justify-start" onClick={() => navigate('/app/orcamentos/novo')}>
                                     <FileText className="mr-2 h-4 w-4" />
-                                    Novo or\u00e7amento
+                                    Novo orçamento
                                 </Button>
                                 <Button variant="outline" className="justify-start" onClick={() => navigate('/app/clientes')}>
                                     <UserPlus className="mr-2 h-4 w-4" />
@@ -81,7 +81,7 @@ const DashboardPage = () => {
                         <Card className="border-border bg-card">
                             <CardHeader>
                                 <CardTitle>Prioridades do dia</CardTitle>
-                                <CardDescription>O que precisa de aten\u00e7\u00e3o agora.</CardDescription>
+                                <CardDescription>O que precisa de atenção agora.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="space-y-3">
@@ -94,7 +94,7 @@ const DashboardPage = () => {
                                         <Badge variant="secondary">{kpis.schedulesToday}</Badge>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
-                                        <span>Or\u00e7amentos em aberto</span>
+                                        <span>Orçamentos em aberto</span>
                                         <Badge variant="secondary">{kpis.openOrdersCount}</Badge>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
@@ -130,7 +130,7 @@ const DashboardPage = () => {
                                                 <div className="flex items-center justify-between gap-3">
                                                     <div>
                                                         <p className="text-sm font-medium text-foreground truncate max-w-[220px]">
-                                                            {order.title || 'Or\u00e7amento sem t\u00edtulo'}
+                                                            {order.title || 'Orçamento sem título'}
                                                         </p>
                                                         <p className="text-xs text-muted-foreground">
                                                             Valor: {formatCurrency(order.final_price || order.total_cost || 0)}
@@ -145,7 +145,7 @@ const DashboardPage = () => {
 
                                 {todaySchedules.length === 0 && overdueOrders.length === 0 && (
                                     <div className="rounded-lg border border-border/40 bg-background/30 p-3 text-xs text-muted-foreground">
-                                        Nenhuma pend\u00eancia urgente no momento.
+                                        Nenhuma pendência urgente no momento.
                                     </div>
                                 )}
                             </CardContent>

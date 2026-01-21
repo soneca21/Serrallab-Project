@@ -54,10 +54,10 @@ const ProfileSettings = () => {
         const { contentType } = resolveImageType(file);
         const normalizedType = contentType === 'image/jpg' ? 'image/jpeg' : contentType;
         if (!allowedImageTypes.includes(normalizedType)) {
-            throw new Error('Formato inv\u00e1lido. Use PNG, JPG, GIF ou WEBP.');
+            throw new Error('Formato inválido. Use PNG, JPG, GIF ou WEBP.');
         }
         if (file.size > maxImageSizeBytes) {
-            throw new Error('O arquivo deve ter no m\u00e1ximo 2MB.');
+            throw new Error('O arquivo deve ter no máximo 2MB.');
         }
         return contentType;
     };
@@ -78,7 +78,7 @@ const ProfileSettings = () => {
             .getPublicUrl(filePath);
 
         if (!data?.publicUrl) {
-            throw new Error('N\u00e3o foi poss\u00edvel gerar a URL da imagem.');
+            throw new Error('Não foi possível gerar a URL da imagem.');
         }
 
         return data.publicUrl;
@@ -158,9 +158,9 @@ const ProfileSettings = () => {
         if (!user?.id) return;
         try {
             await navigator.clipboard?.writeText(user.id);
-            toast({ title: 'Copiado', description: 'ID do usu\u00e1rio copiado.' });
+            toast({ title: 'Copiado', description: 'ID do usuário copiado.' });
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Erro', description: 'N\u00e3o foi poss\u00edvel copiar o ID.' });
+            toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível copiar o ID.' });
         }
     };
 
@@ -170,7 +170,7 @@ const ProfileSettings = () => {
             await navigator.clipboard?.writeText(formData.email);
             toast({ title: 'Copiado', description: 'Email copiado.' });
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Erro', description: 'N\u00e3o foi poss\u00edvel copiar o email.' });
+            toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível copiar o email.' });
         }
     };
 
@@ -185,7 +185,7 @@ const ProfileSettings = () => {
                 <Card className="xl:col-span-2">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><User className="h-5 w-5 text-primary" /> Minha Conta</CardTitle>
-                        <CardDescription>{'Identidade e informa\u00e7\u00f5es principais do usu\u00e1rio.'}</CardDescription>
+                        <CardDescription>{'Identidade e informações principais do usuário.'}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
@@ -219,7 +219,7 @@ const ProfileSettings = () => {
                                         {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Upload className="mr-2 h-4 w-4" />}
                                         Alterar Foto
                                     </Button>
-                                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF ou WEBP. M\u00e1x 2MB.</p>
+                                    <p className="text-xs text-muted-foreground">PNG, JPG, GIF ou WEBP. Máx 2MB.</p>
                                 </div>
                             </div>
                         </div>
@@ -227,7 +227,7 @@ const ProfileSettings = () => {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="full_name">Nome de Exibi\u00e7\u00e3o</Label>
+                                    <Label htmlFor="full_name">Nome de Exibição</Label>
                                     <Input 
                                         id="full_name" 
                                         value={formData.full_name} 
@@ -260,7 +260,7 @@ const ProfileSettings = () => {
                                 </span>
                                 <span className="inline-flex items-center gap-2 rounded-full border border-border/50 px-3 py-1 text-xs text-muted-foreground">
                                     <Clock className="h-3.5 w-3.5" />
-                                    {'\u00daltimo login '}{lastSignIn}
+                                    {'Último login '}{lastSignIn}
                                 </span>
                             </div>
 
@@ -276,7 +276,7 @@ const ProfileSettings = () => {
                                     </Button>
                                     <Button type="submit" disabled={loading} className="w-full sm:w-auto">
                                         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                        Salvar altera\u00e7\u00f5es
+                                        Salvar alterações
                                     </Button>
                                 </div>
                             </div>
@@ -287,7 +287,7 @@ const ProfileSettings = () => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Resumo da Conta</CardTitle>
-                        <CardDescription>{'Seguran\u00e7a, acessos e dados do usu\u00e1rio.'}</CardDescription>
+                        <CardDescription>{'Segurança, acessos e dados do usuário.'}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="space-y-3 rounded-xl border border-border/40 bg-background/30 p-4">
@@ -300,7 +300,7 @@ const ProfileSettings = () => {
                                 <span className="text-sm font-medium text-foreground truncate">{formData.email || '-'}</span>
                             </div>
                             <div className="flex items-center justify-between gap-3">
-                                <span className="text-xs text-muted-foreground">ID do usu\u00e1rio</span>
+                                <span className="text-xs text-muted-foreground">ID do usuário</span>
                                 <Button variant="ghost" size="icon" onClick={handleCopyUserId}>
                                     <Copy className="h-4 w-4" />
                                 </Button>
@@ -315,14 +315,14 @@ const ProfileSettings = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <Clock className="h-4 w-4 text-primary" />
-                                {'\u00daltimo login: '}{lastSignIn}
+                                {'Último login: '}{lastSignIn}
                             </div>
                         </div>
 
                         <div className="flex flex-col gap-2">
                             <Button variant="outline" onClick={() => navigate('/app/config?tab=security')}>
                                 <Shield className="mr-2 h-4 w-4" />
-                                Central de Seguran\u00e7a
+                                Central de Segurança
                             </Button>
                             <Button variant="outline" onClick={() => navigate('/app/config/security-2fa')}>
                                 <KeyRound className="mr-2 h-4 w-4" />
@@ -335,13 +335,13 @@ const ProfileSettings = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary" /> Prefer\u00eancias de Uso</CardTitle>
-                    <CardDescription>{'Personalize idioma, moeda e calend\u00e1rio.'}</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Globe className="h-5 w-5 text-primary" /> Preferências de Uso</CardTitle>
+                    <CardDescription>{'Personalize idioma, moeda e calendário.'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div className="space-y-2">
-                            <Label>Fuso hor\u00e1rio</Label>
+                            <Label>Fuso horário</Label>
                             <Select value={prefs.timezone} onValueChange={(value) => setPrefs(prev => ({ ...prev, timezone: value }))}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione" />
@@ -395,7 +395,7 @@ const ProfileSettings = () => {
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label>In\u00edcio da semana</Label>
+                            <Label>Início da semana</Label>
                             <Select value={prefs.week_start} onValueChange={(value) => setPrefs(prev => ({ ...prev, week_start: value }))}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione" />
@@ -410,7 +410,7 @@ const ProfileSettings = () => {
                     <div className="flex justify-end">
                         <Button type="button" onClick={handleSavePreferences} disabled={loading || savingPrefs}>
                             {(loading || savingPrefs) && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                            Salvar prefer\u00eancias
+                            Salvar preferências
                         </Button>
                     </div>
                 </CardContent>
@@ -418,8 +418,8 @@ const ProfileSettings = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Sess\u00f5es Ativas</CardTitle>
-                    <CardDescription>{'Dispositivos conectados \u00e0 sua conta.'}</CardDescription>
+                    <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Sessões Ativas</CardTitle>
+                    <CardDescription>{'Dispositivos conectados à sua conta.'}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex flex-col gap-3 rounded-xl border border-border/40 bg-background/30 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -428,7 +428,7 @@ const ProfileSettings = () => {
                                 <User className="h-5 w-5 text-primary" />
                             </div>
                             <div>
-                                <p className="font-medium text-foreground">Sess\u00e3o atual</p>
+                                <p className="font-medium text-foreground">Sessão atual</p>
                                 <p className="text-xs text-muted-foreground">Acesso recente</p>
                             </div>
                         </div>

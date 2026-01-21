@@ -1,23 +1,16 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { useNavigate } from 'react-router-dom';
 import { useRealtime } from '@/contexts/RealtimeContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, BellOff, Bell, Settings2, CheckCheck, Trash2 } from 'lucide-react';
 import NotificationItem from '@/components/NotificationItem';
-import { useNavigate } from 'react-router-dom';
 import { getNotificationRoute, NOTIFICATION_TYPES } from '@/lib/realtime';
-
-const typeLabels = {
-  all: 'Todos os tipos',
-  [NOTIFICATION_TYPES.INFO]: 'Informativo',
-  [NOTIFICATION_TYPES.SUCCESS]: 'Sucesso',
-  [NOTIFICATION_TYPES.WARNING]: 'Aviso',
-  [NOTIFICATION_TYPES.ERROR]: 'Erro'
-};
 
 const NotificacoesPage = () => {
   const {
@@ -71,57 +64,65 @@ const NotificacoesPage = () => {
 
   const handleDeleteAll = () => {
     if (!notifications.length) return;
-    if (window.confirm('Deseja apagar todas as notificações? Esta ação não pode ser desfeita.')) {
+    if (window.confirm('Deseja excluir todas as notificações? Esta ação não pode ser desfeita.')) {
       deleteAllNotifications();
     }
   };
 
   return (
     <HelmetProvider>
-      <Helmet><title>Notificações - Serrallab</title></Helmet>
+      <Helmet><title>Central de Notificações - Serrallab</title></Helmet>
       <div className="container mx-auto max-w-5xl p-4 space-y-6">
-        <div className="space-y-2"><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Bell className="h-6 w-6 text-primary" />
-              <h1 className="text-3xl font-bold tracking-tight">Notificações</h1>
+        <div className="space-y-2">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Bell className="h-6 w-6 text-primary" />
+                <h1 className="text-3xl font-bold tracking-tight">Central de Notificações</h1>
+              </div>
+              <p className="text-muted-foreground">Veja o que exige ação agora e o que já foi resolvido.</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">Não lidas: {counts.unread}</Badge>
+                <Badge variant="outline">Lidas: {counts.read}</Badge>
+                <Badge variant="outline">Total: {counts.all}</Badge>
+              </div>
             </div>
-            <p className="text-muted-foreground">Acompanhe alertas, eventos e atualizações do sistema.</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs text-muted-foreground flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
+                {isConnected ? 'Tempo real ativo' : 'Conexão instável'}
+              </span>
+              <Button variant="outline" size="sm" onClick={() => navigate('/app/config?tab=notifications')}>
+                <Settings2 className="mr-2 h-4 w-4" />
+                Preferências
+              </Button>
+              <Button variant="default" size="sm" onClick={markAllAsRead} disabled={unreadCount === 0}>
+                <CheckCheck className="mr-2 h-4 w-4" />
+                Marcar tudo como lido
+              </Button>
+              <Button variant="outline" size="sm" onClick={deleteReadNotifications} disabled={counts.read === 0}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir lidas
+              </Button>
+              <Button variant="destructive" size="sm" onClick={handleDeleteAll} disabled={notifications.length === 0}>
+                <Trash2 className="mr-2 h-4 w-4" />
+                Excluir tudo
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-muted-foreground flex items-center gap-2">
-              <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
-              {isConnected ? 'Tempo real ativo' : 'Reconectando'}
-            </span>
-            <Button variant="outline" size="sm" onClick={() => navigate('/app/config?tab=notifications')}>
-              <Settings2 className="mr-2 h-4 w-4" />
-              Configurar notificações
-            </Button>
-            <Button variant="default" size="sm" onClick={markAllAsRead} disabled={unreadCount === 0}>
-              <CheckCheck className="mr-2 h-4 w-4" />
-              Marcar todas
-            </Button>
-            <Button variant="outline" size="sm" onClick={deleteReadNotifications} disabled={counts.read === 0}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Limpar lidas
-            </Button>
-            <Button variant="destructive" size="sm" onClick={handleDeleteAll} disabled={notifications.length === 0}>
-              <Trash2 className="mr-2 h-4 w-4" />
-              Limpar tudo
-            </Button>
-          </div>
-        </div><div className="h-px bg-border mb-4" /></div>
+          <div className="h-px bg-border mb-4" />
+        </div>
 
         <Card>
           <CardHeader className="border-b border-border">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <CardTitle className="text-base">Histórico</CardTitle>
-                <CardDescription>Selecione uma notificação para abrir o item relacionado.</CardDescription>
+                <CardTitle className="text-base">Caixa de entrada</CardTitle>
+                <CardDescription>Filtre por status, tipo ou pesquise por palavras-chave.</CardDescription>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <Input
-                  placeholder="Buscar por título ou mensagem"
+                  placeholder="Buscar por assunto ou mensagem"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="sm:w-[240px]"
@@ -169,8 +170,8 @@ const NotificacoesPage = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center h-64 text-center p-8 text-muted-foreground">
                   <BellOff className="h-12 w-12 mb-4 opacity-50" />
-                  <p className="text-lg font-medium">Nenhuma notificação encontrada</p>
-                  <p className="text-sm">Ajuste filtros ou volte mais tarde.</p>
+                  <p className="text-lg font-medium">Nenhuma notificação por aqui</p>
+                  <p className="text-sm">Quando algo exigir atenção, aparece nesta lista.</p>
                 </div>
               )}
             </Tabs>
@@ -182,5 +183,3 @@ const NotificacoesPage = () => {
 };
 
 export default NotificacoesPage;
-
-
