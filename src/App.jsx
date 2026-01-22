@@ -14,6 +14,7 @@ import PricingPage from '@/pages/PricingPage';
 import AuthPage from '@/pages/AuthPage';
 import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
+import LoadingPage from '@/pages/LoadingPage';
 import DashboardPage from '@/pages/app/DashboardPage';
 import ClientesPage from '@/pages/app/ClientesPage';
 import ClienteProfilePage from '@/pages/app/ClienteProfilePage';
@@ -50,7 +51,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     }
     
     if (!user) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/loading" replace />;
     }
 
     if (adminOnly && !isSystemAdmin(profile, user)) {
@@ -77,6 +78,7 @@ function AppRoutes() {
         <Route path="cadastro" element={<AuthPage />} />
         <Route path="recuperar-senha" element={<ForgotPasswordPage />} />
         <Route path="redefinir-senha" element={<ResetPasswordPage />} />
+        <Route path="loading" element={<LoadingPage />} />
       </Route>
       
         <Route 
