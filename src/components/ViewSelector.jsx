@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { KeyRound } from 'lucide-react';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useViewMode } from '@/contexts/ViewModeContext';
+import { isSystemAdmin } from '@/lib/roles';
 
 const ViewSelector = () => {
   const { user, profile } = useAuth();
   const { viewMode, setViewMode } = useViewMode();
   const navigate = useNavigate();
 
-  const isAdmin = profile?.role === 'admin' || user?.user_metadata?.role === 'admin';
-  if (!isAdmin) return null;
+  const canSeeSystemAdmin = isSystemAdmin(profile, user);
+  if (!canSeeSystemAdmin) return null;
 
   const isAdminView = viewMode === 'admin';
 
@@ -30,9 +31,13 @@ const ViewSelector = () => {
     >
       <div className="flex items-center gap-2 text-sm font-semibold text-white whitespace-nowrap">
         <KeyRound className="h-4 w-4 text-primary" />
-        <span>Visão Admin</span>
+        <span>Admin do Sistema</span>
       </div>
-      <div className="relative h-6 w-11 rounded-full border border-[#1b1b1b] bg-[#090909]">
+      <div
+        className={`relative h-6 w-11 rounded-full border border-[#1b1b1b] ${
+          isAdminView ? 'bg-red-600' : 'bg-green-600'
+        }`}
+      >
         <div
           className={`absolute inset-0 flex items-center ${
             isAdminView ? 'justify-end' : 'justify-start'

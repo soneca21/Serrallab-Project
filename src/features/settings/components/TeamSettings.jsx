@@ -11,43 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Check, X, Loader2, Users, UserPlus, Pencil, Trash2, ShieldCheck, Mail, Crown, Lock, AlertTriangle } from 'lucide-react';
+import { ROLE_META, PERMISSION_MATRIX } from '@/lib/permissions';
 
-const roleMeta = {
-    owner: {
-        label: 'Proprietário',
-        description: 'Controle total da organização, faturamento e usuários.',
-        badge: 'default'
-    },
-    admin: {
-        label: 'Administrador',
-        description: 'Gerencia operações e configurações, sem acesso ao faturamento.',
-        badge: 'secondary'
-    },
-    editor: {
-        label: 'Editor',
-        description: 'Cria e atualiza clientes, orçamentos e agendamentos.',
-        badge: 'outline'
-    },
-    viewer: {
-        label: 'Visualizador',
-        description: 'Acesso somente leitura aos dados essenciais.',
-        badge: 'outline'
-    }
-};
-
-const permissionMatrix = [
-    { key: 'dashboard', label: 'Ver dashboard', owner: true, admin: true, editor: true, viewer: true },
-    { key: 'clients', label: 'Gerenciar clientes', owner: true, admin: true, editor: true, viewer: false },
-    { key: 'quotes', label: 'Criar/editar orçamentos', owner: true, admin: true, editor: true, viewer: false },
-    { key: 'pipeline', label: 'Atualizar pipeline', owner: true, admin: true, editor: true, viewer: false },
-    { key: 'schedules', label: 'Gerenciar agendamentos', owner: true, admin: true, editor: true, viewer: false },
-    { key: 'materials', label: 'Gerenciar materiais', owner: true, admin: true, editor: true, viewer: false },
-    { key: 'reports', label: 'Ver relatórios', owner: true, admin: true, editor: true, viewer: true },
-    { key: 'integrations', label: 'Canais e integrações', owner: true, admin: true, editor: false, viewer: false },
-    { key: 'security', label: 'Segurança e 2FA', owner: true, admin: true, editor: false, viewer: false },
-    { key: 'team', label: 'Gerenciar equipe', owner: true, admin: true, editor: false, viewer: false },
-    { key: 'billing', label: 'Planos e faturamento', owner: true, admin: false, editor: false, viewer: false }
-];
 
 const TeamSettings = () => {
     const { user } = useAuth();
@@ -162,14 +127,14 @@ const TeamSettings = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {Object.keys(roleMeta).map((key) => (
+                        {Object.keys(ROLE_META).map((key) => (
                             <div key={key} className="rounded-xl border border-border/40 bg-background/30 p-4 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <p className="text-sm font-semibold text-foreground">{roleMeta[key].label}</p>
+                                    <p className="text-sm font-semibold text-foreground">{ROLE_META[key].label}</p>
                                     {key === 'owner' ? <Crown className="h-4 w-4 text-primary" /> : <ShieldCheck className="h-4 w-4 text-primary" />}
                                 </div>
-                                <p className="text-xs text-muted-foreground">{roleMeta[key].description}</p>
-                                <Badge variant={roleMeta[key].badge}>{roleMeta[key].label}</Badge>
+                                <p className="text-xs text-muted-foreground">{ROLE_META[key].description}</p>
+                                <Badge variant={ROLE_META[key].badge}>{ROLE_META[key].label}</Badge>
                             </div>
                         ))}
                     </div>
@@ -265,8 +230,8 @@ const TeamSettings = () => {
                                                 </div>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                <Badge variant={roleMeta[member.permission_level]?.badge || 'outline'}>
-                                                    {roleMeta[member.permission_level]?.label || member.permission_level}
+                                                <Badge variant={ROLE_META[member.permission_level]?.badge || 'outline'}>
+                                                    {ROLE_META[member.permission_level]?.label || member.permission_level}
                                                 </Badge>
                                             </TableCell>
                                             <TableCell className="text-center">
@@ -319,7 +284,7 @@ const TeamSettings = () => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {permissionMatrix.map((row) => (
+                                {PERMISSION_MATRIX.map((row) => (
                                     <TableRow key={row.key}>
                                         <TableCell className="text-sm text-foreground">{row.label}</TableCell>
                                         <TableCell className="text-center">{row.owner ? <Check className="h-4 w-4 text-emerald-400 mx-auto" /> : <X className="h-4 w-4 text-muted-foreground mx-auto" />}</TableCell>
@@ -357,7 +322,7 @@ const TeamSettings = () => {
                                 </SelectContent>
                             </Select>
                             <p className="text-xs text-muted-foreground">
-                                {roleMeta[editingMember.permission_level]?.description || 'Acesso personalizado.'}
+                                {ROLE_META[editingMember.permission_level]?.description || 'Acesso personalizado.'}
                             </p>
                         </div>
                         <DialogFooter>

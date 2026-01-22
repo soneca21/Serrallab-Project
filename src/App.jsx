@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { useAuth, AuthProvider } from '@/contexts/SupabaseAuthContext';
+import { isSystemAdmin } from '@/lib/roles';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { RealtimeProvider } from '@/contexts/RealtimeContext';
@@ -52,7 +53,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
         return <Navigate to="/login" replace />;
     }
 
-    if (adminOnly && profile?.role !== 'admin') {
+    if (adminOnly && !isSystemAdmin(profile, user)) {
         return <Navigate to="/app" replace />;
     }
 

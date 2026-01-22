@@ -20,6 +20,7 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useViewMode } from '@/contexts/ViewModeContext';
+import { isSystemAdmin } from '@/lib/roles';
 
 const MaterialForm = ({ material, onSave, onCancel, categories, isLoading }) => {
     const defaultState = { name: '', category: '', unit: 'un', cost: '', length: '' };
@@ -128,7 +129,7 @@ const MaterialCard = ({ material, isAdmin, onEdit, onDelete }) => {
 };
 
 const GlobalCatalogPage = () => {
-    const { profile } = useAuth();
+    const { profile, user } = useAuth();
     const { viewMode } = useViewMode();
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -138,7 +139,7 @@ const GlobalCatalogPage = () => {
     const [selectedMaterial, setSelectedMaterial] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const { toast } = useToast();
-    const isAdmin = profile?.role === 'admin' && viewMode === 'admin';
+    const isAdmin = isSystemAdmin(profile, user) && viewMode === 'admin';
 
     const fetchMaterials = useCallback(async () => {
         setLoading(true);

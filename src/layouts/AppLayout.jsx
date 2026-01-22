@@ -20,17 +20,19 @@ import LeadsMobile from '@/pages/app/LeadsMobile.tsx';
 import OrcamentosMobile from '@/pages/app/OrcamentosMobile.tsx';
 import PipelineMobile from '@/pages/app/PipelineMobile.tsx';
 import { cn } from '@/lib/utils';
+import { isSystemAdmin } from '@/lib/roles';
+import { hasPermission } from '@/lib/permissions';
 
 // Main Navigation Items
 const mainNavItems = [
-    { path: '/app', label: 'Dashboard', icon: LayoutDashboard, roles: ['client', 'admin'] },
-    { path: '/app/orcamentos', label: 'Or\u00e7amentos', icon: FileText, roles: ['client', 'admin'] },
-    { path: '/app/pipeline', label: 'Pipeline', icon: Columns, roles: ['client', 'admin'] },
-    { path: '/app/clientes', label: 'Clientes', icon: Users, roles: ['client', 'admin'] },
-    { path: '/app/agendamentos', label: 'Agendamentos', icon: CalendarClock, roles: ['client', 'admin'] },
-    { path: '/app/materiais', label: 'Meus Materiais', icon: Wrench, roles: ['client', 'admin'] },
-    { path: '/app/fornecedores', label: 'Fornecedores', icon: Truck, roles: ['client', 'admin'] },
-    { path: '/app/catalogo-global', label: 'Cat\u00e1logo Global', icon: BookCopy, roles: ['client', 'admin'] },
+    { path: '/app', label: 'Dashboard', icon: LayoutDashboard, roles: ['client', 'admin'], permissionKey: 'dashboard' },
+    { path: '/app/orcamentos', label: 'Or\u00e7amentos', icon: FileText, roles: ['client', 'admin'], permissionKey: 'quotes' },
+    { path: '/app/pipeline', label: 'Pipeline', icon: Columns, roles: ['client', 'admin'], permissionKey: 'pipeline' },
+    { path: '/app/clientes', label: 'Clientes', icon: Users, roles: ['client', 'admin'], permissionKey: 'clients' },
+    { path: '/app/agendamentos', label: 'Agendamentos', icon: CalendarClock, roles: ['client', 'admin'], permissionKey: 'schedules' },
+    { path: '/app/materiais', label: 'Meus Materiais', icon: Wrench, roles: ['client', 'admin'], permissionKey: 'materials' },
+    { path: '/app/fornecedores', label: 'Fornecedores', icon: Truck, roles: ['client', 'admin'], permissionKey: 'materials' },
+    { path: '/app/catalogo-global', label: 'Cat\u00e1logo Global', icon: BookCopy, roles: ['client', 'admin'], permissionKey: 'materials' },
 ];
 
 const adminNavItems = [
@@ -46,17 +48,17 @@ const adminNavItems = [
 const configItems = [
     { path: '/app/config?tab=profile', label: 'Minha Conta', icon: User },
     { path: '/app/config?tab=company', label: 'Organiza\u00e7\u00e3o', icon: Building },
-    { path: '/app/config/canais', label: 'Canais', icon: MessageSquare },
-    { path: '/app/config/integracoes', label: 'Integra\u00e7\u00f5es', icon: Database },
-    { path: '/app/config?tab=team', label: 'Equipe', icon: Users },
-    { path: '/app/config?tab=billing', label: 'Planos', icon: CreditCard },
+    { path: '/app/config/canais', label: 'Canais', icon: MessageSquare, permissionKey: 'integrations' },
+    { path: '/app/config/integracoes', label: 'Integra\u00e7\u00f5es', icon: Database, permissionKey: 'integrations' },
+    { path: '/app/config?tab=team', label: 'Equipe', icon: Users, permissionKey: 'team' },
+    { path: '/app/config?tab=billing', label: 'Planos', icon: CreditCard, permissionKey: 'billing' },
     { path: '/app/config?tab=notifications', label: 'Notifica\u00e7\u00f5es', icon: Bell },
-    { path: '/app/config?tab=security', label: 'Seguran\u00e7a', icon: Shield },
+    { path: '/app/config?tab=security', label: 'Seguran\u00e7a', icon: Shield, permissionKey: 'security' },
 ];
 
 const SidebarContent = ({ onLinkClick }) => {
     const { toast } = useToast();
-    const { signOut, profile } = useAuth();
+    const { signOut, profile, user, teamRole } = useAuth();
     const { viewMode } = useViewMode();
     const navigate = useNavigate();
     const location = useLocation();
@@ -73,9 +75,10 @@ const SidebarContent = ({ onLinkClick }) => {
         localStorage.setItem('sidebar_config_expanded', newState);
     };
 
-    const currentRole = profile?.role === 'admin' ? viewMode : 'client';
+    const currentRole = isSystemAdmin(profile, user) ? viewMode : 'client';
     const currentTab = searchParams.get('tab');
     const navItems = currentRole === 'admin' ? adminNavItems : mainNavItems;
+    const canAccessItem = (item) => (currentRole === 'admin' ? true : hasPermission(teamRole, item.permissionKey));
 
     const handleLogout = async () => {
         await signOut();
@@ -98,7 +101,7 @@ const SidebarContent = ({ onLinkClick }) => {
                 <ViewSelector />
 
                 <nav className="flex flex-col gap-1">
-                    {navItems.filter(item => item.roles.includes(currentRole)).map((item) => (
+                    {navItems.filter(item => item.roles.includes(currentRole) && canAccessItem(item)).map((item) => (
                         <NavLink
                             key={item.path}
                             to={item.path}
@@ -143,7 +146,7 @@ const SidebarContent = ({ onLinkClick }) => {
                                             transition={{ duration: 0.2 }}
                                             className="overflow-hidden ml-4 pl-4 border-l border-border mt-1 space-y-1"
                                         >
-                                            {configItems.map((item) => {
+                                            {configItems.filter((item) => canAccessItem(item)).map((item) => {
                                                 const isTabMatch = item.path.includes('?tab') && location.pathname === '/app/config' && item.path.includes(`tab=${currentTab}`);
                                                 const isPathMatch = !item.path.includes('?tab') && location.pathname === item.path;
                                                 const isActive = isTabMatch || isPathMatch;
@@ -242,8 +245,9 @@ const AppLayout = () => {
     const [isMobile, setIsMobile] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
-    const { profile } = useAuth();
+    const { profile, user, teamRole } = useAuth();
     const { viewMode } = useViewMode();
+    const currentRole = isSystemAdmin(profile, user) ? viewMode : 'client';
 
     useEffect(() => {
         const checkMobile = () => {
@@ -255,7 +259,7 @@ const AppLayout = () => {
     }, []);
 
     useEffect(() => {
-        if (profile?.role !== 'admin') return;
+        if (!isSystemAdmin(profile, user)) return;
 
         const isAdminRoute = location.pathname.startsWith('/app/admin');
         if (viewMode === 'admin' && !isAdminRoute) {
@@ -264,7 +268,38 @@ const AppLayout = () => {
         if (viewMode === 'client' && isAdminRoute) {
             navigate('/app', { replace: true });
         }
-    }, [profile?.role, viewMode, location.pathname, navigate]);
+    }, [profile, user, viewMode, location.pathname, navigate]);
+
+    useEffect(() => {
+        if (currentRole !== 'client') return;
+
+        const permissionByTab = {
+            team: 'team',
+            billing: 'billing',
+            security: 'security',
+        };
+
+        let permissionKey = null;
+
+        if (location.pathname.startsWith('/app/config')) {
+            const tab = new URLSearchParams(location.search).get('tab');
+            if (tab && permissionByTab[tab]) {
+                permissionKey = permissionByTab[tab];
+            } else if (location.pathname === '/app/config/canais' || location.pathname === '/app/config/integracoes') {
+                permissionKey = 'integrations';
+            }
+        } else {
+            const match = mainNavItems.find((item) => {
+                if (item.path === '/app') return location.pathname === '/app';
+                return location.pathname.startsWith(item.path);
+            });
+            permissionKey = match?.permissionKey || null;
+        }
+
+        if (permissionKey && !hasPermission(teamRole, permissionKey)) {
+            navigate('/app', { replace: true });
+        }
+    }, [currentRole, location.pathname, location.search, teamRole, navigate]);
 
     if (isMobile) {
         let MobileContent = <Outlet />;

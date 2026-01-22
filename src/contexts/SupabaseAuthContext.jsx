@@ -5,6 +5,8 @@ import { supabase } from '@/lib/customSupabaseClient';
 import { useToast } from '@/components/ui/use-toast';
 import Verify2FAModal from '@/features/auth/components/Verify2FAModal.tsx';
 import { verify2FACode } from '@/features/auth/api/twoFactorAuth.ts';
+import { isSystemAdmin } from '@/lib/roles';
+import { TEAM_ROLES } from '@/lib/permissions';
 
 const AuthContext = createContext(undefined);
 
@@ -16,6 +18,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [teamRole, setTeamRole] = useState(TEAM_ROLES.OWNER);
+  const [primaryUserId, setPrimaryUserId] = useState(null);
+  const [accessLoading, setAccessLoading] = useState(false);
   
   // 2FA State
   const [is2FARequired, setIs2FARequired] = useState(false);
@@ -142,6 +147,56 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const resolveAccess = useCallback(async (activeUser, activeProfile) => {
+    if (!activeUser) {
+      setTeamRole(TEAM_ROLES.OWNER);
+      setPrimaryUserId(null);
+      setAccessLoading(false);
+      return;
+    }
+
+    if (isSystemAdmin(activeProfile, activeUser)) {
+      setTeamRole('system_admin');
+      setPrimaryUserId(activeUser.id);
+      setAccessLoading(false);
+      return;
+    }
+
+    setAccessLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('secondary_users')
+        .select('primary_user_id, permission_level')
+        .eq('user_id', activeUser.id)
+        .maybeSingle();
+
+      if (!error && data?.primary_user_id) {
+        setTeamRole(data.permission_level || TEAM_ROLES.VIEWER);
+        setPrimaryUserId(data.primary_user_id);
+        return;
+      }
+
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('secondary_users')
+        .select('primary_user_id, permission_level')
+        .eq('email', activeUser.email)
+        .maybeSingle();
+
+      if (!fallbackError && fallbackData?.primary_user_id) {
+        setTeamRole(fallbackData.permission_level || TEAM_ROLES.VIEWER);
+        setPrimaryUserId(fallbackData.primary_user_id);
+        return;
+      }
+    } catch (err) {
+      console.error('Erro ao resolver permissao de acesso:', err);
+    } finally {
+      setAccessLoading(false);
+    }
+
+    setTeamRole(TEAM_ROLES.OWNER);
+    setPrimaryUserId(activeUser.id);
+  }, []);
+
   // Init Auth
   useEffect(() => {
     const initAuth = async () => {
@@ -166,18 +221,26 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user, fetchProfile]);
 
+  useEffect(() => {
+    resolveAccess(user, profile);
+  }, [user, profile, resolveAccess]);
+
   const value = useMemo(() => ({
     user,
     session,
     loading,
     profile,
     profileLoading,
+    teamRole,
+    primaryUserId,
+    accessLoading,
+    isSecondaryUser: Boolean(primaryUserId && user?.id && primaryUserId !== user.id),
     signUp,
     signIn,
     signOut,
     refreshProfile: () => fetchProfile(user?.id),
     updateUserPassword: async (pw) => await supabase.auth.updateUser({ password: pw })
-  }), [user, session, loading, profile, profileLoading, signUp, signIn, signOut, fetchProfile]);
+  }), [user, session, loading, profile, profileLoading, teamRole, primaryUserId, accessLoading, signUp, signIn, signOut, fetchProfile]);
 
   return (
     <AuthContext.Provider value={value}>
