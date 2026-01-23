@@ -1,13 +1,14 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, Search, Building, Star, Clock, Shield, Ban, Users, BarChart2, Settings, DollarSign, PlusCircle, Edit, Trash2, ArrowUpRight, ArrowDownRight, Activity, FileText, Mail, Phone } from 'lucide-react';
+import { Loader2, Search, Building, Star, Clock, Shield, Ban, Users, BarChart2, Settings, DollarSign, PlusCircle, Edit, Trash2, ArrowUpRight, ArrowDownRight, Activity, FileText, Mail, Phone, Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/customSupabaseClient';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,6 +32,9 @@ const ENTITY_LABELS = {
     lead: 'Lead',
     usuario: 'Usuário',
 };
+
+const AI_SETTINGS_ID = '00000000-0000-0000-0000-000000000001';
+const DEFAULT_AI_SYSTEM_PROMPT = 'Voce e um assistente para orcamentos. Gere um titulo curto, descricao clara e itens com material_id valido. Retorne apenas JSON valido.';
 
 const formatCurrency = (value) => {
     const safe = Number(value) || 0;
@@ -1802,6 +1806,268 @@ const AuditTab = ({ onHealthCheck }) => {
     );
 };
 
+const AiAgentTab = ({ onHealthCheck }) => {
+    const { toast } = useToast();
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [settings, setSettings] = useState(null);
+    const [draft, setDraft] = useState({
+        id: AI_SETTINGS_ID,
+        enabled: true,
+        model: 'gpt-4o-mini',
+        temperature: 0.6,
+        max_tokens: 700,
+        item_limit: 20,
+        system_prompt: DEFAULT_AI_SYSTEM_PROMPT,
+    });
+    const [logs, setLogs] = useState([]);
+
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const [settingsRes, logsRes] = await Promise.all([
+                supabase.from('ai_quote_agent_settings').select('*').eq('id', AI_SETTINGS_ID).maybeSingle(),
+                supabase.from('ai_quote_agent_logs').select('*').order('created_at', { ascending: false }).limit(50),
+            ]);
+
+            if (settingsRes.error) throw settingsRes.error;
+            if (logsRes.error) throw logsRes.error;
+
+            const resolvedSettings = settingsRes.data || {
+                id: AI_SETTINGS_ID,
+                enabled: true,
+                model: 'gpt-4o-mini',
+                temperature: 0.6,
+                max_tokens: 700,
+                item_limit: 20,
+                system_prompt: DEFAULT_AI_SYSTEM_PROMPT,
+            };
+            setSettings(resolvedSettings);
+            setDraft({
+                id: resolvedSettings.id || AI_SETTINGS_ID,
+                enabled: resolvedSettings.enabled ?? true,
+                model: resolvedSettings.model || 'gpt-4o-mini',
+                temperature: Number(resolvedSettings.temperature ?? 0.6),
+                max_tokens: Number(resolvedSettings.max_tokens ?? 700),
+                item_limit: Number(resolvedSettings.item_limit ?? 20),
+                system_prompt: resolvedSettings.system_prompt || DEFAULT_AI_SYSTEM_PROMPT,
+            });
+
+            setLogs(logsRes.data || []);
+            onHealthCheck?.(true);
+        } catch (error) {
+            console.error('Erro ao carregar agente IA:', error);
+            toast({ title: 'Erro ao carregar agente IA', variant: 'destructive' });
+            onHealthCheck?.(false);
+        } finally {
+            setLoading(false);
+        }
+    }, [toast, onHealthCheck]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const payload = {
+                enabled: !!draft.enabled,
+                model: draft.model?.trim() || 'gpt-4o-mini',
+                temperature: Number(draft.temperature ?? 0.6),
+                max_tokens: Number(draft.max_tokens ?? 700),
+                item_limit: Number(draft.item_limit ?? 20),
+                system_prompt: draft.system_prompt?.trim() || DEFAULT_AI_SYSTEM_PROMPT,
+                updated_at: new Date().toISOString(),
+            };
+            const { data, error } = await supabase
+                .from('ai_quote_agent_settings')
+                .update(payload)
+                .eq('id', AI_SETTINGS_ID)
+                .select()
+                .single();
+
+            if (error) throw error;
+            setSettings(data);
+            setDraft({
+                id: data.id,
+                enabled: data.enabled,
+                model: data.model,
+                temperature: Number(data.temperature ?? 0.6),
+                max_tokens: Number(data.max_tokens ?? 700),
+                item_limit: Number(data.item_limit ?? 20),
+                system_prompt: data.system_prompt || DEFAULT_AI_SYSTEM_PROMPT,
+            });
+            toast({ title: 'Configuracoes salvas' });
+        } catch (error) {
+            console.error('Erro ao salvar agente IA:', error);
+            toast({ title: 'Erro ao salvar configuracoes', variant: 'destructive' });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const totals = logs.reduce((acc, entry) => {
+        acc.count += 1;
+        if (entry.status === 'success') acc.success += 1;
+        if (entry.status === 'error') acc.error += 1;
+        acc.responseMs += Number(entry.response_ms || 0);
+        acc.tokens += Number(entry.total_tokens || 0);
+        return acc;
+    }, { count: 0, success: 0, error: 0, responseMs: 0, tokens: 0 });
+
+    const avgResponse = totals.count ? Math.round(totals.responseMs / totals.count) : 0;
+    const avgTokens = totals.count ? Math.round(totals.tokens / totals.count) : 0;
+    const successRate = totals.count ? Math.round((totals.success / totals.count) * 100) : 0;
+    const lastError = logs.find((entry) => entry.status === 'error');
+
+    if (loading) {
+        return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 className="text-lg font-medium text-foreground">Agente IA de Orçamentos</h3>
+                    <p className="text-sm text-muted-foreground">Controle de modelo, limites e monitoramento de execucoes.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={fetchData}>Atualizar</Button>
+                    <Button size="sm" onClick={handleSave} disabled={saving}>
+                        {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Salvar
+                    </Button>
+                </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base"><Bot className="h-4 w-4 text-primary" />Status do Agente</CardTitle>
+                        <CardDescription>Ative ou pause o assistente de sugestoes.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between rounded-lg border border-surface-strong p-3">
+                            <div>
+                                <div className="text-sm font-medium text-foreground">Agente habilitado</div>
+                                <div className="text-xs text-muted-foreground">Bloqueia o uso do prompt em novos orcamentos.</div>
+                            </div>
+                            <Switch checked={!!draft.enabled} onCheckedChange={(value) => setDraft(prev => ({ ...prev, enabled: value }))} />
+                        </div>
+                        <div className="rounded-lg border border-surface-strong p-3 text-sm text-muted-foreground">
+                            <div className="font-medium text-foreground mb-1">Ultimo erro</div>
+                            <div>{lastError?.error_message || 'Sem erros recentes.'}</div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Uso e Desempenho</CardTitle>
+                        <CardDescription>Resumo das ultimas execucoes registradas.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Requisicoes</span>
+                            <span className="font-semibold text-foreground">{totals.count}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Sucesso</span>
+                            <span className="font-semibold text-foreground">{successRate}%</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Tempo medio</span>
+                            <span className="font-semibold text-foreground">{avgResponse} ms</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Tokens medios</span>
+                            <span className="font-semibold text-foreground">{avgTokens}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">Parametros do Modelo</CardTitle>
+                        <CardDescription>Defina custos e qualidade das respostas.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                            <Label>Modelo</Label>
+                            <Input value={draft.model} onChange={(e) => setDraft(prev => ({ ...prev, model: e.target.value }))} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label>Temperatura</Label>
+                                <Input type="number" step="0.1" value={draft.temperature} onChange={(e) => setDraft(prev => ({ ...prev, temperature: e.target.value }))} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Max tokens</Label>
+                                <Input type="number" value={draft.max_tokens} onChange={(e) => setDraft(prev => ({ ...prev, max_tokens: e.target.value }))} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Limite de itens</Label>
+                                <Input type="number" value={draft.item_limit} onChange={(e) => setDraft(prev => ({ ...prev, item_limit: e.target.value }))} />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">Prompt Base</CardTitle>
+                    <CardDescription>Instrucao principal usada pelo assistente.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Textarea
+                        value={draft.system_prompt}
+                        onChange={(e) => setDraft(prev => ({ ...prev, system_prompt: e.target.value }))}
+                        className="min-h-[140px]"
+                    />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">Ultimas Execucoes</CardTitle>
+                    <CardDescription>Historico recente para diagnostico rapido.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="rounded-md border border-surface-strong overflow-hidden">
+                        <Table>
+                            <TableHeader className="bg-surface-strong">
+                                <TableRow>
+                                    <TableHead>Quando</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Modelo</TableHead>
+                                    <TableHead>Tokens</TableHead>
+                                    <TableHead>Tempo</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {logs.length > 0 ? logs.map((entry) => (
+                                    <TableRow key={entry.id}>
+                                        <TableCell className="text-xs text-muted-foreground">{formatRelativeTime(entry.created_at)}</TableCell>
+                                        <TableCell className="text-sm capitalize">{entry.status}</TableCell>
+                                        <TableCell className="text-sm">{entry.model || '-'}</TableCell>
+                                        <TableCell className="text-sm">{entry.total_tokens ?? '-'}</TableCell>
+                                        <TableCell className="text-sm">{entry.response_ms ? `${entry.response_ms} ms` : '-'}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                                            Nenhuma execucao registrada.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
+
 // --- Componente Principal da Pagina ---
 
 const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
@@ -1842,6 +2108,11 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
             title: 'Auditoria',
             description: 'Registro de a\u00e7\u00f5es administrativas e eventos.',
             Icon: Activity,
+        },
+        'ai-agent': {
+            title: 'Agente IA',
+            description: 'Governanca e configuracao do assistente de orcamentos.',
+            Icon: Bot,
         },
     };
     const pageMeta = pageMetaByTab[activeTab] || pageMetaByTab.overview;
@@ -1895,6 +2166,7 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
                             <TabsTrigger value="clients" className="data-[state=active]:bg-primary data-[state=active]:text-white px-4 py-2 rounded-md transition-all"><Users className="mr-2 h-4 w-4" />Clientes</TabsTrigger>
                             <TabsTrigger value="plans" className="data-[state=active]:bg-primary data-[state=active]:text-white px-4 py-2 rounded-md transition-all"><Settings className="mr-2 h-4 w-4" />Planos & Pacotes</TabsTrigger>
                             <TabsTrigger value="billing" className="data-[state=active]:bg-primary data-[state=active]:text-white px-4 py-2 rounded-md transition-all"><DollarSign className="mr-2 h-4 w-4" />Financeiro</TabsTrigger>
+                            <TabsTrigger value="ai-agent" className="data-[state=active]:bg-primary data-[state=active]:text-white px-4 py-2 rounded-md transition-all"><Bot className="mr-2 h-4 w-4" />Agente IA</TabsTrigger>
                             <TabsTrigger value="audit" className="data-[state=active]:bg-primary data-[state=active]:text-white px-4 py-2 rounded-md transition-all"><Activity className="mr-2 h-4 w-4" />Auditoria</TabsTrigger>
                         </TabsList>
                     </div>
@@ -1905,6 +2177,7 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
                     <TabsContent value="clients" className="mt-0"><ClientsTab onHealthCheck={setSupabaseOnline} /></TabsContent>
                     <TabsContent value="plans" className="mt-0"><PlansManagementTab onHealthCheck={setSupabaseOnline} /></TabsContent>
                     <TabsContent value="billing" className="mt-0"><BillingTab onHealthCheck={setSupabaseOnline} /></TabsContent>
+                    <TabsContent value="ai-agent" className="mt-0"><AiAgentTab onHealthCheck={setSupabaseOnline} /></TabsContent>
                     <TabsContent value="audit" className="mt-0"><AuditTab onHealthCheck={setSupabaseOnline} /></TabsContent>
                 </Tabs>
             </motion.div>

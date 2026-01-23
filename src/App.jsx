@@ -116,6 +116,7 @@ function AppRoutes() {
         <Route path="admin/clientes" element={<AdminSectionRoute tab="clients" />} />
         <Route path="admin/planos" element={<AdminSectionRoute tab="plans" />} />
         <Route path="admin/financeiro" element={<AdminSectionRoute tab="billing" />} />
+        <Route path="admin/agente-ia" element={<AdminSectionRoute tab="ai-agent" />} />
         <Route path="admin/auditoria" element={<AdminSectionRoute tab="audit" />} />
       </Route>
 

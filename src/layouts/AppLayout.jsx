@@ -5,7 +5,7 @@ import {
     Hammer, LayoutDashboard, FileText, Users, Settings, LogOut, Wrench, 
     BookCopy, Menu, Truck, MessageSquare, CalendarClock, Home, Columns,
     ChevronDown, ChevronRight, User, Building, CreditCard, Bell, Shield, ClipboardList, Database, Link,
-    BarChart2, Activity, DollarSign
+    BarChart2, Activity, DollarSign, Bot
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toaster } from '@/components/ui/toaster';
@@ -41,6 +41,7 @@ const adminNavItems = [
     { path: '/app/admin/clientes', label: 'Clientes', icon: Users, roles: ['admin'] },
     { path: '/app/admin/planos', label: 'Planos & Pacotes', icon: Settings, roles: ['admin'] },
     { path: '/app/admin/financeiro', label: 'Financeiro', icon: DollarSign, roles: ['admin'] },
+    { path: '/app/admin/agente-ia', label: 'Agente IA', icon: Bot, roles: ['admin'] },
     { path: '/app/admin/auditoria', label: 'Auditoria', icon: Activity, roles: ['admin'] },
 ];
 
@@ -163,7 +164,12 @@ const SidebarContent = ({ onLinkClick }) => {
                                                                 : 'text-muted-foreground'
                                                         )}
                                                    >
-                                                    <item.icon className="h-4 w-4" />
+                                                    <item.icon
+                                                        className={cn(
+                                                            "h-4 w-4 transition-colors",
+                                                            isActive ? "text-primary" : "text-muted-foreground group-hover:text-primary"
+                                                        )}
+                                                    />
                                                     <span>{item.label}</span>
                                                 </NavLink>
                                             );

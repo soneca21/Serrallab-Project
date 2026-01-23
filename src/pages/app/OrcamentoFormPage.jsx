@@ -20,6 +20,20 @@ import MaterialSelectorDialog from '@/components/MaterialSelectorDialog';
 import DownloadPdfButton from '@/features/orcamentos/components/DownloadPdfButton';
 import { createAuditLog } from '@/features/audit/api/auditLog';
 
+const brazilStates = [
+    'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
+];
+
+const contactPreferences = [
+    { value: 'email', label: 'Email', helper: 'Usamos o email para mensagens e documentos.' },
+    { value: 'phone', label: 'Telefone', helper: 'Ligamos durante o horario comercial.' },
+    { value: 'whatsapp', label: 'WhatsApp', helper: 'Preferencia para links e respostas rapidas.' },
+    { value: 'both', label: 'Email e telefone', helper: 'Entramos por ambos conforme a situacao.' },
+];
+
+const validateEmail = (value) => /^\S+@\S+\.\S+$/.test(value);
+const validatePhone = (value) => /^\d{8,15}$/.test(value.replace(/\D/g, ''));
+
 const AiSugestionDialog = ({ isOpen, onOpenChange, onApplySuggestion, userMaterials }) => {
     const { toast } = useToast();
     const [prompt, setPrompt] = useState('');
@@ -146,8 +160,21 @@ const OrcamentoFormPage = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [isSelectorOpen, setIsSelectorOpen] = useState(false);
     const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
+    const [isNewClientOpen, setIsNewClientOpen] = useState(false);
     const [currentItemId, setCurrentItemId] = useState(null);
     const [pipelineStages, setPipelineStages] = useState([]);
+    const [newClientData, setNewClientData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        company: '',
+        position: '',
+        city: '',
+        state: '',
+        contact_preference: 'email',
+        notes: '',
+    });
+    const [newClientErrors, setNewClientErrors] = useState({});
 
     const [formData, setFormData] = useState({
         title: '',
@@ -315,6 +342,25 @@ const OrcamentoFormPage = () => {
 
     const handleInputChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
     const handleSelectChange = (name, value) => setFormData(prev => ({ ...prev, [name]: value }));
+    const handleClientSelect = (value) => {
+        if (value === '__new_client__') {
+            setNewClientErrors({});
+            setNewClientData({
+                name: '',
+                email: '',
+                phone: '',
+                company: '',
+                position: '',
+                city: '',
+                state: '',
+                contact_preference: 'email',
+                notes: '',
+            });
+            setIsNewClientOpen(true);
+            return;
+        }
+        handleSelectChange('client_id', value);
+    };
     const handleItemChange = (itemId, field, value) => setFormData(prev => ({ ...prev, items: prev.items.map(item => item.id === itemId ? { ...item, [field]: value } : item) }));
     
     const handleMaterialSelect = (material) => {
@@ -361,6 +407,48 @@ const OrcamentoFormPage = () => {
     };
 
     const openMaterialSelector = (itemId) => { setCurrentItemId(itemId); setIsSelectorOpen(true); };
+    const handleSaveNewClient = async (event) => {
+        event.preventDefault();
+        const errors = {};
+        if (!newClientData.name.trim()) errors.name = 'Informe o nome do cliente.';
+        if (!validateEmail(newClientData.email)) errors.email = 'Informe um email valido.';
+        if (!newClientData.phone || !validatePhone(newClientData.phone)) errors.phone = 'Informe um telefone com 8 a 15 digitos.';
+        if (!newClientData.state) errors.state = 'Selecione um estado.';
+        if (Object.keys(errors).length) {
+            setNewClientErrors(errors);
+            toast({ title: 'Erro', description: 'Preencha os campos obrigatorios corretamente.', variant: 'destructive' });
+            return;
+        }
+
+        const payload = {
+            name: newClientData.name.trim(),
+            email: newClientData.email.trim(),
+            phone: newClientData.phone.trim(),
+            company: newClientData.company?.trim() || '',
+            position: newClientData.position?.trim() || '',
+            city: newClientData.city?.trim() || '',
+            state: newClientData.state,
+            contact_preference: newClientData.contact_preference,
+            notes: newClientData.notes?.trim() || '',
+            user_id: user.id,
+        };
+
+        const { data, error } = await supabase.from('clients').insert(payload).select().single();
+        if (error) {
+            toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+            return;
+        }
+
+        setClients(prev => [data, ...prev]);
+        setFormData(prev => ({ ...prev, client_id: data.id }));
+        setIsNewClientOpen(false);
+        toast({ title: 'Cliente criado', description: 'Cliente adicionado ao orcamento.' });
+        createAuditLog('cliente', data.id, 'create', {
+            name: data.name,
+            email: data.email,
+            phone: data.phone,
+        });
+    };
 
     const addItem = () => setFormData(prev => ({ ...prev, items: [...prev.items, { id: uuidv4(), material_id: '', name: 'Selecione um material', quantity: 1, cost: 0, unit: 'un' }] }));
     const removeItem = (itemId) => {
@@ -554,7 +642,7 @@ const OrcamentoFormPage = () => {
                 <div className="flex-grow space-y-6">
                     <Card>
                         <CardHeader><div className="flex justify-between items-center"><CardTitle>{id ? 'Editar Orçamento' : 'Novo Orçamento'}</CardTitle><Button variant="outline" size="sm" onClick={() => navigate('/app/orcamentos')}><ArrowLeft className="mr-2 h-4 w-4" /> Voltar</Button></div></CardHeader>
-                        <CardContent className="space-y-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label>Título do Orçamento</Label><Input name="title" value={formData.title} onChange={handleInputChange} placeholder="Ex: Portão Basculante para Garagem" /></div><div><Label>Cliente</Label><Select name="client_id" value={formData.client_id} onValueChange={(v) => handleSelectChange('client_id', v)}><SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger><SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div></div><div><Label>Descrição / Detalhes</Label><Textarea name="description" value={formData.description || ''} onChange={handleInputChange} placeholder="Detalhes sobre o projeto, medidas, etc." /></div></CardContent>
+                        <CardContent className="space-y-4"><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><Label>Título do Orçamento</Label><Input name="title" value={formData.title} onChange={handleInputChange} placeholder="Ex: Portão Basculante para Garagem" /></div><div><Label>Cliente</Label><Select name="client_id" value={formData.client_id} onValueChange={handleClientSelect}><SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger><SelectContent><SelectItem value="__new_client__">+ Novo cliente</SelectItem>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div></div><div><Label>Descrição / Detalhes</Label><Textarea name="description" value={formData.description || ''} onChange={handleInputChange} placeholder="Detalhes sobre o projeto, medidas, etc." /></div></CardContent>
                     </Card>
                     <Card>
                         <CardHeader><CardTitle>Itens e Custos</CardTitle></CardHeader>
@@ -627,8 +715,143 @@ const OrcamentoFormPage = () => {
             </div>
             <MaterialSelectorDialog isOpen={isSelectorOpen} onOpenChange={setIsSelectorOpen} userMaterials={userMaterials} globalMaterials={globalMaterials} onSelectMaterial={handleMaterialSelect}/>
             <AiSugestionDialog isOpen={isAiDialogOpen} onOpenChange={setIsAiDialogOpen} onApplySuggestion={handleApplySuggestion} userMaterials={userMaterials} />
+            <Dialog open={isNewClientOpen} onOpenChange={setIsNewClientOpen}>
+                <DialogContent className="rounded-xl">
+                    <DialogHeader>
+                        <DialogTitle>Novo Cliente</DialogTitle>
+                        <DialogDescription>Cadastre o cliente sem sair do orcamento.</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSaveNewClient} className="space-y-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Nome</Label>
+                                <Input
+                                    value={newClientData.name}
+                                    onChange={(e) => {
+                                        setNewClientErrors(prev => ({ ...prev, name: undefined }));
+                                        setNewClientData(prev => ({ ...prev, name: e.target.value }));
+                                    }}
+                                    className="rounded-xl"
+                                />
+                                {newClientErrors.name && <p className="text-xs text-destructive mt-1">{newClientErrors.name}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Empresa</Label>
+                                <Input
+                                    value={newClientData.company}
+                                    onChange={(e) => setNewClientData(prev => ({ ...prev, company: e.target.value }))}
+                                    className="rounded-xl"
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Email</Label>
+                                <Input
+                                    type="email"
+                                    value={newClientData.email}
+                                    onChange={(e) => {
+                                        setNewClientErrors(prev => ({ ...prev, email: undefined }));
+                                        setNewClientData(prev => ({ ...prev, email: e.target.value }));
+                                    }}
+                                    className="rounded-xl"
+                                />
+                                {newClientErrors.email && <p className="text-xs text-destructive mt-1">{newClientErrors.email}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Cargo/Funcao</Label>
+                                <Input
+                                    value={newClientData.position}
+                                    onChange={(e) => setNewClientData(prev => ({ ...prev, position: e.target.value }))}
+                                    className="rounded-xl"
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Telefone</Label>
+                                <Input
+                                    type="tel"
+                                    value={newClientData.phone}
+                                    onChange={(e) => {
+                                        setNewClientErrors(prev => ({ ...prev, phone: undefined }));
+                                        setNewClientData(prev => ({ ...prev, phone: e.target.value }));
+                                    }}
+                                    className="rounded-xl"
+                                />
+                                {newClientErrors.phone && <p className="text-xs text-destructive mt-1">{newClientErrors.phone}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Preferencia de contato</Label>
+                                <Select
+                                    value={newClientData.contact_preference}
+                                    onValueChange={(value) => setNewClientData(prev => ({ ...prev, contact_preference: value }))}
+                                >
+                                    <SelectTrigger className="rounded-xl">
+                                        <SelectValue placeholder="Selecione uma opcao" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {contactPreferences.map(pref => (
+                                            <SelectItem key={pref.value} value={pref.value}>
+                                                {pref.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {contactPreferences.find(pref => pref.value === newClientData.contact_preference) && (
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {contactPreferences.find(pref => pref.value === newClientData.contact_preference)?.helper}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Cidade</Label>
+                                <Input
+                                    value={newClientData.city}
+                                    onChange={(e) => setNewClientData(prev => ({ ...prev, city: e.target.value }))}
+                                    className="rounded-xl"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Estado</Label>
+                                <Select value={newClientData.state} onValueChange={(value) => {
+                                    setNewClientErrors(prev => ({ ...prev, state: undefined }));
+                                    setNewClientData(prev => ({ ...prev, state: value }));
+                                }}>
+                                    <SelectTrigger className="rounded-xl">
+                                        <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {brazilStates.map((uf) => (
+                                            <SelectItem key={uf} value={uf}>
+                                                {uf}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {newClientErrors.state && <p className="text-xs text-destructive mt-1">{newClientErrors.state}</p>}
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Observacoes</Label>
+                            <Textarea
+                                value={newClientData.notes}
+                                onChange={(e) => setNewClientData(prev => ({ ...prev, notes: e.target.value }))}
+                                className="rounded-xl"
+                                placeholder="Adicione contexto ou historico adicional sobre este cliente."
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit" className="rounded-xl w-full">Salvar</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </HelmetProvider>
     );
 };
 
 export default OrcamentoFormPage;
+
