@@ -19,6 +19,15 @@ const stageMeta = {
   Perdido: { color: 'bg-red-500/10 border-red-500/20 text-red-500', icon: XCircle },
 };
 
+const stageAccent = {
+  Novo: '#3b82f6',
+  Atendimento: '#eab308',
+  Enviado: '#a855f7',
+  'Em Producao': '#f97316',
+  Entregue: '#14b8a6',
+  Perdido: '#ef4444',
+};
+
 const stageLabels = {
   'Em Producao': 'Em Produ\u00e7\u00e3o',
 };
@@ -167,6 +176,7 @@ const PipelinePage = () => {
                             <div className="grid h-full w-full min-w-full grid-cols-6 gap-3 pb-4">
                                 {stages.map(stage => {
                                     const meta = stageMeta[stage.name] || { color: 'bg-surface/50 border-border/30 text-muted-foreground', icon: AlertCircle };
+                                    const accentColor = stage.color || stageAccent[stage.name] || '#94a3b8';
                                     const StageIcon = meta.icon;
                                     return (
                                         <div
@@ -195,7 +205,8 @@ const PipelinePage = () => {
                                                             layoutId={q.id}
                                                             initial={{ opacity: 0 }}
                                                             animate={{ opacity: 1 }}
-                                                            className="bg-card p-4 rounded-xl border border-surface-strong cursor-grab active:cursor-grabbing hover:border-primary/50 hover:shadow-lg transition-all"
+                                                            className="bg-card p-4 rounded-xl border border-surface-strong cursor-grab active:cursor-grabbing hover:border-[var(--stage-color)] hover:shadow-lg transition-all"
+                                                            style={{ '--stage-color': accentColor }}
                                                             draggable
                                                             onDragStart={e => e.dataTransfer.setData('text/plain', q.id)}
                                                             onClick={() => navigate(`/app/orcamentos/editar/${q.id}`)}
