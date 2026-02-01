@@ -28,9 +28,9 @@ const HeroSection = () => (
     <div className="w-full relative z-10">
       <motion.div variants={staggerContainer} initial="hidden" animate="visible">
         <motion.div variants={fadeIn()} className="mb-8 inline-block bg-surface-strong p-6 rounded-full border-2 border-primary shadow-[0_0_30px_rgba(218,105,11,0.2)]">
-          <HammerIcon className="h-16 w-16 md:h-24 md:w-24 mx-auto text-primary drop-shadow-[0_0_10px_rgba(218,105,11,0.5)]" />
+          <HammerIcon className="h-14 w-14 md:h-24 md:w-24 mx-auto text-primary drop-shadow-[0_0_10px_rgba(218,105,11,0.5)]" />
         </motion.div>
-        <motion.h1 variants={fadeIn(0.1)} className="text-4xl md:text-7xl font-heading font-bold mb-6 tracking-tight text-foreground">
+        <motion.h1 variants={fadeIn(0.1)} className="text-5xl md:text-7xl font-heading font-bold mb-6 tracking-tight text-foreground">
           Transforme Orçamentos<br /> <span className="text-primary drop-shadow-[0_0_15px_rgba(218,105,11,0.3)]">em Lucro</span>
         </motion.h1>
         <motion.p variants={fadeIn(0.2)} className="text-lg md:text-xl max-w-3xl mx-auto text-muted-foreground mb-10 font-body leading-relaxed">
@@ -54,17 +54,17 @@ const HeroSection = () => (
 );
 
 const FeatureCard = ({ icon: Icon, title, description, delay }) => (
-    <motion.div 
+        <motion.div 
         variants={fadeIn(delay)} 
-        className="bg-surface p-8 rounded-xl border border-surface-strong text-left transition-all duration-300 hover:border-primary hover:border-l-4 hover:-translate-y-2 hover:shadow-[0_0_20px_rgba(218,105,11,0.1)] group"
+        className="bg-surface py-12 px-6 rounded-xl border border-surface-strong text-center transition-all duration-300 hover:border-primary hover:border-l-4 hover:-translate-y-2 hover:shadow-[0_0_20px_rgba(218,105,11,0.1)] group"
     >
-        <div className="flex items-start mb-5">
+        <div className="flex justify-center mb-5">
             <div className="bg-surface-strong p-3 rounded-lg border border-primary/20 group-hover:border-primary/50 transition-colors">
                 <Icon className="h-7 w-7 text-primary group-hover:drop-shadow-[0_0_8px_rgba(218,105,11,0.6)] transition-all" />
             </div>
         </div>
-        <h3 className="text-xl font-heading font-semibold mb-3 text-foreground group-hover:text-primary transition-colors">{title}</h3>
-        <p className="text-muted-foreground font-body leading-relaxed">{description}</p>
+        <h3 className="text-lg font-heading font-semibold mb-3 text-foreground group-hover:text-primary transition-colors">{title}</h3>
+        <p className="text-muted-foreground font-body leading-relaxed text-justify">{description}</p>
     </motion.div>
 );
 
@@ -79,7 +79,7 @@ const FeaturesSection = () => (
                 <motion.p variants={fadeIn(0.1)} className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
                     Deixe a burocracia conosco e foque no que você faz de melhor: criar peças incríveis.
                 </motion.p>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <FeatureCard icon={Zap} title="Orçamentos em Minutos" description="Selecione materiais, adicione mão de obra e seus custos. O cálculo é automático e sem erros." delay={0} />
                     <FeatureCard icon={Users} title="Gestão de Clientes (CRM)" description="Mantenha um histórico completo de seus clientes e orçamentos enviados. Nunca mais perca um contato." delay={0.1} />
                     <FeatureCard icon={Package} title="Catálogo de Materiais" description="Cadastre seus materiais e fornecedores uma vez e use para sempre. Importe do nosso catálogo global para começar." delay={0.2} />
@@ -200,10 +200,10 @@ const PricingSection = () => {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8"></div>
                         <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-tr-full -ml-8 -mb-8"></div>
                         
-                        <h3 className="text-2xl md:text-3xl font-heading font-bold mb-4 text-foreground relative z-10">
+                        <h3 className="text-5xl md:text-5xl font-heading font-bold mb-4 text-foreground relative z-10">
                             Acabaram seus orçamentos?
                         </h3>
-                        <p className="text-lg text-muted-foreground mb-10 relative z-10">
+                        <p className="text-3xl text-muted-foreground mb-10 relative z-10">
                             Compre pacotes avulsos para continuar orçando sem precisar mudar de plano.
                         </p>
                         <div className="flex flex-wrap justify-center gap-6 relative z-10">
@@ -229,10 +229,10 @@ const PricingSection = () => {
 const CTASection = () => (
     <section id="contact" className="py-20 md:py-28 bg-background border-t border-surface-strong relative overflow-hidden scroll-mt-28 min-h-screen">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-primary/10 to-transparent opacity-50"></div>
-        <div className="w-full text-center relative z-10">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} variants={fadeIn()}>
+        <div className="w-full text-center relative z-10 mt-24">
+                <motion.div className="mt-12" initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} variants={fadeIn()}>
                 <div className="mb-8 inline-flex items-center justify-center p-4 bg-surface-strong rounded-full border border-primary/30 shadow-[0_0_20px_rgba(218,105,11,0.15)]">
-                    <Hammer className="h-10 w-10 text-primary" />
+                    <Hammer className="h-14 w-14 text-primary" />
                 </div>
                 <h2 className="text-3xl md:text-5xl font-heading font-bold mb-6 text-foreground">
                     Pronto para modernizar sua serralheria?

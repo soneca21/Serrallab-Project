@@ -132,10 +132,10 @@ const Header = ({ isAuthenticated }) => {
                         );
                     })}
                     <div className="flex items-center gap-4 ml-4">
-                         <NavLink
+                            <NavLink
                             to={isAuthenticated ? '/app' : '/login'}
                             className={({ isActive }) =>
-                                `font-medium text-sm transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'}`
+                                `font-medium text-sm transition-colors hover:text-primary ${isActive ? 'text-primary' : 'text-muted-foreground'} border-2 border-surface-strong hover:border-primary rounded-xl px-4 py-2 transition-all duration-300`
                             }
                         >
                             {isAuthenticated ? 'Dashboard' : 'Entrar'}
@@ -191,7 +191,7 @@ const Header = ({ isAuthenticated }) => {
                             <NavLink
                                 to={isAuthenticated ? '/app' : '/login'}
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-gray-300 hover:bg-surface hover:text-white transition-all"
+                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-gray-300 border-2 border-surface-strong hover:border-primary hover:text-primary transition-all"
                             >
                                 <LogIn className="h-5 w-5" />
                                 {isAuthenticated ? 'Dashboard' : 'Entrar'}
