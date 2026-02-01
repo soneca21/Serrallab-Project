@@ -1435,8 +1435,8 @@ const BillingTab = ({ onHealthCheck }) => {
                 setInvoices(list);
                 setMonthTotal(total);
                 onHealthCheck?.(true);
-            } catch (error) {
-                console.error('Erro ao carregar faturas:', error);
+            } catch (err) {
+                console.error('Erro ao carregar faturas:', err);
                 toast({ title: 'Erro ao carregar faturas', variant: 'destructive' });
                 setInvoices([]);
                 setMonthTotal(0);
@@ -1445,7 +1445,6 @@ const BillingTab = ({ onHealthCheck }) => {
                 setLoading(false);
             }
         };
-
         fetchInvoices();
     }, [toast, onHealthCheck]);
 
@@ -1512,9 +1511,9 @@ const BillingTab = ({ onHealthCheck }) => {
         link.click();
     };
 
-    const paidCount = invoices.filter((invoice) => (invoice.status || '').toLowerCase() === 'paid').length;
-    const openCount = invoices.filter((invoice) => (invoice.status || '').toLowerCase() === 'open').length;
-    const failedCount = invoices.filter((invoice) => (invoice.status || '').toLowerCase() === 'failed').length;
+    const paidCount = invoices.filter((i) => (i.status || '').toLowerCase() === 'paid').length;
+    const openCount = invoices.filter((i) => (i.status || '').toLowerCase() === 'open').length;
+    const failedCount = invoices.filter((i) => (i.status || '').toLowerCase() === 'failed').length;
 
     const summaryCards = [
         { title: 'Faturamento do mês', value: formatCurrency(monthTotal) },
@@ -1525,6 +1524,9 @@ const BillingTab = ({ onHealthCheck }) => {
         { title: 'Valor em aberto', value: formatCurrency(openAmount) },
         { title: 'Ticket médio', value: `R$ ${avgInvoice}` },
     ];
+
+    // Ensure topActions is defined to avoid runtime errors (can be enhanced later)
+    const topActions = [];
 
     return (
         <div className="space-y-6">
@@ -1560,9 +1562,7 @@ const BillingTab = ({ onHealthCheck }) => {
                         <SelectItem value="all">Tudo</SelectItem>
                     </SelectContent>
                 </Select>
-                <Button variant="secondary" size="sm" onClick={exportCsv} disabled={!filteredInvoices.length}>
-                    Exportar CSV
-                </Button>
+                <Button variant="secondary" size="sm" onClick={exportCsv} disabled={!filteredInvoices.length}>Exportar CSV</Button>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -1598,7 +1598,7 @@ const BillingTab = ({ onHealthCheck }) => {
                         <CardTitle>Histórico de Faturamento</CardTitle>
                         <CardDescription>Lista filtrada com base nos filtros selecionados.</CardDescription>
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => setStatusFilter('all') & setPeriodFilter('month')}>Limpar filtros</Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setStatusFilter('all'); setPeriodFilter('month'); }}>Limpar filtros</Button>
                 </CardHeader>
                 <CardContent>
                     {loading ? (
@@ -1619,17 +1619,14 @@ const BillingTab = ({ onHealthCheck }) => {
                                     {filteredInvoices.length > 0 ? filteredInvoices.map((invoice) => (
                                         <TableRow key={invoice.id}>
                                             <TableCell className="text-xs text-muted-foreground">{new Date(invoice.created_at).toLocaleDateString('pt-BR')}</TableCell>
-                                            <TableCell className="text-sm">{invoice.companies?.name || '-'}</TableCell>
-                                            <TableCell className="text-sm font-medium">{formatCurrency(invoice.amount)}</TableCell>
-                                            <TableCell className="text-sm">
-                                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-surface-strong">{formatInvoiceStatus(invoice.status)}</span>
+                                            <TableCell className="text-sm">{invoice.companies?.name || '-'}
                                             </TableCell>
+                                            <TableCell className="text-sm font-medium">{formatCurrency(invoice.amount)}</TableCell>
+                                            <TableCell className="text-sm"><span className="px-2 py-1 rounded-full text-xs font-semibold bg-surface-strong">{formatInvoiceStatus(invoice.status)}</span></TableCell>
                                             <TableCell className="text-right">
                                                 {invoice.pdf_url ? (
                                                     <Button variant="ghost" size="icon" asChild>
-                                                        <a href={invoice.pdf_url} target="_blank" rel="noreferrer">
-                                                            <FileText className="h-4 w-4" />
-                                                        </a>
+                                                        <a href={invoice.pdf_url} target="_blank" rel="noreferrer"><FileText className="h-4 w-4" /></a>
                                                     </Button>
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground">-</span>
@@ -1638,9 +1635,7 @@ const BillingTab = ({ onHealthCheck }) => {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                                Nenhuma fatura encontrada com os filtros aplicados.
-                                            </TableCell>
+                                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">Nenhuma fatura encontrada com os filtros aplicados.</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
