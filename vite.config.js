@@ -254,6 +254,8 @@ export default defineConfig({
 		},
 	},
 	build: {
+		// Output directory that matches Hostinger's default web root (public_html)
+		outDir: 'public_html',
 		rollupOptions: {
 			external: [
 				'@babel/parser',
