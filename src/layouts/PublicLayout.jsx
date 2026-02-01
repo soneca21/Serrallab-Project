@@ -103,7 +103,7 @@ const Header = ({ isAuthenticated }) => {
             transition={{ duration: 0.5, ease: 'easeOut' }}
             className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-lg"
         >
-            <div className="container flex h-20 items-center justify-between">
+            <div className="w-full flex h-20 items-center justify-between px-4 md:px-8">
                 <NavLink to="/" className="flex items-center gap-2 text-2xl font-heading font-bold hover:opacity-90 transition-opacity" onClick={(e) => handleNavClick(e, { path: '/#home', type: 'scroll'})}>
                     <Anvil className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(218,105,11,0.6)]" />
                     <span className="text-foreground">Serral<span className="text-primary">lab</span></span>
@@ -215,7 +215,7 @@ const Header = ({ isAuthenticated }) => {
 
 const Footer = ({ isAuthenticated }) => (
     <footer className="bg-surface border-t border-border py-12">
-        <div className="container">
+        <div className="w-full px-4 md:px-8">
             <div className="grid md:grid-cols-4 gap-8 mb-12">
                 <div className="col-span-1 md:col-span-2">
                     <div className="flex items-center gap-2 text-2xl font-heading font-bold mb-4">

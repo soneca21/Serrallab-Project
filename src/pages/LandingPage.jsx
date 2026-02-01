@@ -23,9 +23,9 @@ const staggerContainer = {
 };
 
 const HeroSection = () => (
-  <section id="home" className="relative py-24 md:py-40 text-center text-foreground overflow-hidden bg-page-bg scroll-mt-28">
+    <section id="home" className="relative py-24 md:py-40 text-center text-foreground overflow-hidden bg-page-bg scroll-mt-28 min-h-screen">
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background opacity-40"></div>
-    <div className="container relative z-10">
+    <div className="w-full relative z-10">
       <motion.div variants={staggerContainer} initial="hidden" animate="visible">
         <motion.div variants={fadeIn()} className="mb-8 inline-block bg-surface-strong p-6 rounded-full border-2 border-primary shadow-[0_0_30px_rgba(218,105,11,0.2)]">
           <HammerIcon className="h-16 w-16 md:h-24 md:w-24 mx-auto text-primary drop-shadow-[0_0_10px_rgba(218,105,11,0.5)]" />
@@ -69,8 +69,8 @@ const FeatureCard = ({ icon: Icon, title, description, delay }) => (
 );
 
 const FeaturesSection = () => (
-    <section id="features" className="py-20 md:py-28 bg-background border-t border-surface-strong scroll-mt-28">
-        <div className="container">
+    <section id="features" className="py-20 md:py-28 bg-background border-t border-surface-strong scroll-mt-28 min-h-screen">
+        <div className="w-full px-4 md:px-8">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }} variants={staggerContainer}>
                 <motion.h2 variants={fadeIn()} className="text-3xl md:text-5xl font-heading font-bold text-center mb-5 text-foreground">
                     Tudo que você precisa <span className="text-primary">em um só lugar</span>
@@ -144,8 +144,8 @@ const PricingSection = () => {
     ];
 
     return (
-        <section className="py-20 md:py-28 bg-surface border-t border-surface-strong" id="pricing">
-            <div className="container">
+        <section className="py-20 md:py-28 bg-surface border-t border-surface-strong min-h-screen" id="pricing">
+            <div className="w-full">
                 <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={staggerContainer}>
                     <motion.h2 variants={fadeIn()} className="text-3xl md:text-5xl font-heading font-bold text-center mb-5 text-foreground">
                         Planos Flexíveis para seu Negócio
@@ -227,9 +227,9 @@ const PricingSection = () => {
 };
 
 const CTASection = () => (
-    <section id="contact" className="py-20 md:py-28 bg-background border-t border-surface-strong relative overflow-hidden scroll-mt-28">
+    <section id="contact" className="py-20 md:py-28 bg-background border-t border-surface-strong relative overflow-hidden scroll-mt-28 min-h-screen">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-primary/10 to-transparent opacity-50"></div>
-        <div className="container text-center relative z-10">
+        <div className="w-full text-center relative z-10">
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} variants={fadeIn()}>
                 <div className="mb-8 inline-flex items-center justify-center p-4 bg-surface-strong rounded-full border border-primary/30 shadow-[0_0_20px_rgba(218,105,11,0.15)]">
                     <Hammer className="h-10 w-10 text-primary" />
