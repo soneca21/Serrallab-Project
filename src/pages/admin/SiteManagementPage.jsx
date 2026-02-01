@@ -1576,21 +1576,6 @@ const BillingTab = ({ onHealthCheck }) => {
                 ))}
             </div>
 
-            {topActions.length > 0 && (
-                <div className="grid gap-3 md:grid-cols-3">
-                    {topActions.map((item) => (
-                        <Card key={item.action} className="border border-surface-strong">
-                            <CardHeader className="pb-1">
-                                <CardTitle className="text-xs text-muted-foreground">Top ação</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-lg font-semibold text-foreground">{item.action}</p>
-                                <p className="text-xs text-muted-foreground">{item.count} registros</p>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
 
             <Card>
                 <CardHeader className="flex items-center justify-between">
