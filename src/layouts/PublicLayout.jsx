@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Home, LogIn, DollarSign, Menu, X, Layers, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';

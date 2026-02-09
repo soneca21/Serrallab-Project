@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
@@ -119,6 +119,17 @@ export function useDashboardData() {
       }
 
       const { data: auditLogs } = await auditQuery;
+
+      const leads = (leadsRaw || []).map((lead) => ({
+        ...lead,
+        name: decodeEscapedUnicode(lead?.name),
+        source: decodeEscapedUnicode(lead?.source),
+      }));
+      const orders = (ordersRaw || []).map(decodeOrderTextFields);
+      const pipelineStages = (pipelineStagesRaw || []).map((stage) => ({
+        ...stage,
+        name: decodeEscapedUnicode(stage?.name),
+      }));
 
       const leadsToday = leads.filter((l) => l.created_at >= startOfDay.toISOString()).length;
       const currentMonthLeads = leads.filter((l) => l.created_at >= startOfMonth).length;
@@ -252,13 +263,3 @@ export function useDashboardData() {
 
   return { data, loading, error, refetch: fetchDashboardData };
 }
-      const leads = (leadsRaw || []).map((lead) => ({
-        ...lead,
-        name: decodeEscapedUnicode(lead?.name),
-        source: decodeEscapedUnicode(lead?.source),
-      }));
-      const orders = (ordersRaw || []).map(decodeOrderTextFields);
-      const pipelineStages = (pipelineStagesRaw || []).map((stage) => ({
-        ...stage,
-        name: decodeEscapedUnicode(stage?.name),
-      }));
