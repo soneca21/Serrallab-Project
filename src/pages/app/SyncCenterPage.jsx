@@ -20,6 +20,7 @@ import {
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useNavigate } from 'react-router-dom';
 import { SystemStatusChip } from '@/components/SystemStatus';
+import AppSectionHeader from '@/components/AppSectionHeader';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 function formatDate(dateValue) {
@@ -183,12 +184,10 @@ const SyncCenterPage = () => {
             >
                 Ir para pendências com erro permanente
             </a>
-            <div>
-                <h1 id="sync-center-title" className="pwa-type-title text-foreground">Centro de Sincronização</h1>
-                <p className="pwa-type-body text-muted-foreground mt-1">
-                    Acompanhe fila offline, estado da sincronização e resolva pendências sem suporte técnico.
-                </p>
-            </div>
+            <AppSectionHeader
+                title="Centro de Sincronização"
+                description="Acompanhe a fila offline, o estado da sincronização e resolva pendências."
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="pwa-surface-card">

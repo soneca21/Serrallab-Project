@@ -46,9 +46,8 @@ const IntegracoesPage = () => {
             <Helmet><title>Integracoes - Serrallab</title></Helmet>
             <div className="space-y-6 w-full max-w-full">
                 <AppSectionHeader
-                    title={<span className="pl-3 border-l-4 border-primary">Integracoes</span>}
+                    title="Integrações"
                     description="Conecte ferramentas essenciais para cobrança, comunicação e operação diária."
-                    actions={null}
                 />
 
                 {loading ? (

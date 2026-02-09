@@ -11,6 +11,7 @@ import DeliveryChart from '@/features/reports/components/DeliveryChart';
 import RevenueChart from '@/features/reports/components/RevenueChart';
 import { useReports } from '@/features/reports/hooks/useReports';
 import { PERIOD_PRESETS, formatCurrency } from '@/lib/reports';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const ReportsPage = () => {
     const { toast } = useToast();
@@ -39,25 +40,22 @@ const ReportsPage = () => {
             <Helmet><title>Relatórios — Serrallab</title></Helmet>
             <div className="container mx-auto max-w-7xl p-4 space-y-6">
                 
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                           <BarChart3 className="h-8 w-8 text-primary" />
-                           Relatórios e Indicadores
-                        </h1>
-                        <p className="text-muted-foreground">Acompanhe o desempenho do seu negócio em tempo real.</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={refetch} disabled={isLoading}>
-                            <RefreshCcw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                            Atualizar
-                        </Button>
-                        <Button variant="default" size="sm">
-                            <Download className="h-4 w-4 mr-2" />
-                            Exportar CSV
-                        </Button>
-                    </div>
-                </div>
+                <AppSectionHeader
+                    title="Relatórios e Indicadores"
+                    description="Acompanhe o desempenho do seu negócio em tempo real."
+                    actions={
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={refetch} disabled={isLoading}>
+                                <RefreshCcw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                                Atualizar
+                            </Button>
+                            <Button variant="default" size="sm">
+                                <Download className="h-4 w-4 mr-2" />
+                                Exportar CSV
+                            </Button>
+                        </div>
+                    }
+                />
 
                 <PeriodFilter 
                     period_start={period.start} 

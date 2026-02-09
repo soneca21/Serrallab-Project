@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useViewMode } from '@/contexts/ViewModeContext';
 import { isSystemAdmin } from '@/lib/roles';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const MaterialForm = ({ material, onSave, onCancel, categories, isLoading }) => {
     const defaultState = { name: '', category: '', unit: 'un', cost: '', length: '' };
@@ -213,20 +214,15 @@ const GlobalCatalogPage = () => {
         <>
             <Helmet><title>{'Catálogo Global - Serrallab'}</title></Helmet>
             <div className="w-full space-y-6">
-                <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div className="flex items-start gap-3">
-                        <BookCopy className="text-primary h-6 w-6 mt-1" />
-                        <div>
-                            <h2 className="text-3xl font-heading font-bold">{'Catálogo Global de Materiais'}</h2>
-                            <p className="text-muted-foreground">{'Base de insumos compartilhada entre todos os usuários.'}</p>
-                        </div>
-                    </div>
-                    {isAdmin && (
+                <AppSectionHeader
+                    title="Catálogo Global de Materiais"
+                    description="Base de insumos compartilhada entre todos os usuários. Importe para seu catálogo."
+                    actions={isAdmin ? (
                         <Button onClick={() => handleOpenDialog()} className="rounded-xl w-full sm:w-auto">
                             <PlusCircle className="mr-2 h-4 w-4" /> Novo Material
                         </Button>
-                    )}
-                </div><div className="h-px bg-border mb-4" /></div>
+                    ) : undefined}
+                />
 
                 <div className="relative max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

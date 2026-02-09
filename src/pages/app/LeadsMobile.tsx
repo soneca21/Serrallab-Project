@@ -123,10 +123,11 @@ const LeadsMobile: React.FC = () => {
         <div className="pb-4">
             <MobileHeader
                 title="Leads"
+                description="Conduza conversas e mantenha cada lead registrado com histórico completo."
                 onMenu={handleRefresh}
             />
 
-            <div className="px-4 pt-4 space-y-4 pwa-section-compact">
+            <div className="px-4 pt-24 space-y-4 pwa-section-compact">
                 <div className="flex items-center justify-between gap-2">
                     <Button size="sm" onClick={() => setIsCreateOpen(true)}>
                         <Plus className="h-4 w-4 mr-1" /> Novo lead

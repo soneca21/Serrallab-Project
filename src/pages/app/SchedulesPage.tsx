@@ -1,4 +1,4 @@
-﻿
+
 import React, { useEffect, useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import ScheduleRunsDrawer from '@/features/schedules/components/ScheduleRunsDraw
 import { getSchedules, deleteSchedule, toggleSchedule } from '@/features/schedules/api/schedules';
 import { MessageSchedule } from '@/types/schedules';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const SchedulesPage = () => {
     const { toast } = useToast();
@@ -73,19 +74,15 @@ const SchedulesPage = () => {
             <Helmet><title>Agendamentos - Serrallab</title></Helmet>
             <div className="space-y-8 pb-8">
                 {/* Header Section */}
-                <div className="space-y-2"><div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex flex-col gap-2">
-                        <h2 className="text-3xl font-heading font-bold text-foreground tracking-tight">
-                            Agendamentos
-                        </h2>
-                        <p className="text-muted-foreground">
-                            {'Programe mensagens recorrentes, lembretes e follow-ups automáticos.'}
-                        </p>
-                    </div>
-                    <Button onClick={() => { setEditingSchedule(undefined); setIsFormOpen(true); }} className="w-full sm:w-auto">
-                        <Plus className="mr-2 h-4 w-4" /> Novo Agendamento
-                    </Button>
-                </div><div className="h-px bg-border mb-4" /></div>
+                <AppSectionHeader
+                    title="Agendamentos"
+                    description="Programe mensagens recorrentes, lembretes e follow-ups automáticos."
+                    actions={
+                        <Button onClick={() => { setEditingSchedule(undefined); setIsFormOpen(true); }} className="w-full sm:w-auto">
+                            <Plus className="mr-2 h-4 w-4" /> Novo Agendamento
+                        </Button>
+                    }
+                />
 
                 {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

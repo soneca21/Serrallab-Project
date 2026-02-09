@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { WEBHOOK_EVENTS } from '@/lib/webhooks';
 import { Webhook as WebhookIcon, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const WebhooksPage = () => {
     const [webhook, setWebhook] = useState<Webhook | null>(null);
@@ -49,13 +50,10 @@ const WebhooksPage = () => {
         <HelmetProvider>
             <Helmet><title>Webhooks — Serrallab</title></Helmet>
             <div className="container mx-auto max-w-5xl space-y-6">
-                <div className="flex items-center gap-2 mb-6">
-                    <WebhookIcon className="h-8 w-8 text-primary" />
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Webhooks</h1>
-                        <p className="text-muted-foreground">Integre o Serrallab com outras plataformas.</p>
-                    </div>
-                </div>
+                <AppSectionHeader
+                    title="Webhooks"
+                    description="Integre o Serrallab com outras plataformas via eventos em tempo real."
+                />
 
                 <div className="grid gap-6 md:grid-cols-3">
                     <div className="md:col-span-2 space-y-6">

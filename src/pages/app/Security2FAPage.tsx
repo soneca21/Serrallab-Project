@@ -1,4 +1,4 @@
-﻿
+
 import React, { useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { use2FA } from '@/hooks/use2FA';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Shield, ShieldAlert, CheckCircle2, Loader2, Smartphone } from 'lucide-react';
 import Enable2FAModal from '@/features/auth/components/Enable2FAModal';
 import { Badge } from '@/components/ui/badge';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const Security2FAPage = () => {
   const { isEnabled, loading, disable } = use2FA();
@@ -27,10 +28,10 @@ const Security2FAPage = () => {
     <HelmetProvider>
       <Helmet><title>Segurança 2FA — Serrallab</title></Helmet>
       <div className="container max-w-3xl py-8 space-y-6">
-        <div className="flex items-center gap-3 mb-6">
-            <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Autenticação em Dois Fatores</h1>
-        </div>
+        <AppSectionHeader
+            title="Autenticação em Dois Fatores"
+            description="Proteja sua conta com um código extra no login. Recomendado para maior segurança."
+        />
 
         <Card className={isEnabled ? "border-green-500/20 bg-green-500/5" : ""}>
           <CardHeader>

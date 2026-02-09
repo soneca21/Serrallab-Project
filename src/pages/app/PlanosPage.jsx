@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useSubscription } from '@/contexts/SubscriptionContext';
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle, Check, X, CreditCard, ArrowRight, PackagePlus } from 'lucide-react';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const featureRows = [
   { key: 'clientes', label: 'Clientes', type: 'quota' },
@@ -102,10 +103,10 @@ const PlanosPage = () => {
     <>
       <Helmet><title>Planos - Serrallab</title></Helmet>
       <div className="w-full space-y-12 py-10">
-        <div className="text-center space-y-4">
-            <h1 className="text-4xl font-heading font-bold">Planos e Preços</h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Escolha o plano ideal para o momento da sua operação.</p>
-        </div>
+        <AppSectionHeader
+            title="Planos e Preços"
+            description="Escolha o plano ideal para o momento da sua operação."
+        />
 
         <Card className="max-w-5xl mx-auto">
           <CardHeader>

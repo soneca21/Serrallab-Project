@@ -1,4 +1,4 @@
-﻿
+
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { createAuditLog } from '@/features/audit/api/auditLog';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const FornecedoresPage = () => {
     const { user } = useAuth();
@@ -89,15 +90,15 @@ const FornecedoresPage = () => {
         <>
             <Helmet><title>Fornecedores - Serrallab</title></Helmet>
             <div className="w-full space-y-6">
-                <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h2 className="text-3xl font-heading font-bold">Fornecedores</h2>
-                        <p className="text-muted-foreground">{'Gerencie seus parceiros de negócio.'}</p>
-                    </div>
-                    <Button onClick={() => { setFormData({}); setIsDialogOpen(true); }} className="rounded-xl w-full sm:w-auto">
-                        <PlusCircle className="mr-2 h-4 w-4" /> Novo Fornecedor
-                    </Button>
-                </div><div className="h-px bg-border mb-4" /></div>
+                <AppSectionHeader
+                    title="Fornecedores"
+                    description="Gerencie seus parceiros de negócio e contatos de compra."
+                    actions={
+                        <Button onClick={() => { setFormData({}); setIsDialogOpen(true); }} className="rounded-xl w-full sm:w-auto">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Novo Fornecedor
+                        </Button>
+                    }
+                />
 
                 <Card className="rounded-xl border-surface-strong">
                     <CardContent className="p-0">

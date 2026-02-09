@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const materialIconMatchers = [
     { keywords: ['disco', 'abrasivo'], icon: Disc },
@@ -137,26 +138,26 @@ const MateriaisPage = () => {
         <>
             <Helmet><title>{'Materiais - Serrallab'}</title></Helmet>
             <div className="w-full space-y-6">
-                <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div>
-                        <h2 className="text-3xl font-heading font-bold">Materiais</h2>
-                        <p className="text-muted-foreground">{'Catálogo de insumos e preços.'}</p>
-                    </div>
-                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                        <Button
-                            variant="secondary"
-                            onClick={handleImportGlobalCatalog}
-                            className="rounded-xl w-full sm:w-auto"
-                            disabled={isImporting}
-                        >
-                            {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                            {'Importar Catálogo Global'}
-                        </Button>
-                        <Button onClick={() => openDialog()} className="rounded-xl w-full sm:w-auto">
-                            <PlusCircle className="mr-2 h-4 w-4" /> {'Novo Material'}
-                        </Button>
-                    </div>
-                </div><div className="h-px bg-border mb-4" /></div>
+                <AppSectionHeader
+                    title="Materiais"
+                    description="Catálogo de insumos e preços para usar nos orçamentos."
+                    actions={
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                            <Button
+                                variant="secondary"
+                                onClick={handleImportGlobalCatalog}
+                                className="rounded-xl w-full sm:w-auto"
+                                disabled={isImporting}
+                            >
+                                {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                Importar Catálogo Global
+                            </Button>
+                            <Button onClick={() => openDialog()} className="rounded-xl w-full sm:w-auto">
+                                <PlusCircle className="mr-2 h-4 w-4" /> Novo Material
+                            </Button>
+                        </div>
+                    }
+                />
 
                 <div className="relative max-w-sm">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

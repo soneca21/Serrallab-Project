@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useRealtime } from '@/contexts/RealtimeContext';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, BellOff, Bell, Settings2, CheckCheck, Trash2 } from 'lucide-react';
 import NotificationItem from '@/components/NotificationItem';
 import { getNotificationRoute, NOTIFICATION_TYPES } from '@/lib/realtime';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const NotificacoesPage = () => {
   const {
@@ -73,21 +74,14 @@ const NotificacoesPage = () => {
     <HelmetProvider>
       <Helmet><title>Central de Notificações - Serrallab</title></Helmet>
       <div className="container mx-auto max-w-5xl p-4 space-y-6">
-        <div className="space-y-2">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Bell className="h-6 w-6 text-primary" />
-                <h1 className="text-3xl font-bold tracking-tight">Central de Notificações</h1>
-              </div>
-              <p className="text-muted-foreground">Veja o que exige ação agora e o que já foi resolvido.</p>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">Não lidas: {counts.unread}</Badge>
-                <Badge variant="outline">Lidas: {counts.read}</Badge>
-                <Badge variant="outline">Total: {counts.all}</Badge>
-              </div>
-            </div>
+        <AppSectionHeader
+          title="Central de Notificações"
+          description="Veja o que exige ação agora e o que já foi resolvido."
+          actions={
             <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">Não lidas: {counts.unread}</Badge>
+              <Badge variant="outline">Lidas: {counts.read}</Badge>
+              <Badge variant="outline">Total: {counts.all}</Badge>
               <span className="text-xs text-muted-foreground flex items-center gap-2">
                 <span className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-yellow-400'}`} />
                 {isConnected ? 'Tempo real ativo' : 'Conexão instável'}
@@ -109,9 +103,8 @@ const NotificacoesPage = () => {
                 Excluir tudo
               </Button>
             </div>
-          </div>
-          <div className="h-px bg-border mb-4" />
-        </div>
+          }
+        />
 
         <Card>
           <CardHeader className="border-b border-border">

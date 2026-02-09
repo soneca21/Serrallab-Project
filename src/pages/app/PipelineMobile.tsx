@@ -81,9 +81,13 @@ const PipelineMobile: React.FC = () => {
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <MobileHeader title="Pipeline" onMenu={() => void loadData()} />
+            <MobileHeader
+                title="Pipeline"
+                description="Gerencie o fluxo de seus negócios e mova orçamentos entre etapas."
+                onMenu={() => void loadData()}
+            />
 
-            <div className="px-4 pt-4 space-y-4 pwa-section-compact">
+            <div className="px-4 pt-24 space-y-4 pwa-section-compact">
                 <div className="flex items-center justify-between gap-2">
                     <Button size="sm" onClick={() => navigate('/app/orcamentos/novo')}>
                         <Plus className="h-4 w-4 mr-1" /> Novo orçamento

@@ -71,9 +71,13 @@ const OrcamentosMobile: React.FC = () => {
 
     return (
         <div className="pb-4">
-            <MobileHeader title="Orçamentos" onMenu={() => void loadData()} />
+            <MobileHeader
+                title="Orçamentos"
+                description="Gerencie suas propostas comerciais e acompanhe o status de cada negociação."
+                onMenu={() => void loadData()}
+            />
 
-            <div className="p-4 space-y-4 pwa-section-compact">
+            <div className="p-4 pt-24 space-y-4 pwa-section-compact">
                 <div className="flex items-center justify-between gap-2">
                     <Button size="sm" onClick={() => navigate('/app/orcamentos/novo')}>
                         <Plus className="h-4 w-4 mr-1" /> Novo orçamento

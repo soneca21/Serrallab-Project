@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
 import { SystemStatusChip } from '@/components/SystemStatus';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const stageMeta = {
   Novo: { color: 'bg-blue-500/10 border-blue-500/20 text-blue-500', icon: AlertCircle },
@@ -200,12 +201,10 @@ const PipelinePage = () => {
         <HelmetProvider>
             <Helmet><title>Pipeline - Serrallab</title></Helmet>
             <div className="h-[calc(100vh-8rem)] flex flex-col min-h-0">
-                <div className="space-y-2 mb-6">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h2 className="text-3xl font-heading font-bold">Pipeline</h2>
-                                <p className="text-muted-foreground">Gerencie o fluxo de seus negócios.</p>
-                            </div>
+                <AppSectionHeader
+                    title="Pipeline"
+                    description="Gerencie o fluxo de seus negócios e mova orçamentos entre etapas."
+                    actions={
                         <div className="flex items-center gap-3">
                             <Button onClick={() => navigate('/app/orcamentos/novo')} className="rounded-xl">
                                 <Plus className="mr-2 h-4 w-4" /> Novo
@@ -214,8 +213,9 @@ const PipelinePage = () => {
                                 <Settings2 className="mr-2 h-4 w-4" /> Etapas
                             </Button>
                         </div>
-                    </div>
-                    <div className="h-px bg-border mb-4" />
+                    }
+                />
+                <div className="mb-6" />
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
                         <div className="bg-surface/60 border border-border/60 rounded-xl p-3 flex flex-col gap-3">
                             <div className="flex items-center gap-2 text-sm font-semibold text-foreground"><Filter className="h-4 w-4" /> Filtros</div>
@@ -253,7 +253,6 @@ const PipelinePage = () => {
                             </div>
                         </div>
                     </div>
-                </div>
 
                 {loading ? (
                     <div className="flex-1 flex justify-center items-center">

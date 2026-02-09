@@ -1,4 +1,4 @@
-﻿
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { createAuditLog } from '@/features/audit/api/auditLog';
 import { generatePdf } from '@/features/orcamentos/api/generatePdf';
+import AppSectionHeader from '@/components/AppSectionHeader';
 
 const OrcamentosPage = () => {
     const { user } = useAuth();
@@ -115,15 +116,15 @@ const OrcamentosPage = () => {
         <>
             <Helmet><title>{'Orçamentos - Serrallab'}</title></Helmet>
             <div className="w-full space-y-6">
-                 <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                        <h2 className="text-3xl font-heading font-bold text-foreground">{'Orçamentos'}</h2>
-                        <p className="text-muted-foreground">Gerencie suas propostas comerciais.</p>
-                    </div>
-                    <Button asChild className="rounded-xl">
-                        <NavLink to="/app/orcamentos/novo"><PlusCircle className="mr-2 h-4 w-4" /> {'Novo Orçamento'}</NavLink>
-                    </Button>
-                </div><div className="h-px bg-border mb-4" /></div>
+                <AppSectionHeader
+                    title="Orçamentos"
+                    description="Gerencie suas propostas comerciais e acompanhe o status de cada negociação."
+                    actions={
+                        <Button asChild className="rounded-xl">
+                            <NavLink to="/app/orcamentos/novo"><PlusCircle className="mr-2 h-4 w-4" /> Novo Orçamento</NavLink>
+                        </Button>
+                    }
+                />
 
                 <Card className="rounded-xl border-surface-strong">
                     <CardHeader className="border-b border-border/50 pb-4">
