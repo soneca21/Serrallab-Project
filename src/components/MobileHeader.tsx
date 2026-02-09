@@ -22,7 +22,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ title, onBack, onMenu, clas
                 )}
             </div>
             
-            <h1 className="text-lg font-heading font-semibold truncate text-center flex-1">
+            <h1 className="pwa-type-subtitle truncate text-center flex-1">
                 {title}
             </h1>
 

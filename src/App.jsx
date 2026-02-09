@@ -33,9 +33,12 @@ import SchedulesPage from '@/pages/app/SchedulesPage.tsx';
 import LeadsPage from '@/pages/app/LeadsPage.tsx';
 import WebhooksPage from '@/pages/app/WebhooksPage.tsx';
 import Security2FAPage from '@/pages/app/Security2FAPage.tsx'; 
+import SyncCenterPage from '@/pages/app/SyncCenterPage';
 import { Toaster } from '@/components/ui/toaster';
 import { Loader2 } from 'lucide-react';
 import ScrollToTop from '@/components/ScrollToTop';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import ServiceWorkerUpdatePrompt from '@/components/ServiceWorkerUpdatePrompt';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -96,6 +99,7 @@ function AppRoutes() {
         <Route path="clientes/:id" element={<ClienteProfilePage />} />
         <Route path="leads" element={<LeadsPage />} />
         <Route path="agendamentos" element={<SchedulesPage />} />
+        <Route path="sincronizacao" element={<SyncCenterPage />} />
         <Route path="materiais" element={<MateriaisPage />} />
         <Route path="fornecedores" element={<FornecedoresPage />} />
         <Route path="catalogo-global" element={<GlobalCatalogPage />} />
@@ -127,12 +131,19 @@ function AppRoutes() {
 }
 
 // Main App Component
+function PushNotificationsBootstrap() {
+    usePushNotifications();
+    return null;
+}
+
 function App() {
     return (
         <HelmetProvider>
             <BrowserRouter>
                 <ScrollToTop />
                 <AuthProvider>
+                    <PushNotificationsBootstrap />
+                    <ServiceWorkerUpdatePrompt />
                     <NotificationProvider>
                         <SubscriptionProvider>
                             <UsageProvider>

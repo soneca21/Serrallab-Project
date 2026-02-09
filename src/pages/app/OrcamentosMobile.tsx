@@ -1,67 +1,135 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import MobileHeader from '@/components/MobileHeader';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { getOrcamentosOffline } from '@/lib/offline';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import OperationalStateCard from '@/components/OperationalStateCard';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 const OrcamentosMobile: React.FC = () => {
-    const { sync, isSyncing } = useOfflineSync();
+    const { sync, isSyncing, isOnline } = useOfflineSync();
     const [orcamentos, setOrcamentos] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [hasInitialOfflineEmpty, setHasInitialOfflineEmpty] = useState(false);
     const navigate = useNavigate();
 
-    const loadData = async () => {
-        const data = await getOrcamentosOffline();
-        setOrcamentos(data || []);
+    const loadFromCache = useCallback(async () => {
+        try {
+            const data = await getOrcamentosOffline();
+            setOrcamentos(data || []);
+            return data || [];
+        } catch {
+            setOrcamentos([]);
+            setErrorMessage('Nao foi possivel carregar os orcamentos salvos no dispositivo.');
+            return [];
+        }
+    }, []);
+
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        setErrorMessage(null);
+
+        const cachedData = await loadFromCache();
+        setHasInitialOfflineEmpty(!isOnline && cachedData.length === 0);
         setLoading(false);
-    };
+
+        if (isOnline) {
+            const result = await sync();
+            if (!result?.success && cachedData.length === 0) {
+                setErrorMessage('Falha ao buscar orcamentos na rede e nao ha dados em cache.');
+            }
+            await loadFromCache();
+        } else if (cachedData.length === 0) {
+            setErrorMessage(null);
+        }
+    }, [isOnline, loadFromCache, sync]);
 
     useEffect(() => {
-        loadData();
-    }, [isSyncing]);
+        void loadData();
+    }, [loadData]);
+
+    useEffect(() => {
+        if (!isSyncing) {
+            void loadFromCache();
+        }
+    }, [isSyncing, loadFromCache]);
 
     const getStatusColor = (status: string) => {
-        switch(status) {
-            case 'Aprovado': return 'bg-green-500';
-            case 'Rejeitado': return 'bg-red-500';
-            case 'Negociação': return 'bg-yellow-500';
-            default: return 'bg-gray-500';
+        switch (status) {
+            case 'Aprovado': return 'bg-success text-success-foreground';
+            case 'Rejeitado': return 'bg-error text-error-foreground';
+            case 'Negocia\u00e7\u00e3o':
+            case 'Negociacao': return 'bg-warning text-warning-foreground';
+            default: return 'bg-offline text-offline-foreground';
         }
     };
 
     return (
         <div className="pb-4">
-            <MobileHeader title="Orçamentos" />
-            
-            <div className="p-4 space-y-4">
+            <MobileHeader title="Orcamentos" onMenu={() => void loadData()} />
+
+            <div className="p-4 space-y-4 pwa-section-compact">
+                <div className="flex items-center justify-between gap-2">
+                    <Button size="sm" onClick={() => navigate('/app/orcamentos/novo')}>
+                        <Plus className="h-4 w-4 mr-1" /> Novo orcamento
+                    </Button>
+                </div>
+
+                {errorMessage && (
+                    <OperationalStateCard
+                        kind="error"
+                        title="Falha ao carregar orcamentos"
+                        description={`${errorMessage} Proximo passo: tente novamente.`}
+                        onPrimaryAction={() => void loadData()}
+                    />
+                )}
+
                 {loading ? (
-                    Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)
+                    <OperationalStateCard kind="loading" loadingRows={4} />
+                ) : hasInitialOfflineEmpty ? (
+                    <OperationalStateCard
+                        kind="offline-empty"
+                        title="Sem cache inicial para Orcamentos"
+                        description="Conecte-se a internet ao menos uma vez para baixar os dados."
+                        onPrimaryAction={() => void loadData()}
+                    />
                 ) : (
-                    orcamentos.map(orc => (
-                        <Card key={orc.id} onClick={() => navigate(`/app/orcamentos/editar/${orc.id}`)}>
-                            <CardContent className="p-4">
+                    orcamentos.map((orc) => (
+                        <Card key={orc.id} onClick={() => navigate(`/app/orcamentos/editar/${orc.id}`)} className="pwa-surface-card">
+                            <CardContent className="pwa-surface-pad">
                                 <div className="flex justify-between items-start mb-2">
-                                    <h3 className="font-bold text-base line-clamp-1">{orc.title}</h3>
+                                    <h3 className="pwa-type-subtitle line-clamp-1">{orc.title}</h3>
                                     <Badge className={getStatusColor(orc.status)}>{orc.status}</Badge>
                                 </div>
-                                <p className="text-sm text-muted-foreground mb-3">{orc.clients?.name || 'Cliente N/A'}</p>
-                                
+                                <p className="pwa-type-body text-muted-foreground mb-3">{orc.clients?.name || 'Cliente N/A'}</p>
+
                                 <div className="flex justify-between items-end border-t border-border pt-3">
-                                    <div className="text-xs text-muted-foreground">
+                                    <div className="pwa-type-meta">
                                         {new Date(orc.created_at).toLocaleDateString()}
                                     </div>
-                                    <div className="font-bold text-lg text-primary">
+                                    <div className="pwa-type-subtitle text-primary">
                                         {formatCurrency(orc.final_price)}
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                     ))
+                )}
+
+                {!loading && orcamentos.length === 0 && (
+                    <OperationalStateCard
+                        kind="empty"
+                        title="Nenhum orcamento disponivel"
+                        description={isOnline
+                            ? 'Nenhum orcamento foi encontrado para os filtros atuais.'
+                            : 'Voce esta offline e nao ha orcamentos em cache para exibir.'}
+                        onPrimaryAction={() => void loadData()}
+                    />
                 )}
             </div>
         </div>

@@ -19,6 +19,9 @@ import { createOrcamentoPdf, generatePdf } from '@/features/orcamentos/api/gener
 import MaterialSelectorDialog from '@/components/MaterialSelectorDialog';
 import DownloadPdfButton from '@/features/orcamentos/components/DownloadPdfButton';
 import { createAuditLog } from '@/features/audit/api/auditLog';
+import { useSubscription } from '@/contexts/SubscriptionContext';
+import { updateOrderStatusWithOfflineSupport } from '@/lib/offlineMutations';
+import { SystemStatusChip } from '@/components/SystemStatus';
 
 const brazilStates = [
     'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
@@ -33,6 +36,32 @@ const contactPreferences = [
 
 const validateEmail = (value) => /^\S+@\S+\.\S+$/.test(value);
 const validatePhone = (value) => /^\d{8,15}$/.test(value.replace(/\D/g, ''));
+
+const parseFeatureList = (features) => {
+    if (!features) return [];
+    if (Array.isArray(features)) return features;
+    try {
+        const parsed = JSON.parse(features);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return typeof features === 'string' ? features.split(',') : [];
+    }
+};
+
+const detectQuoteLimit = (plan) => {
+    if (!plan) return null;
+    if (typeof plan.quote_limit === 'number') {
+        return plan.quote_limit === 0 ? Infinity : plan.quote_limit;
+    }
+    const list = parseFeatureList(plan.features);
+    const quoteEntry = list.find((entry) => typeof entry === 'string' && entry.startsWith('orcamentos:'));
+    if (!quoteEntry) return null;
+    const [, value] = quoteEntry.split(':');
+    if (!value) return null;
+    if (value === 'unlimited') return Infinity;
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : null;
+};
 
 const AiSugestionDialog = ({ isOpen, onOpenChange, onApplySuggestion, userMaterials }) => {
     const { toast } = useToast();
@@ -152,15 +181,18 @@ const OrcamentoFormPage = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user, profile } = useAuth();
+    const { plan } = useSubscription();
     
     const [clients, setClients] = useState([]);
     const [userMaterials, setUserMaterials] = useState([]);
     const [globalMaterials, setGlobalMaterials] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [quoteUsage, setQuoteUsage] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
     const [isSelectorOpen, setIsSelectorOpen] = useState(false);
     const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
     const [isNewClientOpen, setIsNewClientOpen] = useState(false);
+    const [statusMutationState, setStatusMutationState] = useState(null);
     const [currentItemId, setCurrentItemId] = useState(null);
     const [pipelineStages, setPipelineStages] = useState([]);
     const [newClientData, setNewClientData] = useState({
@@ -254,6 +286,24 @@ const OrcamentoFormPage = () => {
         fetchData();
     }, [fetchData]);
 
+    useEffect(() => {
+        if (!user) {
+            setQuoteUsage(null);
+            return;
+        }
+        const fetchQuoteCount = async () => {
+            const { count, error } = await supabase
+                .from('orders')
+                .select('id', { count: 'exact', head: true })
+                .eq('user_id', user.id);
+
+            if (!error) {
+                setQuoteUsage(count ?? 0);
+            }
+        };
+        fetchQuoteCount();
+    }, [user]);
+
     const parseNumber = (value) => {
         if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
         const raw = String(value ?? '').trim();
@@ -296,6 +346,12 @@ const OrcamentoFormPage = () => {
             netProfit: marginAmount,
         };
     }, [formData.items, formData.labor_cost, formData.painting_cost, formData.transport_cost, formData.other_costs, config]);
+
+    const planQuoteLimit = useMemo(() => detectQuoteLimit(plan), [plan]);
+    const remainingQuotes = useMemo(() => {
+        if (planQuoteLimit === null || planQuoteLimit === Infinity || quoteUsage === null) return null;
+        return Math.max(planQuoteLimit - quoteUsage, 0);
+    }, [planQuoteLimit, quoteUsage]);
 
 
     // Client-side PDF backup
@@ -606,9 +662,14 @@ const OrcamentoFormPage = () => {
             return;
         }
 
-        const { error } = await supabase.from('orders').update({ status: 'Enviado' }).eq('id', orcamentoId);
-        if (error) {
-            toast({ title: 'Erro ao enviar', description: error.message, variant: 'destructive' });
+        const mutationResult = await updateOrderStatusWithOfflineSupport({
+            order_id: orcamentoId,
+            status: 'Enviado',
+        });
+        setStatusMutationState(mutationResult.state);
+
+        if (mutationResult.state === 'failed') {
+            toast({ title: 'Erro ao enviar', description: mutationResult.message, variant: 'destructive' });
             return;
         }
 
@@ -624,7 +685,12 @@ const OrcamentoFormPage = () => {
             }
         }).catch(err => console.error('Orcamento notify failed', err));
 
-        toast({ title: 'Proposta Enviada!', description: `A proposta foi enviada por ${method}.` });
+        toast({
+            title: mutationResult.state === 'pending' ? 'Envio pendente' : 'Proposta Enviada!',
+            description: mutationResult.state === 'pending'
+                ? 'Status atualizado localmente e sera sincronizado ao reconectar.'
+                : `A proposta foi enviada por ${method}.`,
+        });
         createAuditLog(
             'orcamento',
             orcamentoId,
@@ -698,6 +764,13 @@ const OrcamentoFormPage = () => {
                                 <Button variant="secondary" className="col-span-1" onClick={handleGenerateClientPdf}><FileText className="mr-2 h-4 w-4" /> Exportar PDF</Button>
                             )}
                             <Button variant="outline" className="border-metallic-orange text-metallic-orange col-span-2" onClick={() => setIsAiDialogOpen(true)}><Bot className="mr-2 h-4 w-4" /> Sugestão IA</Button>
+                            {statusMutationState && (
+                                <div className="col-span-2 text-xs">
+                                    {statusMutationState === 'pending' && <SystemStatusChip status="pending" prefix="Status" />}
+                                    {statusMutationState === 'synced' && <SystemStatusChip status="synced" prefix="Status" />}
+                                    {statusMutationState === 'failed' && <SystemStatusChip status="failed" prefix="Status" />}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                     <Card>
@@ -710,6 +783,25 @@ const OrcamentoFormPage = () => {
                             <div className="flex justify-between text-green-400"><span>Lucro Estimado:</span><span className="font-bold">R$ {calculations.netProfit.toFixed(2)}</span></div>
                         </CardContent>
                          <CardFooter className="text-xs text-gray-400">Valores baseados na sua configuração de margem ({config.margin}%), impostos ({config.tax}%) e desperdício ({config.waste}%).</CardFooter>
+                    </Card>
+                    <Card>
+                        <CardHeader><CardTitle>Contador de Orçamentos</CardTitle></CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                            <div className="flex items-center justify-between text-muted-foreground">
+                                <span>Usados</span>
+                                <span className="text-2xl text-foreground font-semibold">{quoteUsage ?? '—'}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <span>Limite</span>
+                                <span>{planQuoteLimit === Infinity ? 'Ilimitado' : (planQuoteLimit ?? '—')}</span>
+                            </div>
+                            {remainingQuotes !== null && (
+                                <div className="flex items-center justify-between text-xs text-green-400">
+                                    <span>Restam</span>
+                                    <span>{remainingQuotes}</span>
+                                </div>
+                            )}
+                        </CardContent>
                     </Card>
                 </div>
             </div>

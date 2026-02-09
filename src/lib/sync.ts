@@ -1,7 +1,9 @@
-﻿import { supabase } from '@/lib/customSupabaseClient';
+import { supabase } from '@/lib/customSupabaseClient';
 import { saveLeadsOffline, saveOrcamentosOffline, savePipelineOffline } from './offline';
+import { processOfflineMutationQueue } from './offlineQueueProcessor';
+import { trackPwaTelemetry } from '@/lib/pwaTelemetry';
 
-const STATUS_STAGE_FALLBACK = {
+export const STATUS_STAGE_FALLBACK = {
     Rascunho: 'Novo',
     Enviado: 'Enviado',
     Aprovado: 'Em Producao',
@@ -12,11 +14,45 @@ const STATUS_STAGE_FALLBACK = {
     Rejeitado: 'Perdido',
 };
 
+export const PIPELINE_STAGE_ORDER = [
+    'Novo',
+    'Atendimento',
+    'Enviado',
+    'Em Producao',
+    'Entregue',
+    'Perdido',
+];
+
+export function resolvePipelineStageName(order, stageMap = {}) {
+    return stageMap[order.pipeline_stage_id] || order.pipeline_stage_name || STATUS_STAGE_FALLBACK[order.status] || 'Novo';
+}
+
+export function groupOrdersByPipelineStage(orders = []) {
+    const seed = PIPELINE_STAGE_ORDER.reduce((acc, stage) => {
+        acc[stage] = [];
+        return acc;
+    }, {});
+
+    return (orders || []).reduce((acc, order) => {
+        const stage = resolvePipelineStageName(order);
+        if (!acc[stage]) {
+            acc[stage] = [];
+        }
+        acc[stage].push(order);
+        return acc;
+    }, seed);
+}
+
 export async function syncLeads() {
-    const { data, error } = await supabase.from('leads').select('*');
+    const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false });
+
     if (error) throw error;
-    if (data) await saveLeadsOffline(data);
-    return data;
+    const normalized = data || [];
+    await saveLeadsOffline(normalized);
+    return normalized;
 }
 
 export async function syncOrcamentos() {
@@ -35,7 +71,7 @@ export async function syncOrcamentos() {
 
     const normalized = (ordersRes.data || []).map((order) => ({
         ...order,
-        pipeline_stage_name: stageMap[order.pipeline_stage_id] || STATUS_STAGE_FALLBACK[order.status] || 'Novo',
+        pipeline_stage_name: resolvePipelineStageName(order, stageMap),
     }));
 
     await saveOrcamentosOffline(normalized);
@@ -44,12 +80,7 @@ export async function syncOrcamentos() {
 
 export async function syncPipeline(ordersData) {
     const data = ordersData || await syncOrcamentos();
-    const pipelineData = data.reduce((acc, order) => {
-        const stage = order.pipeline_stage_name || 'Novo';
-        if (!acc[stage]) acc[stage] = [];
-        acc[stage].push(order);
-        return acc;
-    }, {});
+    const pipelineData = groupOrdersByPipelineStage(data);
 
     await savePipelineOffline(pipelineData);
     return pipelineData;
@@ -57,14 +88,40 @@ export async function syncPipeline(ordersData) {
 
 export async function syncAll() {
     try {
+        const queueSummary = await processOfflineMutationQueue();
+        void trackPwaTelemetry('queue_size', {
+            total: queueSummary.total,
+            processed: queueSummary.processed,
+            failed_temporary: queueSummary.failedTemporary,
+            failed_permanent: queueSummary.failedPermanent,
+            skipped_backoff: queueSummary.skippedBackoff,
+            skipped_duplicate: queueSummary.skippedDuplicate,
+            skipped_no_processor: queueSummary.skippedNoProcessor,
+        });
+
         const [leads, orcamentos] = await Promise.all([
             syncLeads(),
             syncOrcamentos(),
         ]);
         await syncPipeline(orcamentos);
-        return { success: true, timestamp: new Date() };
+        void trackPwaTelemetry('sync_success', {
+            leads_count: leads.length,
+            orcamentos_count: orcamentos.length,
+            queue_total: queueSummary.total,
+            queue_processed: queueSummary.processed,
+        });
+        return {
+            success: true,
+            timestamp: new Date(),
+            leadsCount: leads.length,
+            orcamentosCount: orcamentos.length,
+            queue: queueSummary,
+        };
     } catch (error) {
         console.error('Sync failed:', error);
+        void trackPwaTelemetry('sync_error', {
+            message: error instanceof Error ? error.message : String(error),
+        });
         return { success: false, error };
     }
 }

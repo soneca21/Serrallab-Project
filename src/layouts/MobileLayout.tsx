@@ -2,7 +2,6 @@
 import React from 'react';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import OfflineIndicator from '@/components/OfflineIndicator';
-import InstallPrompt from '@/components/InstallPrompt';
 import { Toaster } from '@/components/ui/toaster';
 
 interface MobileLayoutProps {
@@ -16,7 +15,6 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
             <main className="flex-1 overflow-x-hidden">
                 {children}
             </main>
-            <InstallPrompt />
             <MobileBottomNav />
             <Toaster />
         </div>

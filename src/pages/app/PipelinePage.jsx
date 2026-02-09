@@ -1,14 +1,20 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, User, DollarSign, Loader2, Clock, Zap, CheckCircle2, XCircle, AlertCircle, RefreshCcw } from 'lucide-react';
+import { Plus, User, DollarSign, Loader2, Clock, Zap, CheckCircle2, XCircle, AlertCircle, Filter, Settings2, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/customSupabaseClient';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
-import { useOfflineSync } from '@/hooks/useOfflineSync';
+import { updatePipelineStageWithOfflineSupport } from '@/lib/offlineMutations';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip } from 'recharts';
+import { SystemStatusChip } from '@/components/SystemStatus';
 
 const stageMeta = {
   Novo: { color: 'bg-blue-500/10 border-blue-500/20 text-blue-500', icon: AlertCircle },
@@ -29,7 +35,7 @@ const stageAccent = {
 };
 
 const stageLabels = {
-  'Em Producao': 'Em Produ\u00e7\u00e3o',
+  'Em Producao': 'Em Produção',
 };
 
 const statusToStageName = {
@@ -37,7 +43,7 @@ const statusToStageName = {
   Enviado: 'Enviado',
   Aprovado: 'Em Producao',
   'Proposta Aceita': 'Em Producao',
-  'Conclu\u00eddo': 'Entregue',
+  'Concluído': 'Entregue',
   Concluido: 'Entregue',
   Ganho: 'Entregue',
   Rejeitado: 'Perdido',
@@ -47,56 +53,94 @@ const PipelinePage = () => {
     const { user } = useAuth();
     const { toast } = useToast();
     const navigate = useNavigate();
-    const { sync, isSyncing, isOnline } = useOfflineSync();
     const [loading, setLoading] = useState(true);
     const [quotes, setQuotes] = useState([]);
     const [stages, setStages] = useState([]);
+    const [search, setSearch] = useState('');
+    const [minValue, setMinValue] = useState('');
+    const [maxValue, setMaxValue] = useState('');
+    const [isStageModalOpen, setIsStageModalOpen] = useState(false);
+    const [stageDrafts, setStageDrafts] = useState([]);
+    const [mutationFeedbackByQuote, setMutationFeedbackByQuote] = useState({});
+
+    const fetchData = useCallback(async () => {
+        if (!user) return;
+        setLoading(true);
+        const [stagesRes, ordersRes] = await Promise.all([
+            supabase.from('pipeline_stages').select('*').order('order', { ascending: true }),
+            supabase.from('orders').select('*, clients(name)').eq('user_id', user.id),
+        ]);
+
+        if (stagesRes.error) {
+            toast({ title: 'Erro', description: stagesRes.error.message, variant: 'destructive' });
+        } else {
+            setStages(stagesRes.data || []);
+        }
+
+        if (ordersRes.error) {
+            toast({ title: 'Erro', description: ordersRes.error.message, variant: 'destructive' });
+        } else {
+            setQuotes(ordersRes.data || []);
+        }
+        setLoading(false);
+    }, [user, toast]);
 
     useEffect(() => {
-        const fetch = async () => {
-            if (!user) return;
-            setLoading(true);
-            const [stagesRes, ordersRes] = await Promise.all([
-                supabase.from('pipeline_stages').select('*').order('order', { ascending: true }),
-                supabase.from('orders').select('*, clients(name)').eq('user_id', user.id),
-            ]);
-
-            if (stagesRes.error) {
-                toast({ title: 'Erro', description: stagesRes.error.message, variant: 'destructive' });
-            } else {
-                setStages(stagesRes.data || []);
-            }
-
-            if (ordersRes.error) {
-                toast({ title: 'Erro', description: ordersRes.error.message, variant: 'destructive' });
-            } else {
-                setQuotes(ordersRes.data || []);
-            }
-            setLoading(false);
-        };
-        fetch();
-    }, [user, toast]);
+        fetchData();
+    }, [fetchData]);
 
     const handleDrop = async (quoteId, newStage) => {
         const quote = quotes.find(q => q.id === quoteId);
         if (!quote) return;
+        const stageName = stages.find((stage) => stage.id === newStage)?.name;
 
         // Optimistic
         setQuotes(prev => prev.map(q => q.id === quoteId ? { ...q, pipeline_stage_id: newStage } : q));
 
-        const { error } = await supabase.from('orders').update({ pipeline_stage_id: newStage }).eq('id', quoteId);
-        if (error) {
+        const result = await updatePipelineStageWithOfflineSupport({
+            order_id: quoteId,
+            pipeline_stage_id: newStage,
+            pipeline_stage_name: stageName,
+        });
+
+        setMutationFeedbackByQuote((prev) => ({
+            ...prev,
+            [quoteId]: result.state,
+        }));
+
+        if (result.state === 'failed') {
             toast({ title: 'Erro ao atualizar', variant: 'destructive' });
             setQuotes(prev => prev.map(q => q.id === quoteId ? { ...q, pipeline_stage_id: quote.pipeline_stage_id } : q));
+            return;
+        }
+
+        if (result.state === 'pending') {
+            toast({ title: 'Atualizacao pendente', description: 'Etapa salva localmente e sera sincronizada ao reconectar.' });
         }
     };
+
+    const filteredQuotes = useMemo(() => {
+        const term = search.trim().toLowerCase();
+        const min = minValue ? Number(minValue) : null;
+        const max = maxValue ? Number(maxValue) : null;
+        return quotes.filter((q) => {
+            const matchesText = term
+                ? (q.title || '').toLowerCase().includes(term) ||
+                  (q.clients?.name || '').toLowerCase().includes(term)
+                : true;
+            const value = Number(q.final_price || 0);
+            const matchesMin = min !== null ? value >= min : true;
+            const matchesMax = max !== null ? value <= max : true;
+            return matchesText && matchesMin && matchesMax;
+        });
+    }, [quotes, search, minValue, maxValue]);
 
     const groupedQuotes = useMemo(() => {
         const groups = {};
         if (!stages.length) return groups;
         const stageByName = new Map(stages.map((stage) => [stage.name, stage]));
         stages.forEach(s => groups[s.id] = []);
-        quotes.forEach(q => {
+        filteredQuotes.forEach(q => {
             let stageId = q.pipeline_stage_id;
             if (!stageId) {
                 const stageName = statusToStageName[q.status] || 'Novo';
@@ -107,63 +151,108 @@ const PipelinePage = () => {
             groups[stageId].push(q);
         });
         return groups;
-    }, [quotes, stages]);
+    }, [filteredQuotes, stages]);
 
-    const handleSync = async () => {
-        if (!isOnline) {
-            toast({
-                title: 'Sem conex\u00e3o',
-                description: 'Conecte-se \u00e0 internet para sincronizar a pipeline.',
-                variant: 'destructive',
-            });
-            return;
-        }
+    const performanceData = useMemo(() => {
+        return stages.map((stage) => ({
+            name: stageLabels[stage.name] || stage.name,
+            count: groupedQuotes[stage.id]?.length || 0,
+            total: groupedQuotes[stage.id]?.reduce((sum, q) => sum + (Number(q.final_price) || 0), 0) || 0,
+        }));
+    }, [stages, groupedQuotes]);
+    const openStageManager = () => {
+        setStageDrafts(stages.map((s) => ({ ...s })));
+        setIsStageModalOpen(true);
+    };
 
+    const updateDraft = (id, field, value) => {
+        setStageDrafts((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+    };
+
+    const addDraftStage = () => {
+        const nextOrder = (stageDrafts[stageDrafts.length - 1]?.order || 0) + 1;
+        setStageDrafts((prev) => [
+            ...prev,
+            { id: `tmp-${Date.now()}`, name: 'Nova Etapa', color: '#6366f1', order: nextOrder },
+        ]);
+    };
+
+    const saveStages = async () => {
         try {
-            await sync();
-            toast({
-                title: 'Sincroniza\u00e7\u00e3o conclu\u00edda',
-                description: 'Pipeline atualizada com os dados mais recentes.',
-            });
+            const payload = stageDrafts.map((s) => ({
+                id: s.id && s.id.startsWith('tmp-') ? undefined : s.id,
+                name: s.name,
+                color: s.color,
+                order: Number(s.order) || 0,
+            }));
+            const { error } = await supabase.from('pipeline_stages').upsert(payload, { onConflict: 'id' });
+            if (error) throw error;
+            toast({ title: 'Etapas salvas' });
+            setIsStageModalOpen(false);
+            fetchData();
         } catch (error) {
-            toast({
-                title: 'Erro ao sincronizar',
-                description: error?.message || 'N\u00e3o foi poss\u00edvel atualizar a pipeline.',
-                variant: 'destructive',
-            });
+            toast({ title: 'Erro ao salvar etapas', description: error.message, variant: 'destructive' });
         }
     };
 
     return (
+        <>
         <HelmetProvider>
             <Helmet><title>Pipeline - Serrallab</title></Helmet>
             <div className="h-[calc(100vh-8rem)] flex flex-col min-h-0">
                 <div className="space-y-2 mb-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h2 className="text-3xl font-heading font-bold">Pipeline</h2>
-                            <p className="text-muted-foreground">Gerencie o fluxo de seus neg\u00f3cios.</p>
-                        </div>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h2 className="text-3xl font-heading font-bold">Pipeline</h2>
+                                <p className="text-muted-foreground">Gerencie o fluxo de seus negócios.</p>
+                            </div>
                         <div className="flex items-center gap-3">
-                            <Button
-                                variant="outline"
-                                onClick={handleSync}
-                                className="rounded-xl"
-                                disabled={isSyncing}
-                            >
-                                {isSyncing ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                    <RefreshCcw className="mr-2 h-4 w-4" />
-                                )}
-                                Sincronizar
-                            </Button>
                             <Button onClick={() => navigate('/app/orcamentos/novo')} className="rounded-xl">
                                 <Plus className="mr-2 h-4 w-4" /> Novo
+                            </Button>
+                            <Button variant="secondary" onClick={openStageManager} className="rounded-xl">
+                                <Settings2 className="mr-2 h-4 w-4" /> Etapas
                             </Button>
                         </div>
                     </div>
                     <div className="h-px bg-border mb-4" />
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
+                        <div className="bg-surface/60 border border-border/60 rounded-xl p-3 flex flex-col gap-3">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-foreground"><Filter className="h-4 w-4" /> Filtros</div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                <div className="md:col-span-2">
+                                    <Label className="text-xs">Busca (título ou cliente)</Label>
+                                    <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Ex: portão ou joão" className="h-9" />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">Valor min</Label>
+                                    <Input type="number" value={minValue} onChange={(e) => setMinValue(e.target.value)} className="h-9" />
+                                </div>
+                                <div>
+                                    <Label className="text-xs">Valor máx</Label>
+                                    <Input type="number" value={maxValue} onChange={(e) => setMaxValue(e.target.value)} className="h-9" />
+                                </div>
+                                <div className="self-end">
+                                    <Button variant="ghost" size="sm" onClick={() => { setSearch(''); setMinValue(''); setMaxValue(''); }}>Limpar</Button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-surface/60 border border-border/60 rounded-xl p-3 xl:col-span-2">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2 text-sm font-semibold text-foreground"><ArrowUpRight className="h-4 w-4 text-primary" /> Desempenho</div>
+                                <div className="text-xs text-muted-foreground">Contagem por etapa</div>
+                            </div>
+                            <div className="h-32">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={performanceData}>
+                                        <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                                        <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} formatter={(value) => [value, 'Qtde']} />
+                                        <Bar dataKey="count" fill="#f97316" radius={[6, 6, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -218,6 +307,13 @@ const PipelinePage = () => {
                                                             <div className="flex items-center gap-2 text-sm font-semibold text-primary">
                                                                 <DollarSign className="h-3 w-3" /> R$ {(q.final_price || 0).toFixed(2)}
                                                             </div>
+                                                            {mutationFeedbackByQuote[q.id] && (
+                                                                <div className="mt-2 text-[11px]">
+                                                                    {mutationFeedbackByQuote[q.id] === 'pending' && <SystemStatusChip status="pending" />}
+                                                                    {mutationFeedbackByQuote[q.id] === 'synced' && <SystemStatusChip status="synced" />}
+                                                                    {mutationFeedbackByQuote[q.id] === 'failed' && <SystemStatusChip status="failed" />}
+                                                                </div>
+                                                            )}
                                                         </motion.div>
                                                     ))}
                                                 </AnimatePresence>
@@ -231,10 +327,69 @@ const PipelinePage = () => {
                 )}
             </div>
         </HelmetProvider>
+        <Dialog open={isStageModalOpen} onOpenChange={setIsStageModalOpen}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>Gerenciar Etapas</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                    <div className="flex justify-end">
+                        <Button variant="outline" size="sm" onClick={addDraftStage}><Plus className="mr-2 h-4 w-4" /> Nova etapa</Button>
+                    </div>
+                    <div className="border rounded-lg overflow-hidden">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Ordem</TableHead>
+                                    <TableHead>Nome</TableHead>
+                                    <TableHead>Cor</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {stageDrafts.map((stage) => (
+                                    <TableRow key={stage.id}>
+                                        <TableCell className="w-24">
+                                            <Input
+                                                type="number"
+                                                value={stage.order ?? 0}
+                                                onChange={(e) => updateDraft(stage.id, 'order', e.target.value)}
+                                                className="h-9"
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Input
+                                                value={stage.name}
+                                                onChange={(e) => updateDraft(stage.id, 'name', e.target.value)}
+                                                className="h-9"
+                                            />
+                                        </TableCell>
+                                        <TableCell className="w-32">
+                                            <Input
+                                                type="color"
+                                                value={stage.color || '#6366f1'}
+                                                onChange={(e) => updateDraft(stage.id, 'color', e.target.value)}
+                                                className="h-9 p-1"
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="secondary" onClick={() => setIsStageModalOpen(false)}>Cancelar</Button>
+                    <Button onClick={saveStages}>Salvar</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </>
     );
 };
 
 export default PipelinePage;
+
+
 
 
 

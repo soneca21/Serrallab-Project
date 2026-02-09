@@ -1,4 +1,3 @@
-
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
 interface SerrallabDB extends DBSchema {
@@ -14,10 +13,28 @@ interface SerrallabDB extends DBSchema {
         key: string;
         value: any;
     };
+    offline_mutation_queue: {
+        key: string;
+        value: any;
+        indexes: {
+            by_status: string;
+            by_created_at: string;
+            by_idempotency_key: string;
+        };
+    };
+    offline_conflicts: {
+        key: string;
+        value: any;
+        indexes: {
+            by_created_at: string;
+            by_mutation_type: string;
+        };
+    };
 }
 
 const DB_NAME = 'serrallab-db';
-const DB_VERSION = 1;
+const DB_VERSION = 3;
+const MAIN_PIPELINE_ID = 'main_pipeline';
 
 let dbPromise: Promise<IDBPDatabase<SerrallabDB>> | null = null;
 
@@ -32,7 +49,18 @@ function getDB() {
                     db.createObjectStore('orcamentos', { keyPath: 'id' });
                 }
                 if (!db.objectStoreNames.contains('pipeline')) {
-                    db.createObjectStore('pipeline', { keyPath: 'id' }); // Storing as a single object or list, using id for simplicity
+                    db.createObjectStore('pipeline', { keyPath: 'id' });
+                }
+                if (!db.objectStoreNames.contains('offline_mutation_queue')) {
+                    const queueStore = db.createObjectStore('offline_mutation_queue', { keyPath: 'id' });
+                    queueStore.createIndex('by_status', 'status', { unique: false });
+                    queueStore.createIndex('by_created_at', 'created_at', { unique: false });
+                    queueStore.createIndex('by_idempotency_key', 'idempotency_key', { unique: true });
+                }
+                if (!db.objectStoreNames.contains('offline_conflicts')) {
+                    const conflictsStore = db.createObjectStore('offline_conflicts', { keyPath: 'id' });
+                    conflictsStore.createIndex('by_created_at', 'created_at', { unique: false });
+                    conflictsStore.createIndex('by_mutation_type', 'mutation_type', { unique: false });
                 }
             },
         });
@@ -40,44 +68,58 @@ function getDB() {
     return dbPromise;
 }
 
-export async function saveLeadsOffline(leads: any[]) {
+async function replaceStoreItems(storeName: 'leads' | 'orcamentos', items: any[]) {
     const db = await getDB();
-    const tx = db.transaction('leads', 'readwrite');
-    await Promise.all([
-        ...leads.map(lead => tx.store.put(lead)),
-        tx.done
-    ]);
+    const tx = db.transaction(storeName, 'readwrite');
+
+    await tx.store.clear();
+    for (const item of items || []) {
+        await tx.store.put(item);
+    }
+
+    await tx.done;
+}
+
+function sortByCreatedAtDesc(items: any[]) {
+    return [...(items || [])].sort((a, b) => {
+        const timeA = new Date(a?.created_at || 0).getTime();
+        const timeB = new Date(b?.created_at || 0).getTime();
+        return timeB - timeA;
+    });
+}
+
+export async function saveLeadsOffline(leads: any[]) {
+    await replaceStoreItems('leads', leads || []);
 }
 
 export async function getLeadsOffline() {
     const db = await getDB();
-    return db.getAll('leads');
+    const data = await db.getAll('leads');
+    return sortByCreatedAtDesc(data);
 }
 
 export async function saveOrcamentosOffline(orcamentos: any[]) {
-    const db = await getDB();
-    const tx = db.transaction('orcamentos', 'readwrite');
-    await Promise.all([
-        ...orcamentos.map(orc => tx.store.put(orc)),
-        tx.done
-    ]);
+    await replaceStoreItems('orcamentos', orcamentos || []);
 }
 
 export async function getOrcamentosOffline() {
     const db = await getDB();
-    return db.getAll('orcamentos');
+    const data = await db.getAll('orcamentos');
+    return sortByCreatedAtDesc(data);
 }
 
 export async function savePipelineOffline(pipeline: any) {
     const db = await getDB();
-    // Assuming pipeline is an object structure we want to cache entirely
-    // We'll wrap it in an object with a fixed ID
-    await db.put('pipeline', { id: 'main_pipeline', data: pipeline });
+    await db.put('pipeline', {
+        id: MAIN_PIPELINE_ID,
+        data: pipeline || {},
+        updated_at: new Date().toISOString(),
+    });
 }
 
 export async function getPipelineOffline() {
     const db = await getDB();
-    const result = await db.get('pipeline', 'main_pipeline');
+    const result = await db.get('pipeline', MAIN_PIPELINE_ID);
     return result?.data || null;
 }
 

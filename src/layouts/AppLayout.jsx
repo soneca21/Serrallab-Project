@@ -51,6 +51,7 @@ const configItems = [
     { path: '/app/config?tab=company', label: 'Organiza\u00e7\u00e3o', icon: Building },
     { path: '/app/config/canais', label: 'Canais', icon: MessageSquare, permissionKey: 'integrations' },
     { path: '/app/config/integracoes', label: 'Integra\u00e7\u00f5es', icon: Database, permissionKey: 'integrations' },
+    { path: '/app/sincronizacao', label: 'Sincronizacao', icon: ClipboardList, permissionKey: 'dashboard' },
     { path: '/app/config?tab=team', label: 'Equipe', icon: Users, permissionKey: 'team' },
     { path: '/app/config?tab=billing', label: 'Planos', icon: CreditCard, permissionKey: 'billing' },
     { path: '/app/config?tab=notifications', label: 'Notifica\u00e7\u00f5es', icon: Bell },
@@ -128,7 +129,7 @@ const SidebarContent = ({ onLinkClick }) => {
                                 onClick={toggleConfig}
                                 className={cn(
                                     "w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group hover:bg-surface hover:text-white border-l-4 border-transparent hover:border-primary",
-                                    location.pathname.includes('/app/config') ? "text-white" : "text-muted-foreground"
+                                    (location.pathname.includes('/app/config') || location.pathname.includes('/app/sincronizacao')) ? "text-white" : "text-muted-foreground"
                                 )}
                             >
                                 <div className="flex items-center gap-3">
@@ -224,6 +225,7 @@ const Header = () => {
             pageTitle = configItem ? `Configura\u00e7\u00f5es > ${configItem.label}` : 'Configura\u00e7\u00f5es';
         }
     }
+    else if (location.pathname.includes('sincronizacao')) pageTitle = 'Configura\u00e7\u00f5es > Sincronizacao';
     else if (location.pathname.includes('agendamentos')) pageTitle = 'Agendamentos';
     else if (location.pathname.includes('leads')) pageTitle = 'Leads'; 
     else if (location.pathname.includes('webhooks')) pageTitle = 'Webhooks';
@@ -294,6 +296,8 @@ const AppLayout = () => {
             } else if (location.pathname === '/app/config/canais' || location.pathname === '/app/config/integracoes') {
                 permissionKey = 'integrations';
             }
+        } else if (location.pathname.startsWith('/app/sincronizacao')) {
+            permissionKey = 'dashboard';
         } else {
             const match = mainNavItems.find((item) => {
                 if (item.path === '/app') return location.pathname === '/app';

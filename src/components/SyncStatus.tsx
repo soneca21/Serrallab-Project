@@ -1,40 +1,32 @@
-
 import React from 'react';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
-import { RefreshCw, WifiOff, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { SystemStatusInline } from '@/components/SystemStatus';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 const SyncStatus: React.FC = () => {
     const { isSyncing, lastSync, isOnline } = useOfflineSync();
-
-    if (!isOnline) {
-        return (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <WifiOff className="h-3 w-3" />
-                <span>Offline</span>
-            </div>
-        );
-    }
-
-    if (isSyncing) {
-        return (
-            <div className="flex items-center gap-2 text-xs text-primary">
-                <RefreshCw className="h-3 w-3 animate-spin" />
-                <span>Sincronizando...</span>
-            </div>
-        );
-    }
+    const prefersReducedMotion = useReducedMotion();
+    const statusKey = !isOnline ? 'offline' : isSyncing ? 'syncing' : 'synced';
+    const label = !isOnline
+        ? 'Offline'
+        : isSyncing
+            ? 'Sincronizando...'
+            : (lastSync ? `Atualizado as ${format(lastSync, 'HH:mm', { locale: ptBR })}` : 'Sincronizado');
 
     return (
-        <div className="flex items-center gap-2 text-xs text-green-500">
-            <CheckCircle className="h-3 w-3" />
-            <span>
-                {lastSync 
-                    ? `Atualizado às ${format(lastSync, 'HH:mm', { locale: ptBR })}` 
-                    : 'Sincronizado'}
-            </span>
-        </div>
+        <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+                key={`${statusKey}-${label}`}
+                initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 4 }}
+                animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -3 }}
+                transition={{ duration: prefersReducedMotion ? 0.05 : 0.16, ease: 'easeOut' }}
+            >
+                <SystemStatusInline status={statusKey as 'offline' | 'syncing' | 'synced'} label={label} />
+            </motion.div>
+        </AnimatePresence>
     );
 };
 

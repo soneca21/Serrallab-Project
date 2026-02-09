@@ -255,12 +255,26 @@ export default defineConfig({
 	},
 	build: {
 		rollupOptions: {
+			input: {
+				app: path.resolve(__dirname, 'index.html'),
+				'service-worker': path.resolve(__dirname, 'src/service-worker.ts'),
+			},
 			external: [
 				'@babel/parser',
 				'@babel/traverse',
 				'@babel/generator',
 				'@babel/types'
-			]
+			],
+			output: {
+				entryFileNames: (chunkInfo) => {
+					if (chunkInfo.name === 'service-worker') {
+						return 'service-worker.js';
+					}
+					return 'assets/[name]-[hash].js';
+				},
+				chunkFileNames: 'assets/[name]-[hash].js',
+				assetFileNames: 'assets/[name]-[hash][extname]',
+			},
 		}
 	}
 });

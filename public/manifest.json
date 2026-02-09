@@ -1,13 +1,17 @@
 
 {
+  "id": "/app",
   "name": "Serrallab",
   "short_name": "Serrallab",
-  "description": "CRM + Mensageria para vendas",
+  "description": "CRM e mensageria para vendas",
   "start_url": "/app",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#DA690B",
   "background_color": "#121212",
+  "lang": "pt-BR",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/pwa-192x192.png",
@@ -27,6 +31,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "categories": ["business", "productivity"]
+  ]
 }
