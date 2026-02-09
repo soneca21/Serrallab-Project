@@ -73,7 +73,7 @@ const MaterialForm = ({ material, onSave, onCancel, categories, isLoading }) => 
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="m">Metro (m)</SelectItem>
-                                <SelectItem value="m2">Metro Quadrado (m\u00b2)</SelectItem>
+                                <SelectItem value="m2">Metro Quadrado (m²)</SelectItem>
                                 <SelectItem value="kg">Quilograma (kg)</SelectItem>
                                 <SelectItem value="un">Unidade (un)</SelectItem>
                             </SelectContent>
@@ -150,7 +150,7 @@ const GlobalCatalogPage = () => {
             .order('name', { ascending: true });
 
         if (error) {
-            toast({ title: 'Erro ao buscar cat\u00e1logo', description: error.message, variant: 'destructive' });
+            toast({ title: 'Erro ao buscar catálogo', description: error.message, variant: 'destructive' });
         } else {
             setMaterials(data);
         }
@@ -211,14 +211,14 @@ const GlobalCatalogPage = () => {
 
     return (
         <>
-            <Helmet><title>{'Cat\u00e1logo Global \u2014 Serrallab'}</title></Helmet>
+            <Helmet><title>{'Catálogo Global - Serrallab'}</title></Helmet>
             <div className="w-full space-y-6">
                 <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="flex items-start gap-3">
                         <BookCopy className="text-primary h-6 w-6 mt-1" />
                         <div>
-                            <h2 className="text-3xl font-heading font-bold">{'Cat\u00e1logo Global de Materiais'}</h2>
-                            <p className="text-muted-foreground">{'Base de insumos compartilhada entre todos os usu\u00e1rios.'}</p>
+                            <h2 className="text-3xl font-heading font-bold">{'Catálogo Global de Materiais'}</h2>
+                            <p className="text-muted-foreground">{'Base de insumos compartilhada entre todos os usuários.'}</p>
                         </div>
                     </div>
                     {isAdmin && (
@@ -277,7 +277,7 @@ const GlobalCatalogPage = () => {
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-center h-full text-muted-foreground p-10 border-2 border-dashed border-surface-strong rounded-xl">
-                                            <p>{'Nenhum material neste cat\u00e1logo.'}</p>
+                                            <p>{'Nenhum material neste catálogo.'}</p>
                                         </div>
                                     )}
                                 </main>

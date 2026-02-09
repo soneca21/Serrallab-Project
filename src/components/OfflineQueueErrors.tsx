@@ -43,7 +43,7 @@ const OfflineQueueErrors: React.FC = () => {
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 text-sm">
                         <AlertTriangle className="h-4 w-4 text-warning" aria-hidden="true" />
-                        <span>{items.length} pendencia(s) com erro permanente. Proximo passo: reprocessar ou descartar.</span>
+                        <span>{items.length} pendência(s) com erro permanente. Próximo passo: reprocessar ou descartar.</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button size="sm" variant="ghost" onClick={() => navigate('/app/sincronizacao')} aria-label="Abrir centro de sincronização">

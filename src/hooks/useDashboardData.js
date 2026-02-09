@@ -32,6 +32,23 @@ const normalizeStatus = (status) => (
     .trim()
 );
 
+const decodeEscapedUnicode = (value) => {
+  if (typeof value !== 'string' || !value.includes('\\u')) return value;
+  return value.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16))
+  );
+};
+
+const decodeOrderTextFields = (order) => ({
+  ...order,
+  title: decodeEscapedUnicode(order?.title),
+  status: decodeEscapedUnicode(order?.status),
+  pipeline_stage_name: decodeEscapedUnicode(order?.pipeline_stage_name),
+  clients: order?.clients
+    ? { ...order.clients, name: decodeEscapedUnicode(order.clients?.name) }
+    : order?.clients,
+});
+
 export function useDashboardData() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
@@ -58,19 +75,19 @@ export function useDashboardData() {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
 
-      const { data: leads } = await supabase
+      const { data: leadsRaw } = await supabase
         .from('leads')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      const { data: orders } = await supabase
+      const { data: ordersRaw } = await supabase
         .from('orders')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      const { data: pipelineStages, error: pipelineStagesError } = await supabase
+      const { data: pipelineStagesRaw, error: pipelineStagesError } = await supabase
         .from('pipeline_stages')
         .select('id, name, color, "order"')
         .order('order', { ascending: true });
@@ -103,9 +120,9 @@ export function useDashboardData() {
 
       const { data: auditLogs } = await auditQuery;
 
-      const leadsToday = leads ? leads.filter((l) => l.created_at >= startOfDay.toISOString()).length : 0;
-      const currentMonthLeads = leads ? leads.filter((l) => l.created_at >= startOfMonth).length : 0;
-      const currentMonthOrders = orders ? orders.filter((o) => o.created_at >= startOfMonth) : [];
+      const leadsToday = leads.filter((l) => l.created_at >= startOfDay.toISOString()).length;
+      const currentMonthLeads = leads.filter((l) => l.created_at >= startOfMonth).length;
+      const currentMonthOrders = orders.filter((o) => o.created_at >= startOfMonth);
       const wonStatusSet = new Set(['ganho', 'aprovado', 'concluido', 'entregue']);
       const wonOrdersThisMonth = currentMonthOrders.filter((o) =>
         wonStatusSet.has(normalizeStatus(o.status))
@@ -124,25 +141,25 @@ export function useDashboardData() {
         'atendimento',
         'em producao',
       ]);
-      const openOrders = orders ? orders.filter((o) => openStatusSet.has(normalizeStatus(o.status))) : [];
+      const openOrders = orders.filter((o) => openStatusSet.has(normalizeStatus(o.status)));
       const openOrdersValue = openOrders.reduce((sum, o) => sum + (Number(o.final_price) || Number(o.total_cost) || 0), 0);
 
       const followupCutoff = new Date(now);
       followupCutoff.setDate(followupCutoff.getDate() - 2);
-      const overdueOrders = orders ? orders.filter((o) => {
+      const overdueOrders = orders.filter((o) => {
         const normalizedStatus = normalizeStatus(o.status);
         if (!['enviado', 'proposta'].includes(normalizedStatus)) return false;
         return o.created_at && new Date(o.created_at) < followupCutoff;
-      }) : [];
+      });
 
       let pipeline = [];
-      if (pipelineStages && pipelineStages.length) {
+      if (pipelineStages.length) {
         const novoStage = pipelineStages.find((stage) => normalizeStatus(stage.name) === 'novo');
         pipeline = pipelineStages.map((stage) => {
-          const stageOrders = orders ? orders.filter((order) => {
+          const stageOrders = orders.filter((order) => {
             if (order.pipeline_stage_id === stage.id) return true;
             return !order.pipeline_stage_id && novoStage?.id === stage.id;
-          }) : [];
+          });
 
           return {
             name: stage.name,
@@ -159,7 +176,7 @@ export function useDashboardData() {
           Perdido: 0,
         };
 
-        orders?.forEach((o) => {
+        orders.forEach((o) => {
           const normalized = normalizeStatus(o.status);
           if (['proposta', 'rascunho', 'novo'].includes(normalized)) pipelineBuckets.Proposta += 1;
           else if (['negociacao', 'em analise'].includes(normalized)) pipelineBuckets.Negociacao += 1;
@@ -184,7 +201,7 @@ export function useDashboardData() {
         });
       }
 
-      orders?.forEach((o) => {
+      orders.forEach((o) => {
         if (['ganho', 'aprovado'].includes(normalizeStatus(o.status)) && o.created_at) {
           const monthKey = o.created_at.slice(0, 7);
           const targetMonth = months.find((m) => m.key === monthKey);
@@ -193,9 +210,9 @@ export function useDashboardData() {
       });
 
       const negotiationStatuses = new Set(['negociacao', 'proposta', 'enviado']);
-      const activeNegotiations = orders ? orders.filter((o) =>
+      const activeNegotiations = orders.filter((o) =>
         negotiationStatuses.has(normalizeStatus(o.status))
-      ).slice(0, 5) : [];
+      ).slice(0, 5);
 
       setData({
         kpis: {
@@ -209,7 +226,7 @@ export function useDashboardData() {
           openOrdersValue,
         },
         pipeline,
-        recentLeads: leads ? leads.slice(0, 5) : [],
+        recentLeads: leads.slice(0, 5),
         activeNegotiations,
         revenueHistory: months,
         recentActivity: auditLogs || [],
@@ -235,3 +252,13 @@ export function useDashboardData() {
 
   return { data, loading, error, refetch: fetchDashboardData };
 }
+      const leads = (leadsRaw || []).map((lead) => ({
+        ...lead,
+        name: decodeEscapedUnicode(lead?.name),
+        source: decodeEscapedUnicode(lead?.source),
+      }));
+      const orders = (ordersRaw || []).map(decodeOrderTextFields);
+      const pipelineStages = (pipelineStagesRaw || []).map((stage) => ({
+        ...stage,
+        name: decodeEscapedUnicode(stage?.name),
+      }));

@@ -8,7 +8,7 @@ export const STATUS_STAGE_FALLBACK = {
     Enviado: 'Enviado',
     Aprovado: 'Em Producao',
     'Proposta Aceita': 'Em Producao',
-    'Conclu\u00eddo': 'Entregue',
+    'Concluído': 'Entregue',
     Concluido: 'Entregue',
     Ganho: 'Entregue',
     Rejeitado: 'Perdido',

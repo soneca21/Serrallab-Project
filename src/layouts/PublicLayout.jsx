@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Hammer as Anvil, Home, LogIn, DollarSign, Menu, X, Layers, Mail } from 'lucide-react';
+import { Home, LogIn, DollarSign, Menu, X, Layers, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
@@ -105,8 +105,12 @@ const Header = ({ isAuthenticated }) => {
         >
             <div className="w-full flex h-20 items-center justify-between px-4 md:px-8">
                 <NavLink to="/" className="flex items-center gap-2 text-2xl font-heading font-bold hover:opacity-90 transition-opacity" onClick={(e) => handleNavClick(e, { path: '/#home', type: 'scroll'})}>
-                    <Anvil className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(218,105,11,0.6)]" />
-                    <span className="text-foreground">Serral<span className="text-primary">lab</span></span>
+                    <img
+                        src="/pwa-192x192.png"
+                        alt="Logo Serrallab"
+                        className="h-9 w-9 rounded-xl object-cover"
+                    />
+                    <span className="text-foreground">Serrallab</span>
                 </NavLink>
 
                 {/* Desktop Nav */}
@@ -219,8 +223,12 @@ const Footer = ({ isAuthenticated }) => (
             <div className="grid md:grid-cols-4 gap-8 mb-12">
                 <div className="col-span-1 md:col-span-2">
                     <div className="flex items-center gap-2 text-2xl font-heading font-bold mb-4">
-                        <Anvil className="h-6 w-6 text-primary" />
-                        <span className="text-foreground">Serral<span className="text-primary">lab</span></span>
+                        <img
+                            src="/pwa-192x192.png"
+                            alt="Logo Serrallab"
+                            className="h-7 w-7 rounded-lg object-cover"
+                        />
+                        <span className="text-foreground">Serrallab</span>
                     </div>
                     <p className="text-muted-foreground max-w-sm">
                         A plataforma definitiva para serralheiros modernos. Otimize seus processos, conquiste mais clientes e aumente seus lucros.

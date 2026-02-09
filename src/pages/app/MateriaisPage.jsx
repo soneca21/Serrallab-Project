@@ -105,14 +105,14 @@ const MateriaisPage = () => {
                 }));
 
             if (!payload.length) {
-                toast({ title: 'Nenhum material novo', description: 'Seu cat\u00e1logo j\u00e1 est\u00e1 atualizado.' });
+                toast({ title: 'Nenhum material novo', description: 'Seu catálogo já está atualizado.' });
                 return;
             }
 
             const { error: insertError } = await supabase.from('user_materials').insert(payload);
             if (insertError) throw insertError;
 
-            toast({ title: 'Cat\u00e1logo importado', description: `${payload.length} materiais adicionados.` });
+            toast({ title: 'Catálogo importado', description: `${payload.length} materiais adicionados.` });
             fetchMaterials();
         } catch (error) {
             toast({ title: 'Erro ao importar', description: error.message, variant: 'destructive' });
@@ -135,12 +135,12 @@ const MateriaisPage = () => {
 
     return (
         <>
-            <Helmet><title>{'Materiais \u2014 Serrallab'}</title></Helmet>
+            <Helmet><title>{'Materiais - Serrallab'}</title></Helmet>
             <div className="w-full space-y-6">
                 <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div>
                         <h2 className="text-3xl font-heading font-bold">Materiais</h2>
-                        <p className="text-muted-foreground">{'Cat\u00e1logo de insumos e pre\u00e7os.'}</p>
+                        <p className="text-muted-foreground">{'Catálogo de insumos e preços.'}</p>
                     </div>
                     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                         <Button
@@ -150,7 +150,7 @@ const MateriaisPage = () => {
                             disabled={isImporting}
                         >
                             {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                            {'Importar Cat\u00e1logo Global'}
+                            {'Importar Catálogo Global'}
                         </Button>
                         <Button onClick={() => openDialog()} className="rounded-xl w-full sm:w-auto">
                             <PlusCircle className="mr-2 h-4 w-4" /> {'Novo Material'}

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
-    Hammer, LayoutDashboard, FileText, Users, Settings, LogOut, Wrench, 
+    LayoutDashboard, FileText, Users, Settings, LogOut, Wrench, 
     BookCopy, Menu, Truck, MessageSquare, CalendarClock, Home, Columns,
     ChevronDown, ChevronRight, User, Building, CreditCard, Bell, Shield, ClipboardList, Database, Link,
     BarChart2, Activity, DollarSign, Bot
@@ -26,17 +26,17 @@ import { hasPermission } from '@/lib/permissions';
 // Main Navigation Items
 const mainNavItems = [
     { path: '/app', label: 'Dashboard', icon: LayoutDashboard, roles: ['client', 'admin'], permissionKey: 'dashboard' },
-    { path: '/app/orcamentos', label: 'Or\u00e7amentos', icon: FileText, roles: ['client', 'admin'], permissionKey: 'quotes' },
+    { path: '/app/orcamentos', label: 'Orçamentos', icon: FileText, roles: ['client', 'admin'], permissionKey: 'quotes' },
     { path: '/app/pipeline', label: 'Pipeline', icon: Columns, roles: ['client', 'admin'], permissionKey: 'pipeline' },
     { path: '/app/clientes', label: 'Clientes', icon: Users, roles: ['client', 'admin'], permissionKey: 'clients' },
     { path: '/app/agendamentos', label: 'Agendamentos', icon: CalendarClock, roles: ['client', 'admin'], permissionKey: 'schedules' },
     { path: '/app/materiais', label: 'Meus Materiais', icon: Wrench, roles: ['client', 'admin'], permissionKey: 'materials' },
     { path: '/app/fornecedores', label: 'Fornecedores', icon: Truck, roles: ['client', 'admin'], permissionKey: 'materials' },
-    { path: '/app/catalogo-global', label: 'Cat\u00e1logo Global', icon: BookCopy, roles: ['client', 'admin'], permissionKey: 'materials' },
+    { path: '/app/catalogo-global', label: 'Catálogo Global', icon: BookCopy, roles: ['client', 'admin'], permissionKey: 'materials' },
 ];
 
 const adminNavItems = [
-    { path: '/app/admin/visao-geral', label: 'Vis\u00e3o Geral', icon: BarChart2, roles: ['admin'] },
+    { path: '/app/admin/visao-geral', label: 'Visão Geral', icon: BarChart2, roles: ['admin'] },
     { path: '/app/admin/contas', label: 'Contas', icon: Users, roles: ['admin'] },
     { path: '/app/admin/clientes', label: 'Clientes', icon: Users, roles: ['admin'] },
     { path: '/app/admin/planos', label: 'Planos & Pacotes', icon: Settings, roles: ['admin'] },
@@ -48,14 +48,14 @@ const adminNavItems = [
 // Settings Sub-items
 const configItems = [
     { path: '/app/config?tab=profile', label: 'Minha Conta', icon: User },
-    { path: '/app/config?tab=company', label: 'Organiza\u00e7\u00e3o', icon: Building },
+    { path: '/app/config?tab=company', label: 'Organização', icon: Building },
     { path: '/app/config/canais', label: 'Canais', icon: MessageSquare, permissionKey: 'integrations' },
-    { path: '/app/config/integracoes', label: 'Integra\u00e7\u00f5es', icon: Database, permissionKey: 'integrations' },
-    { path: '/app/sincronizacao', label: 'Sincroniza\u00e7\u00e3o', icon: ClipboardList, permissionKey: 'dashboard' },
+    { path: '/app/config/integracoes', label: 'Integrações', icon: Database, permissionKey: 'integrations' },
+    { path: '/app/sincronizacao', label: 'Sincronização', icon: ClipboardList, permissionKey: 'dashboard' },
     { path: '/app/config?tab=team', label: 'Equipe', icon: Users, permissionKey: 'team' },
     { path: '/app/config?tab=billing', label: 'Planos', icon: CreditCard, permissionKey: 'billing' },
-    { path: '/app/config?tab=notifications', label: 'Notifica\u00e7\u00f5es', icon: Bell },
-    { path: '/app/config?tab=security', label: 'Seguran\u00e7a', icon: Shield, permissionKey: 'security' },
+    { path: '/app/config?tab=notifications', label: 'Notificações', icon: Bell },
+    { path: '/app/config?tab=security', label: 'Segurança', icon: Shield, permissionKey: 'security' },
 ];
 
 const SidebarContent = ({ onLinkClick }) => {
@@ -85,8 +85,8 @@ const SidebarContent = ({ onLinkClick }) => {
     const handleLogout = async () => {
         await signOut();
         toast({
-            title: "At\u00e9 logo!",
-            description: "Voc\u00ea foi desconectado com sucesso.",
+            title: "Até logo!",
+            description: "Você foi desconectado com sucesso.",
         });
         navigate('/');
     };
@@ -95,8 +95,12 @@ const SidebarContent = ({ onLinkClick }) => {
          <div className="w-full h-full bg-background p-4 flex flex-col justify-between border-r border-border overflow-y-auto">
             <div className="space-y-6">
                 <div className="flex items-center gap-2 text-2xl font-heading font-bold px-2">
-                    <Hammer className="h-7 w-7 text-primary" />
-                    <span className="text-white">Serral<span className="text-primary">lab</span></span>
+                    <img
+                        src="/pwa-192x192.png"
+                        alt="Logo Serrallab"
+                        className="h-8 w-8 rounded-lg object-cover"
+                    />
+                    <span className="text-white">Serrallab</span>
                 </div>
                 
                 {/* View Selector Component for Admins */}
@@ -134,7 +138,7 @@ const SidebarContent = ({ onLinkClick }) => {
                             >
                                 <div className="flex items-center gap-3">
                                     <Settings className="h-5 w-5 transition-colors duration-200 group-hover:text-primary" />
-                                    <span>{'Configura\u00e7\u00f5es'}</span>
+                                    <span>{'Configurações'}</span>
                                 </div>
                                 {isConfigExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                             </button>
@@ -210,22 +214,22 @@ const Header = () => {
     let pageTitle = "Painel";
     const currentTab = searchParams.get('tab');
 
-    if (location.pathname.includes('orcamentos/novo')) pageTitle = 'Novo Or\u00e7amento';
-    else if (location.pathname.includes('orcamentos/editar')) pageTitle = 'Editar Or\u00e7amento';
+    if (location.pathname.includes('orcamentos/novo')) pageTitle = 'Novo Orçamento';
+    else if (location.pathname.includes('orcamentos/editar')) pageTitle = 'Editar Orçamento';
     else if (location.pathname.startsWith('/app/admin')) {
         const adminItem = adminNavItems.find((item) => location.pathname === item.path);
         pageTitle = adminItem?.label || 'Painel Admin';
     }
     else if (location.pathname.includes('config')) {
-        if (location.pathname.includes('canais')) pageTitle = 'Configura\u00e7\u00f5es > Canais';
-        else if (location.pathname.includes('integracoes')) pageTitle = 'Configura\u00e7\u00f5es > Integra\u00e7\u00f5es';
-        else if (location.pathname.includes('security-2fa')) pageTitle = 'Configura\u00e7\u00f5es > Seguran\u00e7a 2FA'; // Added for 2FA page
+        if (location.pathname.includes('canais')) pageTitle = 'Configurações > Canais';
+        else if (location.pathname.includes('integracoes')) pageTitle = 'Configurações > Integrações';
+        else if (location.pathname.includes('security-2fa')) pageTitle = 'Configurações > Segurança 2FA'; // Added for 2FA page
         else {
             const configItem = configItems.find(c => c.path.includes(`tab=${currentTab}`));
-            pageTitle = configItem ? `Configura\u00e7\u00f5es > ${configItem.label}` : 'Configura\u00e7\u00f5es';
+            pageTitle = configItem ? `Configurações > ${configItem.label}` : 'Configurações';
         }
     }
-    else if (location.pathname.includes('sincronizacao')) pageTitle = 'Configura\u00e7\u00f5es > Sincroniza\u00e7\u00e3o';
+    else if (location.pathname.includes('sincronizacao')) pageTitle = 'Configurações > Sincronização';
     else if (location.pathname.includes('agendamentos')) pageTitle = 'Agendamentos';
     else if (location.pathname.includes('leads')) pageTitle = 'Leads'; 
     else if (location.pathname.includes('webhooks')) pageTitle = 'Webhooks';
@@ -351,7 +355,6 @@ const AppLayout = () => {
 };
 
 export default AppLayout;
-
 
 
 

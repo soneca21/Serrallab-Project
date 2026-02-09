@@ -38,7 +38,7 @@ const OrcamentosPage = () => {
         const { data: fullQuote, error } = await supabase.from('orders').select('*').eq('id', quoteId).single();
         if (error) { toast({ title: 'Erro ao duplicar', variant: 'destructive' }); return; }
         const { id, created_at, ...newQuoteData } = fullQuote;
-        const duplicatedTitle = `${fullQuote.title} (C\u00f3pia)`;
+        const duplicatedTitle = `${fullQuote.title} (Cópia)`;
         const { data: duplicatedQuote, error: insertError } = await supabase.from('orders').insert({ ...newQuoteData, title: duplicatedTitle, status: 'Rascunho' }).select('id').single();
         if (insertError) toast({ title: 'Erro ao duplicar', variant: 'destructive' });
         else {
@@ -58,13 +58,13 @@ const OrcamentosPage = () => {
         if (error) toast({ title: 'Erro ao excluir', variant: 'destructive' });
         else {
             const removed = quotes.find((quote) => quote.id === quoteId);
-            toast({ title: 'Exclu\u00eddo com sucesso!' });
+            toast({ title: 'Excluído com sucesso!' });
             fetchQuotes();
             createAuditLog(
                 'orcamento',
                 quoteId,
                 'delete',
-                { title: removed?.title || 'Or\u00e7amento' }
+                { title: removed?.title || 'Orçamento' }
             );
         }
     };
@@ -77,13 +77,13 @@ const OrcamentosPage = () => {
                 window.open(pdf_url, '_blank', 'noopener,noreferrer');
                 toast({ title: 'PDF aberto', description: 'O PDF foi aberto em uma nova aba.' });
             } else {
-                toast({ title: 'PDF indispon\u00edvel', description: 'N\u00e3o foi poss\u00edvel abrir o PDF.' });
+                toast({ title: 'PDF indisponível', description: 'Não foi possível abrir o PDF.' });
             }
         } catch (error) {
             if (error.code === 'PLAN_LIMIT') {
                 toast({
                     title: 'Recurso bloqueado',
-                    description: 'Fa\u00e7a upgrade para exportar PDFs profissionais.',
+                    description: 'Faça upgrade para exportar PDFs profissionais.',
                     variant: 'destructive',
                     action: <Button variant="secondary" size="sm" onClick={() => navigate('/app/planos')}>Upgrade</Button>
                 });
@@ -113,22 +113,22 @@ const OrcamentosPage = () => {
 
     return (
         <>
-            <Helmet><title>{'Or\u00e7amentos \u2014 Serrallab'}</title></Helmet>
+            <Helmet><title>{'Orçamentos - Serrallab'}</title></Helmet>
             <div className="w-full space-y-6">
                  <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                        <h2 className="text-3xl font-heading font-bold text-foreground">{'Or\u00e7amentos'}</h2>
+                        <h2 className="text-3xl font-heading font-bold text-foreground">{'Orçamentos'}</h2>
                         <p className="text-muted-foreground">Gerencie suas propostas comerciais.</p>
                     </div>
                     <Button asChild className="rounded-xl">
-                        <NavLink to="/app/orcamentos/novo"><PlusCircle className="mr-2 h-4 w-4" /> {'Novo Or\u00e7amento'}</NavLink>
+                        <NavLink to="/app/orcamentos/novo"><PlusCircle className="mr-2 h-4 w-4" /> {'Novo Orçamento'}</NavLink>
                     </Button>
                 </div><div className="h-px bg-border mb-4" /></div>
 
                 <Card className="rounded-xl border-surface-strong">
                     <CardHeader className="border-b border-border/50 pb-4">
                         <div className="flex items-center justify-between">
-                            <CardTitle>{'Lista de Or\u00e7amentos'}</CardTitle>
+                            <CardTitle>{'Lista de Orçamentos'}</CardTitle>
                             <div className="relative w-64">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input 
@@ -145,11 +145,11 @@ const OrcamentosPage = () => {
                             <Table>
                                 <TableHeader className="bg-surface/50">
                                     <TableRow>
-                                        <TableHead className="!text-center">{'T\u00edtulo'}</TableHead>
+                                        <TableHead className="!text-center">{'Título'}</TableHead>
                                         <TableHead className="!text-center">Cliente</TableHead>
                                         <TableHead className="!text-center">Valor</TableHead>
                                         <TableHead className="!text-center">Status</TableHead>
-                                        <TableHead className="!text-center">{'A\u00e7\u00f5es'}</TableHead>
+                                        <TableHead className="!text-center">{'Ações'}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -193,7 +193,7 @@ const OrcamentosPage = () => {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{'Nenhum or\u00e7amento encontrado.'}</TableCell>
+                                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">{'Nenhum orçamento encontrado.'}</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>

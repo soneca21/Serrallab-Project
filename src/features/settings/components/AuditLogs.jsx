@@ -13,7 +13,7 @@ import { ptBR } from 'date-fns/locale';
 const ACTION_LABELS = {
     create: 'Criado',
     update: 'Atualizado',
-    delete: 'Exclu\u00eddo',
+    delete: 'Excluído',
     login: 'Login',
     logout: 'Logout',
 };
@@ -21,10 +21,10 @@ const ACTION_LABELS = {
 const ENTITY_LABELS = {
     cliente: 'Cliente',
     fornecedor: 'Fornecedor',
-    orcamento: 'Or\u00e7amento',
+    orcamento: 'Orçamento',
     pedido: 'Pedido',
     lead: 'Lead',
-    usuario: 'Usu\u00e1rio',
+    usuario: 'Usuário',
 };
 
 const AuditLogs = () => {
@@ -134,11 +134,11 @@ const AuditLogs = () => {
                         <p className="text-xl font-semibold text-foreground">{summary.total}</p>
                     </div>
                     <div className="rounded-xl border border-border bg-muted/10 px-4 py-3">
-                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{'\u00daltimos 7 dias'}</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{'Últimos 7 dias'}</p>
                         <p className="text-xl font-semibold text-foreground">{summary.last7}</p>
                     </div>
                     <div className="rounded-xl border border-border bg-muted/10 px-4 py-3">
-                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{'Exclus\u00f5es'}</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{'Exclusões'}</p>
                         <p className="text-xl font-semibold text-foreground">{summary.deletes}</p>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ const AuditLogs = () => {
                         />
                     </div>
                     <div className="min-w-[10rem]">
-                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{'A\u00e7\u00e3o'}</p>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{'Ação'}</p>
                         <Select value={actionFilter} onValueChange={setActionFilter}>
                             <SelectTrigger className="rounded-xl">
                                 <SelectValue placeholder="Todas" />
@@ -182,16 +182,16 @@ const AuditLogs = () => {
                         </Select>
                     </div>
                     <div className="min-w-[10rem]">
-                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{'Per\u00edodo'}</p>
+                        <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{'Período'}</p>
                         <Select value={dateFilter} onValueChange={setDateFilter}>
                             <SelectTrigger className="rounded-xl">
-                                <SelectValue placeholder={'\u00daltimos 30 dias'} />
+                                <SelectValue placeholder={'Últimos 30 dias'} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="7">{'\u00daltimos 7 dias'}</SelectItem>
-                                <SelectItem value="30">{'\u00daltimos 30 dias'}</SelectItem>
-                                <SelectItem value="90">{'\u00daltimos 90 dias'}</SelectItem>
-                                <SelectItem value="all">{'Todo o hist\u00f3rico'}</SelectItem>
+                                <SelectItem value="7">{'Últimos 7 dias'}</SelectItem>
+                                <SelectItem value="30">{'Últimos 30 dias'}</SelectItem>
+                                <SelectItem value="90">{'Últimos 90 dias'}</SelectItem>
+                                <SelectItem value="all">{'Todo o histórico'}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -202,7 +202,7 @@ const AuditLogs = () => {
                         <TableHeader className="bg-surface-strong">
                             <TableRow>
                                 <TableHead className="text-center">{'Data/Hora'}</TableHead>
-                                <TableHead>{'A\u00e7\u00e3o'}</TableHead>
+                                <TableHead>{'Ação'}</TableHead>
                                 <TableHead>Entidade</TableHead>
                                 <TableHead>Detalhes</TableHead>
                             </TableRow>

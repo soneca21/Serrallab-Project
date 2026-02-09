@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, CheckCircle2, Hammer } from 'lucide-react'; 
+import { Loader2, CheckCircle2 } from 'lucide-react'; 
 import { Checkbox } from '@/components/ui/checkbox';
 
 const AuthPage = () => {
@@ -113,7 +113,11 @@ const AuthPage = () => {
             <div className="text-center mb-8">
               <div className="flex justify-center mb-6">
                 <div className="mb-4 inline-block bg-surface-strong p-6 rounded-full border-2 border-primary shadow-[0_0_30px_rgba(218,105,11,0.2)]">
-                    <Hammer className="h-16 w-16 mx-auto text-primary drop-shadow-[0_0_10px_rgba(218,105,11,0.5)]" />
+                    <img
+                      src="/pwa-192x192.png"
+                      alt="Logo Serrallab"
+                      className="h-16 w-16 mx-auto rounded-2xl object-cover"
+                    />
                 </div>
               </div>
               <h2 className="text-3xl font-heading font-bold text-white tracking-tight">

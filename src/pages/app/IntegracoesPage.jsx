@@ -11,7 +11,7 @@ import AppSectionHeader from '@/components/AppSectionHeader';
 const INTEGRATIONS = [
     { id: 'whatsapp', label: 'WhatsApp (Twilio)', provider: 'twilio', icon: MessageSquare, description: 'Envie alertas, follow-ups e confirmacoes via WhatsApp Business.' },
     { id: 'sms', label: 'SMS (Twilio)', provider: 'twilio', icon: Smartphone, description: 'Dispare avisos e lembretes por SMS em escala.' },
-    { id: 'sendgrid', label: 'Email (SendGrid)', icon: Mail, description: 'Emails transacionais e comunicados automaticos.' },
+    { id: 'sendgrid', label: 'Email (SendGrid)', icon: Mail, description: 'Emails transacionais e comunicados automáticos.' },
     { id: 'mercado_pago', label: 'Mercado Pago', icon: CreditCard, description: 'Receba via PIX e cartao com links de pagamento.' },
     { id: 'google_calendar', label: 'Google Calendar', icon: Calendar, description: 'Sincronize agendamentos da equipe em tempo real.' },
     { id: 'google_sheets', label: 'Google Sheets', icon: FileSpreadsheet, description: 'Exporte leads e orcamentos para planilhas.' },
@@ -47,7 +47,7 @@ const IntegracoesPage = () => {
             <div className="space-y-6 w-full max-w-full">
                 <AppSectionHeader
                     title={<span className="pl-3 border-l-4 border-primary">Integracoes</span>}
-                    description="Conecte ferramentas essenciais para cobranca, comunicacao e operacao diaria."
+                    description="Conecte ferramentas essenciais para cobrança, comunicação e operação diária."
                     actions={null}
                 />
 

@@ -63,7 +63,7 @@ export function isPushPayloadAllowed(payload: any, preferences?: Record<string, 
 
 export async function requestNotificationPermission(): Promise<NotificationPermission> {
     if (!('Notification' in window)) {
-        console.log('Este navegador nao oferece suporte a notificacoes na area de trabalho');
+        console.log('Este navegador não oferece suporte a notificações na área de trabalho');
         return 'denied';
     }
     return await Notification.requestPermission();
@@ -108,7 +108,7 @@ export async function syncPushPreferencesToServiceWorker(preferences?: Record<st
             preferences: buildPushPreferenceSnapshot(preferences),
         });
     } catch (error) {
-        console.error('Falha ao sincronizar preferencias de push com SW:', error);
+        console.error('Falha ao sincronizar preferências de push com SW:', error);
     }
 }
 

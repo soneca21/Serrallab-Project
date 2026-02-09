@@ -97,11 +97,11 @@ const SyncCenterPage = () => {
             toast({
                 title: 'Fila reprocessada',
                 description: isOnline
-                    ? `${permanentErrors.length} pendência(s) movida(s) para reprocessamento. Próximo passo: aguarde a sincronização.`
-                    : `${permanentErrors.length} pendência(s) preparadas. Próximo passo: reconecte-se para enviar automaticamente.`,
+                    ? `${permanentErrors.length} pendÃªncia(s) movida(s) para reprocessamento. PrÃ³ximo passo: aguarde a sincronizaÃ§Ã£o.`
+                    : `${permanentErrors.length} pendÃªncia(s) preparadas. PrÃ³ximo passo: reconecte-se para enviar automaticamente.`,
                 action: !isOnline ? (
                     <Button size="sm" variant="outline" onClick={() => navigate('/app/config/integracoes')}>
-                        Abrir configurações
+                        Abrir configuraÃ§Ãµes
                     </Button>
                 ) : undefined,
             });
@@ -112,13 +112,13 @@ const SyncCenterPage = () => {
             setOpFeedback({
                 tone: 'success',
                 message: isOnline
-                    ? `${permanentErrors.length} pendência(s) movida(s) para reprocessamento.`
-                    : `${permanentErrors.length} pendência(s) preparadas para envio ao reconectar.`,
+                    ? `${permanentErrors.length} pendÃªncia(s) movida(s) para reprocessamento.`
+                    : `${permanentErrors.length} pendÃªncia(s) preparadas para envio ao reconectar.`,
             });
         } catch (error) {
             toast({
                 title: 'Erro ao reprocessar',
-                description: `${error instanceof Error ? error.message : 'Não foi possível reprocessar as pendências.'} Próximo passo: tente novamente ou descarte os itens com erro permanente.`,
+                description: `${error instanceof Error ? error.message : 'NÃ£o foi possÃ­vel reprocessar as pendÃªncias.'} PrÃ³ximo passo: tente novamente ou descarte os itens com erro permanente.`,
                 variant: 'destructive',
                 action: (
                     <Button size="sm" variant="outline" onClick={() => void handleReprocessAll()}>
@@ -128,7 +128,7 @@ const SyncCenterPage = () => {
             });
             setOpFeedback({
                 tone: 'error',
-                message: error instanceof Error ? error.message : 'Não foi possível reprocessar as pendências.',
+                message: error instanceof Error ? error.message : 'NÃ£o foi possÃ­vel reprocessar as pendÃªncias.',
             });
         } finally {
             setBusy(false);
@@ -142,8 +142,8 @@ const SyncCenterPage = () => {
             await Promise.all(selectedPermanentErrors.map((item) => removeOfflineMutation(item.id)));
             setSelectedIds(new Set());
             toast({
-                title: 'Pendências descartadas',
-                description: `${selectedPermanentErrors.length} item(ns) removido(s). Próximo passo: sincronize para atualizar o estado geral.`,
+                title: 'PendÃªncias descartadas',
+                description: `${selectedPermanentErrors.length} item(ns) removido(s). PrÃ³ximo passo: sincronize para atualizar o estado geral.`,
                 action: (
                     <Button size="sm" variant="outline" onClick={() => void sync()}>
                         Sincronizar agora
@@ -158,7 +158,7 @@ const SyncCenterPage = () => {
         } catch (error) {
             toast({
                 title: 'Erro ao descartar',
-                description: `${error instanceof Error ? error.message : 'Não foi possível descartar os itens selecionados.'} Próximo passo: tente novamente ou remova os itens individualmente.`,
+                description: `${error instanceof Error ? error.message : 'NÃ£o foi possÃ­vel descartar os itens selecionados.'} PrÃ³ximo passo: tente novamente ou remova os itens individualmente.`,
                 variant: 'destructive',
                 action: (
                     <Button size="sm" variant="outline" onClick={() => void handleDiscardSelected()}>
@@ -168,7 +168,7 @@ const SyncCenterPage = () => {
             });
             setOpFeedback({
                 tone: 'error',
-                message: error instanceof Error ? error.message : 'Não foi possível descartar os itens selecionados.',
+                message: error instanceof Error ? error.message : 'NÃ£o foi possÃ­vel descartar os itens selecionados.',
             });
         } finally {
             setBusy(false);
@@ -181,12 +181,12 @@ const SyncCenterPage = () => {
                 href="#sync-errors-table"
                 className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-background focus:border focus:border-primary focus:px-3 focus:py-2 focus:rounded-md"
             >
-                Ir para pendências com erro permanente
+                Ir para pendÃªncias com erro permanente
             </a>
             <div>
-                <h1 id="sync-center-title" className="pwa-type-title text-foreground">Centro de Sincronização</h1>
+                <h1 id="sync-center-title" className="pwa-type-title text-foreground">Centro de SincronizaÃ§Ã£o</h1>
                 <p className="pwa-type-body text-muted-foreground mt-1">
-                    Acompanhe fila offline, estado da sincronização e resolva pendências sem suporte técnico.
+                    Acompanhe fila offline, estado da sincronizaÃ§Ã£o e resolva pendÃªncias sem suporte tÃ©cnico.
                 </p>
             </div>
 
@@ -203,19 +203,19 @@ const SyncCenterPage = () => {
 
                 <Card className="pwa-surface-card">
                     <CardHeader className="pb-2">
-                        <CardDescription className="pwa-type-meta">Último sync</CardDescription>
+                        <CardDescription className="pwa-type-meta">Ãšltimo sync</CardDescription>
                         <CardTitle className="pwa-type-subtitle">{formatDate(lastSync)}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="pwa-type-meta">
-                            {isSyncing ? 'Sincronizando agora...' : 'Horário da última sincronização concluída.'}
+                            {isSyncing ? 'Sincronizando agora...' : 'HorÃ¡rio da Ãºltima sincronizaÃ§Ã£o concluÃ­da.'}
                         </p>
                     </CardContent>
                 </Card>
 
                 <Card className="pwa-surface-card">
                     <CardHeader className="pb-2">
-                        <CardDescription className="pwa-type-meta">Status de conexão</CardDescription>
+                        <CardDescription className="pwa-type-meta">Status de conexÃ£o</CardDescription>
                         <CardTitle className="flex items-center gap-2 pwa-type-subtitle">
                             {isOnline ? <Wifi className="h-4 w-4 text-success" /> : <WifiOff className="h-4 w-4 text-offline" />}
                             {isOnline ? 'Online' : 'Offline'}
@@ -223,7 +223,7 @@ const SyncCenterPage = () => {
                     </CardHeader>
                     <CardContent>
                         <p className="pwa-type-meta">
-                            {isOnline ? 'Reprocessamento automático ativo.' : 'A fila será processada ao reconectar.'}
+                            {isOnline ? 'Reprocessamento automÃ¡tico ativo.' : 'A fila serÃ¡ processada ao reconectar.'}
                         </p>
                     </CardContent>
                 </Card>
@@ -234,7 +234,7 @@ const SyncCenterPage = () => {
                         <CardTitle className="pwa-type-subtitle">{permanentErrors.length}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="pwa-type-meta">Itens que exigem ação manual do usuário.</p>
+                        <p className="pwa-type-meta">Itens que exigem aÃ§Ã£o manual do usuÃ¡rio.</p>
                     </CardContent>
                 </Card>
             </div>
@@ -244,10 +244,10 @@ const SyncCenterPage = () => {
                     <div>
                         <CardTitle className="flex items-center gap-2 pwa-type-subtitle">
                             <AlertTriangle className="h-4 w-4 text-warning" />
-                            Pendências com erro permanente
+                            PendÃªncias com erro permanente
                         </CardTitle>
                         <CardDescription className="pwa-type-body">
-                            Selecione itens para descartar ou reenvie tudo para tentativa de sincronização.
+                            Selecione itens para descartar ou reenvie tudo para tentativa de sincronizaÃ§Ã£o.
                         </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -292,21 +292,21 @@ const SyncCenterPage = () => {
                         ) : null}
                     </AnimatePresence>
                     {loading ? (
-                        <p className="pwa-type-body text-muted-foreground" role="status" aria-live="polite">Carregando pendências...</p>
+                        <p className="pwa-type-body text-muted-foreground" role="status" aria-live="polite">Carregando pendÃªncias...</p>
                     ) : permanentErrors.length === 0 ? (
-                        <p className="pwa-type-body text-muted-foreground" role="status" aria-live="polite">Nenhuma pendência com erro permanente no momento.</p>
+                        <p className="pwa-type-body text-muted-foreground" role="status" aria-live="polite">Nenhuma pendÃªncia com erro permanente no momento.</p>
                     ) : (
-                        <Table id="sync-errors-table" role="region" aria-label="Tabela de pendências com erro permanente">
+                        <Table id="sync-errors-table" role="region" aria-label="Tabela de pendÃªncias com erro permanente">
                             <TableHeader>
                                 <TableRow>
                                     <TableHead className="w-[44px]">
                                         <Checkbox
                                             checked={allSelected}
                                             onCheckedChange={(checked) => toggleSelectAll(checked === true)}
-                                            aria-label="Selecionar todas as pendências"
+                                            aria-label="Selecionar todas as pendÃªncias"
                                         />
                                     </TableHead>
-                                    <TableHead>Mutação</TableHead>
+                                    <TableHead>MutaÃ§Ã£o</TableHead>
                                     <TableHead>Entidade</TableHead>
                                     <TableHead>Tentativas</TableHead>
                                     <TableHead>Erro</TableHead>
@@ -321,7 +321,7 @@ const SyncCenterPage = () => {
                                             <Checkbox
                                                 checked={selectedIds.has(item.id)}
                                                 onCheckedChange={(checked) => toggleSelectOne(item.id, checked === true)}
-                                                aria-label={`Selecionar pendência ${item.mutation_type}`}
+                                                aria-label={`Selecionar pendÃªncia ${item.mutation_type}`}
                                             />
                                         </TableCell>
                                         <TableCell className="font-medium">{item.mutation_type}</TableCell>

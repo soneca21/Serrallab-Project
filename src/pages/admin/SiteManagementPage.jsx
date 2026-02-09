@@ -1901,7 +1901,7 @@ const AiAgentTab = ({ onHealthCheck }) => {
             toast({ title: 'Configurações salvas' });
         } catch (error) {
             console.error('Erro ao salvar agente IA:', error);
-            toast({ title: 'Erro ao salvar configuracoes', variant: 'destructive' });
+            toast({ title: 'Erro ao salvar configurações', variant: 'destructive' });
         } finally {
             setSaving(false);
         }
@@ -1963,7 +1963,7 @@ const AiAgentTab = ({ onHealthCheck }) => {
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base">Uso e Desempenho</CardTitle>
-                        <CardDescription>Resumo das ultimas execucoes registradas.</CardDescription>
+                        <CardDescription>Resumo das últimas execuções registradas.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
                         <div className="flex items-center justify-between">
@@ -2080,13 +2080,13 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
 
     const pageMetaByTab = {
         overview: {
-            title: 'Vis\u00e3o Geral',
-            description: 'Indicadores do SaaS, receita e opera\u00e7\u00e3o.',
+            title: 'Visão Geral',
+            description: 'Indicadores do SaaS, receita e operação.',
             Icon: BarChart2,
         },
         users: {
             title: 'Contas',
-            description: 'Gest\u00e3o de assinaturas, status e limites.',
+            description: 'Gestão de assinaturas, status e limites.',
             Icon: Users,
         },
         clients: {
@@ -2096,17 +2096,17 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
         },
         plans: {
             title: 'Planos & Pacotes',
-            description: 'Precifica\u00e7\u00e3o, limites e cat\u00e1logo de planos.',
+            description: 'Precificação, limites e catálogo de planos.',
             Icon: Star,
         },
         billing: {
             title: 'Financeiro',
-            description: 'Faturas, cobran\u00e7a e sa\u00fade financeira.',
+            description: 'Faturas, cobrança e saúde financeira.',
             Icon: DollarSign,
         },
         audit: {
             title: 'Auditoria',
-            description: 'Registro de a\u00e7\u00f5es administrativas e eventos.',
+            description: 'Registro de ações administrativas e eventos.',
             Icon: Activity,
         },
         'ai-agent': {
@@ -2120,7 +2120,7 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
 
     return (
         <HelmetProvider>
-            <Helmet><title>{`${pageMeta.title} - Admin \u2014 Serrallab`}</title></Helmet>
+            <Helmet><title>{`${pageMeta.title} - Admin - Serrallab`}</title></Helmet>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

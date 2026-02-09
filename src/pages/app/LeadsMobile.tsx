@@ -144,7 +144,7 @@ const LeadsMobile: React.FC = () => {
                     <OperationalStateCard
                         kind="error"
                         title="Falha ao carregar leads"
-                        description={`${errorMessage} Proximo passo: tente novamente.`}
+                        description={`${errorMessage} Próximo passo: tente novamente.`}
                         onPrimaryAction={() => void handleRefresh()}
                     />
                 )}

@@ -7,12 +7,12 @@ import { Button } from '@/components/ui/button';
 
 const TAB_LABELS = {
     profile: 'Perfil',
-    company: 'Organiza\u00e7\u00e3o',
+    company: 'Organização',
     team: 'Equipe',
     billing: 'Planos',
     channels: 'Canais',
-    notifications: 'Notifica\u00e7\u00f5es',
-    security: 'Seguran\u00e7a',
+    notifications: 'Notificações',
+    security: 'Segurança',
 };
 
 const ConfigPage = () => {
@@ -23,17 +23,17 @@ const ConfigPage = () => {
     return (
         <>
             <Helmet>
-                <title>Configura\u00e7\u00f5es - Serrallab</title>
+                <title>Configurações - Serrallab</title>
             </Helmet>
             <div className="w-full space-y-6">
                 <AppSectionHeader
                     title={label}
-                    description={'Ajuste sua conta, equipe, notifica\u00e7\u00f5es e integra\u00e7\u00f5es em um s\u00f3 lugar.'}
+                    description={'Ajuste sua conta, equipe, notificações e integrações em um só lugar.'}
                 />
                 <div className="rounded-xl border border-border/60 bg-card/40 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="space-y-1">
-                        <p className="font-medium">Sincroniza\u00e7\u00e3o</p>
-                        <p className="text-sm text-muted-foreground">Central de fila e reprocessamento de pend\u00eancias offline.</p>
+                        <p className="font-medium">Sincronização</p>
+                        <p className="text-sm text-muted-foreground">Central de fila e reprocessamento de pendências offline.</p>
                     </div>
                     <Button asChild variant="outline" className="w-full sm:w-auto">
                         <Link to="/app/sincronizacao">Abrir central</Link>

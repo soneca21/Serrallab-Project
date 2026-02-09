@@ -127,9 +127,9 @@ const ClienteProfilePage = () => {
             } else if (!fallbackCopy()) {
                 throw new Error('fallback_failed');
             }
-            toast({ title: 'Copiado', description: `${label} copiado para a \u00e1rea de transfer\u00eancia.` });
+            toast({ title: 'Copiado', description: `${label} copiado para a área de transferência.` });
         } catch (error) {
-            toast({ title: 'Erro', description: 'N\u00e3o foi poss\u00edvel copiar.', variant: 'destructive' });
+            toast({ title: 'Erro', description: 'Não foi possível copiar.', variant: 'destructive' });
         }
     };
 
@@ -163,7 +163,7 @@ const ClienteProfilePage = () => {
             <div className="w-full space-y-6">
                 <AppSectionHeader
                     title={`Perfil do Cliente > ${client.name}`}
-                    description={'Visualize o hist\u00f3rico completo de or\u00e7amentos e contatos para este cliente.'}
+                    description={'Visualize o histórico completo de orçamentos e contatos para este cliente.'}
                     actions={
                         <div className="flex flex-wrap gap-2">
                             <Button asChild className="rounded-xl">
@@ -188,7 +188,7 @@ const ClienteProfilePage = () => {
                             <div className="space-y-2 mt-2">
                                 <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">E-mail</p>
                                 <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <p className="text-sm font-medium text-foreground break-words">{client.email || 'N\u00e3o informado'}</p>
+                                    <p className="text-sm font-medium text-foreground break-words">{client.email || 'Não informado'}</p>
                                     {client.email && (
                                         <Button variant="outline" size="sm" onClick={() => handleCopy(client.email, 'E-mail')}>
                                             <Copy className="mr-2 h-4 w-4" /> Copiar e-mail
@@ -199,7 +199,7 @@ const ClienteProfilePage = () => {
                             <div className="space-y-2">
                                 <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Telefone</p>
                                 <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <p className="text-sm font-medium text-foreground">{client.phone || 'N\u00e3o informado'}</p>
+                                    <p className="text-sm font-medium text-foreground">{client.phone || 'Não informado'}</p>
                                     <div className="flex flex-wrap gap-2">
                                         {client.phone && (
                                             <Button variant="outline" size="sm" onClick={() => handleCopy(client.phone, 'Telefone')}>
@@ -219,11 +219,11 @@ const ClienteProfilePage = () => {
                             <div className="space-y-2">
                                 <div>
                                     <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Empresa</p>
-                                    <p className="text-sm font-medium text-foreground">{client.company || 'N\u00e3o informado'}</p>
+                                    <p className="text-sm font-medium text-foreground">{client.company || 'Não informado'}</p>
                                 </div>
                                 <div>
                                     <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Cargo/Fun&ccedil;&atilde;o</p>
-                                    <p className="text-sm font-medium text-foreground">{client.position || 'N\u00e3o informado'}</p>
+                                    <p className="text-sm font-medium text-foreground">{client.position || 'Não informado'}</p>
                                 </div>
                             </div>
                             <div className="space-y-4">
@@ -243,11 +243,11 @@ const ClienteProfilePage = () => {
                             <div className="grid grid-cols-2 gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
                                 <div className="rounded-xl border border-border bg-muted/10 px-3 py-2">
                                     <p>Estado</p>
-                                    <p className="text-foreground text-sm mt-1">{client.state || 'N\u00e3o informado'}</p>
+                                    <p className="text-foreground text-sm mt-1">{client.state || 'Não informado'}</p>
                                 </div>
                                 <div className="rounded-xl border border-border bg-muted/10 px-3 py-2">
                                     <p>Cidade</p>
-                                    <p className="text-foreground text-sm mt-1">{client.city || 'N\u00e3o informado'}</p>
+                                    <p className="text-foreground text-sm mt-1">{client.city || 'Não informado'}</p>
                                 </div>
                             </div>
                             <div className="space-y-3">
@@ -312,7 +312,7 @@ const ClienteProfilePage = () => {
                                     <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Filtrar por per&iacute;odo</p>
                                     <Select value={dateFilter} onValueChange={setDateFilter}>
                                         <SelectTrigger className="rounded-xl">
-                                            <SelectValue placeholder={'Todo o hist\u00f3rico'} />
+                                            <SelectValue placeholder={'Todo o histórico'} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="all">Todo o hist&oacute;rico</SelectItem>

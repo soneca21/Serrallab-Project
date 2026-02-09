@@ -29,9 +29,9 @@ const brazilStates = [
 
 const contactPreferences = [
     { value: 'email', label: 'Email', helper: 'Usamos o email para mensagens e documentos.' },
-    { value: 'phone', label: 'Telefone', helper: 'Ligamos durante o horario comercial.' },
-    { value: 'whatsapp', label: 'WhatsApp', helper: 'Preferencia para links e respostas rapidas.' },
-    { value: 'both', label: 'Email e telefone', helper: 'Entramos por ambos conforme a situacao.' },
+    { value: 'phone', label: 'Telefone', helper: 'Ligamos durante o horário comercial.' },
+    { value: 'whatsapp', label: 'WhatsApp', helper: 'Preferência para links e respostas rápidas.' },
+    { value: 'both', label: 'Email e telefone', helper: 'Entramos por ambos conforme a situação.' },
 ];
 
 const validateEmail = (value) => /^\S+@\S+\.\S+$/.test(value);

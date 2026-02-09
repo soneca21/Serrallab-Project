@@ -92,7 +92,7 @@ const FornecedoresPage = () => {
                 <div className="space-y-2"><div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div>
                         <h2 className="text-3xl font-heading font-bold">Fornecedores</h2>
-                        <p className="text-muted-foreground">{'Gerencie seus parceiros de neg\u00f3cio.'}</p>
+                        <p className="text-muted-foreground">{'Gerencie seus parceiros de negócio.'}</p>
                     </div>
                     <Button onClick={() => { setFormData({}); setIsDialogOpen(true); }} className="rounded-xl w-full sm:w-auto">
                         <PlusCircle className="mr-2 h-4 w-4" /> Novo Fornecedor
@@ -119,7 +119,7 @@ const FornecedoresPage = () => {
                                     <TableHead className="text-center">Contato</TableHead>
                                     <TableHead className="text-center">Email</TableHead>
                                     <TableHead className="text-center">Telefone</TableHead>
-                                    <TableHead className="text-center">{'A\u00e7\u00f5es'}</TableHead>
+                                    <TableHead className="text-center">{'Ações'}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -216,7 +216,7 @@ const FornecedoresPage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <Label>{'Endere\u00e7o'}</Label>
+                                    <Label>{'Endereço'}</Label>
                                     <Input
                                         value={formData.address || ''}
                                         onChange={e => setFormData({ ...formData, address: e.target.value })}
@@ -225,7 +225,7 @@ const FornecedoresPage = () => {
                                 </div>
                             </div>
                             <div>
-                                <Label>{'Observa\u00e7\u00f5es'}</Label>
+                                <Label>{'Observações'}</Label>
                                 <Textarea
                                     value={formData.notes || ''}
                                     onChange={e => setFormData({ ...formData, notes: e.target.value })}

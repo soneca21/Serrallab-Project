@@ -42,12 +42,12 @@ const SchedulesList: React.FC<SchedulesListProps> = ({
                   Cliente / Modelo
                 </TableHead>
                 <TableHead className="w-[12%] px-5 py-3 text-center border-l border-border">Canal</TableHead>
-                <TableHead className="w-[14%] px-5 py-3 text-center border-l border-border">{'Recorr\u00eancia'}</TableHead>
+                <TableHead className="w-[14%] px-5 py-3 text-center border-l border-border">{'Recorrência'}</TableHead>
                 <TableHead className="w-[16%] px-5 py-3 text-center border-l border-border">
-                  {'Pr\u00f3xima Execu\u00e7\u00e3o'}
+                  {'Próxima Execução'}
                 </TableHead>
                 <TableHead className="w-[12%] px-5 py-3 text-center border-l border-border">Status</TableHead>
-                <TableHead className="w-[14%] px-6 py-3 text-center border-l border-border">{'A\u00e7\u00f5es'}</TableHead>
+                <TableHead className="w-[14%] px-6 py-3 text-center border-l border-border">{'Ações'}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -93,7 +93,7 @@ const SchedulesList: React.FC<SchedulesListProps> = ({
                       </TableCell>
                       <TableCell className="px-6 py-3 align-middle border-l border-border">
                         <div className="flex justify-center gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => onViewHistory(schedule)} title={'Hist\u00f3rico'}>
+                          <Button variant="ghost" size="icon" onClick={() => onViewHistory(schedule)} title={'Histórico'}>
                             <History className="h-4 w-4 text-blue-500" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => onEdit(schedule)} title="Editar">

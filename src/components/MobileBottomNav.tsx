@@ -4,10 +4,10 @@ import { LayoutDashboard, Inbox, Users, FileText, Columns, Settings } from 'luci
 
 const MobileBottomNav: React.FC = () => {
     const navItems = [
-        { path: '/app', label: 'In\u00edcio', icon: LayoutDashboard, end: true },
+        { path: '/app', label: 'Início', icon: LayoutDashboard, end: true },
         { path: '/app/leads', label: 'Leads', icon: Inbox },
         { path: '/app/clientes', label: 'Clientes', icon: Users },
-        { path: '/app/orcamentos', label: 'Or\u00e7am.', icon: FileText },
+        { path: '/app/orcamentos', label: 'Orçam.', icon: FileText },
         { path: '/app/pipeline', label: 'Pipeline', icon: Columns },
         { path: '/app/config', label: 'Config', icon: Settings },
     ];

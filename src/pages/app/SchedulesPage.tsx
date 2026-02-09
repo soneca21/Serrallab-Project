@@ -48,7 +48,7 @@ const SchedulesPage = () => {
         try {
             await deleteSchedule(id);
             setSchedules(prev => prev.filter(s => s.id !== id));
-            toast({ title: "Sucesso", description: "Agendamento exclu\u00eddo." });
+            toast({ title: "Sucesso", description: "Agendamento excluído." });
         } catch (error) {
             toast({ title: "Erro", description: "Falha ao excluir.", variant: "destructive" });
         }
@@ -79,7 +79,7 @@ const SchedulesPage = () => {
                             Agendamentos
                         </h2>
                         <p className="text-muted-foreground">
-                            {'Programe mensagens recorrentes, lembretes e follow-ups autom\u00e1ticos.'}
+                            {'Programe mensagens recorrentes, lembretes e follow-ups automáticos.'}
                         </p>
                     </div>
                     <Button onClick={() => { setEditingSchedule(undefined); setIsFormOpen(true); }} className="w-full sm:w-auto">

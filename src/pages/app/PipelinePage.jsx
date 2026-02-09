@@ -115,7 +115,7 @@ const PipelinePage = () => {
         }
 
         if (result.state === 'pending') {
-            toast({ title: 'Atualizacao pendente', description: 'Etapa salva localmente e sera sincronizada ao reconectar.' });
+            toast({ title: 'Atualização pendente', description: 'Etapa salva localmente e será sincronizada ao reconectar.' });
         }
     };
 
@@ -388,7 +388,6 @@ const PipelinePage = () => {
 };
 
 export default PipelinePage;
-
 
 
 

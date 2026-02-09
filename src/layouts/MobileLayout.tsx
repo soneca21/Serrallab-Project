@@ -13,7 +13,9 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
         <div className="pwa-native-shell md:hidden">
             <OfflineIndicator />
             <main className="pwa-native-main overflow-x-hidden">
-                {children}
+                <div className="pwa-native-content">
+                    {children}
+                </div>
             </main>
             <MobileBottomNav />
             <Toaster />

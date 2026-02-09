@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { Zap, Users, Package, BarChart, Settings, Send, Hammer, Check, Hammer as HammerIcon, ShieldCheck, Award, Cpu, Gem, Building } from 'lucide-react';
+import { Zap, Users, Package, BarChart, Settings, Send, Check, ShieldCheck, Award, Cpu, Gem, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NavLink } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -28,7 +28,11 @@ const HeroSection = () => (
     <div className="w-full relative z-10">
       <motion.div variants={staggerContainer} initial="hidden" animate="visible">
         <motion.div variants={fadeIn()} className="mb-8 inline-block bg-surface-strong p-6 rounded-full border-2 border-primary shadow-[0_0_30px_rgba(218,105,11,0.2)]">
-          <HammerIcon className="h-14 w-14 md:h-24 md:w-24 mx-auto text-primary drop-shadow-[0_0_10px_rgba(218,105,11,0.5)]" />
+          <img
+            src="/pwa-512x512.png"
+            alt="Logo Serrallab"
+            className="h-14 w-14 md:h-24 md:w-24 mx-auto rounded-[28px] object-cover"
+          />
         </motion.div>
         <motion.h1 variants={fadeIn(0.1)} className="text-5xl md:text-7xl font-heading font-bold mb-6 tracking-tight text-foreground">
           Transforme Orçamentos<br /> <span className="text-primary drop-shadow-[0_0_15px_rgba(218,105,11,0.3)]">em Lucro</span>
@@ -232,7 +236,11 @@ const CTASection = () => (
         <div className="w-full text-center relative z-10 mt-24">
                 <motion.div className="mt-12" initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.5 }} variants={fadeIn()}>
                 <div className="mb-8 inline-flex items-center justify-center p-4 bg-surface-strong rounded-full border border-primary/30 shadow-[0_0_20px_rgba(218,105,11,0.15)]">
-                    <Hammer className="h-14 w-14 text-primary" />
+                    <img
+                        src="/pwa-512x512.png"
+                        alt="Logo Serrallab"
+                        className="h-14 w-14 rounded-2xl object-cover"
+                    />
                 </div>
                 <h2 className="text-3xl md:text-5xl font-heading font-bold mb-6 text-foreground">
                     Pronto para modernizar sua serralheria?

@@ -206,6 +206,16 @@
     min-height: 100dvh;
     padding-top: calc(var(--pwa-safe-top) + var(--pwa-native-header-height));
     padding-bottom: calc(var(--pwa-safe-bottom) + var(--pwa-native-tabbar-height));
+    background:
+      radial-gradient(95% 40% at 50% 0%, hsl(var(--primary) / 0.08) 0%, transparent 55%),
+      transparent;
+  }
+
+  .pwa-native-content {
+    width: 100%;
+    max-width: 56rem;
+    margin-inline: auto;
+    padding-inline: clamp(0.5rem, 2.5vw, 1rem);
   }
 
   .pwa-native-header {

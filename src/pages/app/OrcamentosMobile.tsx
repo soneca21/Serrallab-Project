@@ -63,7 +63,7 @@ const OrcamentosMobile: React.FC = () => {
         switch (status) {
             case 'Aprovado': return 'bg-success text-success-foreground';
             case 'Rejeitado': return 'bg-error text-error-foreground';
-            case 'Negocia\u00e7\u00e3o':
+            case 'Negociação':
             case 'Negociacao': return 'bg-warning text-warning-foreground';
             default: return 'bg-offline text-offline-foreground';
         }
@@ -84,7 +84,7 @@ const OrcamentosMobile: React.FC = () => {
                     <OperationalStateCard
                         kind="error"
                         title="Falha ao carregar orçamentos"
-                        description={`${errorMessage} Proximo passo: tente novamente.`}
+                        description={`${errorMessage} Próximo passo: tente novamente.`}
                         onPrimaryAction={() => void loadData()}
                     />
                 )}

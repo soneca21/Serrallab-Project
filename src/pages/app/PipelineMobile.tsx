@@ -94,7 +94,7 @@ const PipelineMobile: React.FC = () => {
                     <OperationalStateCard
                         kind="error"
                         title="Falha ao carregar pipeline"
-                        description={`${errorMessage} Proximo passo: tente novamente.`}
+                        description={`${errorMessage} Próximo passo: tente novamente.`}
                         onPrimaryAction={() => void loadData()}
                     />
                 )}
