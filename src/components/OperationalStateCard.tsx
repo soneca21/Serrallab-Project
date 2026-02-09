@@ -37,17 +37,17 @@ const iconByKind: Record<OperationalStateKind, React.ReactNode> = {
 const defaultCopy: Record<OperationalStateKind, { title: string; description: string; action: string }> = {
     loading: {
         title: 'Carregando dados',
-        description: 'Buscando dados locais e verificando sincronizacao.',
+        description: 'Buscando dados locais e verificando sincronização.',
         action: 'Atualizar',
     },
     empty: {
-        title: 'Nenhum dado disponivel',
-        description: 'Nao ha registros para exibir neste momento.',
+        title: 'Nenhum dado disponível',
+        description: 'Não há registros para exibir neste momento.',
         action: 'Atualizar',
     },
     error: {
         title: 'Falha ao carregar dados',
-        description: 'Nao foi possivel concluir a leitura. Tente novamente.',
+        description: 'Não foi possível concluir a leitura. Tente novamente.',
         action: 'Tentar novamente',
     },
     'offline-empty': {

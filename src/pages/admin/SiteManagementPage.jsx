@@ -34,7 +34,7 @@ const ENTITY_LABELS = {
 };
 
 const AI_SETTINGS_ID = '00000000-0000-0000-0000-000000000001';
-const DEFAULT_AI_SYSTEM_PROMPT = 'Voce e um assistente para orcamentos. Gere um titulo curto, descricao clara e itens com material_id valido. Retorne apenas JSON valido.';
+const DEFAULT_AI_SYSTEM_PROMPT = 'Você é um assistente para orçamentos. Gere um título curto, descrição clara e itens com material_id válido. Retorne apenas JSON válido.';
 
 const formatCurrency = (value) => {
     const safe = Number(value) || 0;
@@ -1898,7 +1898,7 @@ const AiAgentTab = ({ onHealthCheck }) => {
                 item_limit: Number(data.item_limit ?? 20),
                 system_prompt: data.system_prompt || DEFAULT_AI_SYSTEM_PROMPT,
             });
-            toast({ title: 'Configuracoes salvas' });
+            toast({ title: 'Configurações salvas' });
         } catch (error) {
             console.error('Erro ao salvar agente IA:', error);
             toast({ title: 'Erro ao salvar configuracoes', variant: 'destructive' });
@@ -2111,7 +2111,7 @@ const SiteManagementPage = ({ initialTab = 'overview', hideTabs = false }) => {
         },
         'ai-agent': {
             title: 'Agente IA',
-            description: 'Governanca e configuracao do assistente de orcamentos.',
+            description: 'Governança e configuração do assistente de orçamentos.',
             Icon: Bot,
         },
     };
@@ -2436,4 +2436,3 @@ const UserDetailsDialog = ({ user, plans, packages, onSave, onCancel, isLoading 
 };
 
 export default SiteManagementPage;
-

@@ -389,7 +389,7 @@ const OrcamentoFormPage = () => {
             if (pdf_url) {
                 window.open(pdf_url, '_blank', 'noopener,noreferrer');
             } else {
-                toast({ title: 'PDF indisponivel', description: 'Nao foi possivel abrir o PDF.', variant: 'destructive' });
+                toast({ title: 'PDF indisponível', description: 'Não foi possível abrir o PDF.', variant: 'destructive' });
             }
         } catch (error) {
             toast({ title: 'Erro ao abrir PDF', description: error.message || 'Tente novamente mais tarde.', variant: 'destructive' });
@@ -459,7 +459,7 @@ const OrcamentoFormPage = () => {
             painting_cost: parseNumber(suggestion.painting_cost),
             transport_cost: parseNumber(suggestion.transport_cost),
         }));
-        toast({ title: 'Sugestao aplicada', description: 'O orcamento foi preenchido com os dados da IA.' });
+        toast({ title: 'Sugestão aplicada', description: 'O orçamento foi preenchido com os dados da IA.' });
     };
 
     const openMaterialSelector = (itemId) => { setCurrentItemId(itemId); setIsSelectorOpen(true); };
@@ -498,7 +498,7 @@ const OrcamentoFormPage = () => {
         setClients(prev => [data, ...prev]);
         setFormData(prev => ({ ...prev, client_id: data.id }));
         setIsNewClientOpen(false);
-        toast({ title: 'Cliente criado', description: 'Cliente adicionado ao orcamento.' });
+        toast({ title: 'Cliente criado', description: 'Cliente adicionado ao orçamento.' });
         createAuditLog('cliente', data.id, 'create', {
             name: data.name,
             email: data.email,
@@ -520,12 +520,12 @@ const OrcamentoFormPage = () => {
     
     const handleSave = async (showToast = true) => {
         if (!formData.title.trim()) {
-            toast({ title: 'Titulo obrigatorio', description: 'Informe um titulo para o orcamento.', variant: 'destructive' });
+            toast({ title: 'Título obrigatório', description: 'Informe um título para o orçamento.', variant: 'destructive' });
             return { success: false };
         }
 
         if (!formData.client_id) {
-            toast({ title: 'Cliente obrigatorio', description: 'Selecione um cliente para o orcamento.', variant: 'destructive' });
+            toast({ title: 'Cliente obrigatório', description: 'Selecione um cliente para o orçamento.', variant: 'destructive' });
             return { success: false };
         }
 
@@ -576,7 +576,7 @@ const OrcamentoFormPage = () => {
             return { success: false, error: result.error };
         } else {
             const orcamentoId = id || result.data.id;
-            if(showToast) toast({ title: 'Sucesso!', description: 'Orcamento salvo.' });
+            if(showToast) toast({ title: 'Sucesso!', description: 'Orçamento salvo.' });
 
             const webhookEvent = id ? 'orcamento.updated' : 'orcamento.created';
 
@@ -636,29 +636,29 @@ const OrcamentoFormPage = () => {
         if (!orcamentoId) {
             const saveResult = await handleSave(false);
             if (!saveResult.success) {
-                toast({ title: 'Falha no Envio', description: 'Primeiro salve o orcamento para poder envia-lo.', variant: 'destructive' });
+                toast({ title: 'Falha no envio', description: 'Primeiro salve o orçamento para poder enviá-lo.', variant: 'destructive' });
                 return;
             }
             orcamentoId = saveResult.id;
         }
 
         if (targetType === 'cliente' && !client) {
-            toast({ title: 'Atencao', description: 'Selecione um cliente para enviar o orcamento.', variant: 'destructive' });
+            toast({ title: 'Atenção', description: 'Selecione um cliente para enviar o orçamento.', variant: 'destructive' });
             return;
         }
 
         if (targetType === 'fornecedor') {
-            toast({ title: 'Em breve', description: 'Envio para fornecedores ainda nao implementado.' });
+            toast({ title: 'Em breve', description: 'Envio para fornecedores ainda não implementado.' });
             return;
         }
 
         if ((method === 'whatsapp' || method === 'sms') && !client?.phone) {
-            toast({ title: 'Erro', description: 'O cliente nao possui um numero de telefone valido.', variant: 'destructive' });
+            toast({ title: 'Erro', description: 'O cliente não possui um número de telefone válido.', variant: 'destructive' });
             return;
         }
 
         if (method === 'email' && !client?.email) {
-            toast({ title: 'Erro', description: 'O cliente nao possui um email valido.', variant: 'destructive' });
+            toast({ title: 'Erro', description: 'O cliente não possui um e-mail válido.', variant: 'destructive' });
             return;
         }
 
@@ -811,7 +811,7 @@ const OrcamentoFormPage = () => {
                 <DialogContent className="rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Novo Cliente</DialogTitle>
-                        <DialogDescription>Cadastre o cliente sem sair do orcamento.</DialogDescription>
+                        <DialogDescription>Cadastre o cliente sem sair do orçamento.</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSaveNewClient} className="space-y-4">
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -946,4 +946,3 @@ const OrcamentoFormPage = () => {
 };
 
 export default OrcamentoFormPage;
-

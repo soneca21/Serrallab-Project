@@ -10,9 +10,9 @@ interface MobileLayoutProps {
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({ children }) => {
     return (
-        <div className="min-h-screen bg-background text-foreground pb-20">
+        <div className="pwa-native-shell md:hidden">
             <OfflineIndicator />
-            <main className="flex-1 overflow-x-hidden">
+            <main className="pwa-native-main overflow-x-hidden">
                 {children}
             </main>
             <MobileBottomNav />

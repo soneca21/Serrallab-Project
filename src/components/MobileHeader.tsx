@@ -13,23 +13,28 @@ interface MobileHeaderProps {
 
 const MobileHeader: React.FC<MobileHeaderProps> = ({ title, onBack, onMenu, className }) => {
     return (
-        <header className={cn("sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border h-14 flex items-center px-4 justify-between", className)}>
-            <div className="flex items-center w-10">
+        <header
+            className={cn(
+                'pwa-native-header fixed top-0 left-0 right-0 z-50 flex items-center px-3 justify-between',
+                className
+            )}
+        >
+            <div className="flex items-center w-11">
                 {onBack && (
-                    <Button variant="ghost" size="icon" onClick={onBack} className="h-10 w-10">
-                        <ArrowLeft className="h-6 w-6" />
+                    <Button variant="ghost" size="icon" onClick={onBack} className="h-9 w-9 rounded-xl">
+                        <ArrowLeft className="h-5 w-5" />
                     </Button>
                 )}
             </div>
             
-            <h1 className="pwa-type-subtitle truncate text-center flex-1">
+            <h1 className="pwa-type-subtitle truncate text-center flex-1 tracking-tight">
                 {title}
             </h1>
 
-            <div className="flex items-center w-10 justify-end">
+            <div className="flex items-center w-11 justify-end">
                 {onMenu && (
-                    <Button variant="ghost" size="icon" onClick={onMenu} className="h-10 w-10">
-                        <Menu className="h-6 w-6" />
+                    <Button variant="ghost" size="icon" onClick={onMenu} className="h-9 w-9 rounded-xl">
+                        <Menu className="h-5 w-5" />
                     </Button>
                 )}
             </div>

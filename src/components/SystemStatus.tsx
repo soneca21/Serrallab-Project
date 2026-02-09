@@ -43,7 +43,7 @@ const STATUS_META: Record<SystemStatus, { label: string; icon: React.ElementType
         chipClass: 'pwa-status-chip pwa-status-chip--syncing',
     },
     warning: {
-        label: 'Atencao',
+        label: 'Atenção',
         icon: AlertTriangle,
         toneClass: 'text-warning',
         chipClass: 'pwa-status-chip pwa-status-chip--pending',

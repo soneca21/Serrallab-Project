@@ -183,10 +183,15 @@ const CompanySettings = () => {
                 fileBase: `logo-${profile?.company_id || user.id}-${Date.now()}`
             });
 
+            let saved = false;
             if (company) {
-                await saveCompany(company.id, { logo_url: publicUrl });
+                saved = await saveCompany(company.id, { logo_url: publicUrl });
             } else {
-                await saveProfile({ logo_url: publicUrl });
+                saved = await saveProfile({ logo_url: publicUrl });
+            }
+
+            if (!saved) {
+                throw new Error('Upload concluído, mas não foi possível salvar o logo da empresa.');
             }
             setFormData(prev => ({ ...prev, logo_url: publicUrl }));
             toast({ title: 'Logo atualizado', description: 'O logo da empresa foi enviado.' });
@@ -208,10 +213,11 @@ const CompanySettings = () => {
             logo_url: formData.logo_url
         };
 
+        let savedCompany = false;
         if (company?.id) {
-            await saveCompany(company.id, companyPayload);
+            savedCompany = await saveCompany(company.id, companyPayload);
         } else {
-            await saveProfile({
+            savedCompany = await saveProfile({
                 company_name: formData.name,
                 company_phone: formData.phone,
                 company_address: formData.address,
@@ -219,12 +225,20 @@ const CompanySettings = () => {
             });
         }
 
+        if (!savedCompany) {
+            toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível salvar os dados da organização.' });
+            return;
+        }
+
         const nextPrefs = {
             ...(profile?.preferences || {}),
             ...orgPrefs,
             org_email: formData.email
         };
-        await savePreferences(nextPrefs);
+        const savedPrefs = await savePreferences(nextPrefs);
+        if (!savedPrefs) {
+            return;
+        }
 
         if (!company?.id && !profile?.company_id) {
             toast({

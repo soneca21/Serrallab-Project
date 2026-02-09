@@ -59,6 +59,10 @@
     --pwa-density-card-padding: 0.875rem;
     --pwa-density-list-gap: 0.75rem;
     --pwa-density-section-gap: 1rem;
+    --pwa-safe-top: env(safe-area-inset-top, 0px);
+    --pwa-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --pwa-native-header-height: 3.5rem;
+    --pwa-native-tabbar-height: 4.25rem;
   }
 }
  
@@ -71,6 +75,8 @@
     background-color: #121212;
     color: #EDEDED;
     font-family: 'Inter', sans-serif;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -185,6 +191,54 @@
 
   .pwa-section-compact {
     gap: var(--pwa-density-section-gap);
+  }
+
+  .pwa-native-shell {
+    position: relative;
+    min-height: 100dvh;
+    background:
+      radial-gradient(120% 70% at 50% -10%, hsl(var(--primary) / 0.2) 0%, transparent 40%),
+      hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  .pwa-native-main {
+    min-height: 100dvh;
+    padding-top: calc(var(--pwa-safe-top) + var(--pwa-native-header-height));
+    padding-bottom: calc(var(--pwa-safe-bottom) + var(--pwa-native-tabbar-height));
+  }
+
+  .pwa-native-header {
+    height: calc(var(--pwa-safe-top) + var(--pwa-native-header-height));
+    padding-top: var(--pwa-safe-top);
+    backdrop-filter: blur(14px);
+    background: hsl(var(--background) / 0.78);
+    border-bottom: 1px solid hsl(var(--border) / 0.55);
+  }
+
+  .pwa-native-tabbar {
+    height: calc(var(--pwa-safe-bottom) + var(--pwa-native-tabbar-height));
+    padding-bottom: var(--pwa-safe-bottom);
+    backdrop-filter: blur(16px);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--background) / 0.42) 0%,
+      hsl(var(--background) / 0.95) 56%
+    );
+    border-top: 1px solid hsl(var(--border) / 0.6);
+    box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.22);
+  }
+
+  .pwa-native-tabitem {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border-radius: 0.9rem;
+    transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+    touch-action: manipulation;
+  }
+
+  .pwa-native-tabitem:active {
+    transform: scale(0.96);
   }
 }
 

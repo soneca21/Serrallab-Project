@@ -39,8 +39,8 @@ export default function ServiceWorkerUpdatePrompt() {
         dismissToast();
         toastHandleRef.current = toast({
             duration: 600000,
-            title: 'Nova versao do app disponivel',
-            description: 'Atualize para aplicar melhorias e correcoes.',
+            title: 'Nova versão do app disponível',
+            description: 'Atualize para aplicar melhorias e correções.',
             action: (
                 <div className="flex items-center gap-2">
                     <Button size="sm" onClick={requestRefresh}>

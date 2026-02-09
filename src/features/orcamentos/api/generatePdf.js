@@ -148,7 +148,7 @@ const drawClientAndProjectCards = (doc, data) => {
   const projectDescription = safeText(data.projectDescription);
   const projectDescLines = doc.splitTextToSize(projectDescription, cardWidth - 8).slice(0, 2);
   const projectLines = [
-    `Titulo: ${safeText(data.projectTitle)}`,
+    `Título: ${safeText(data.projectTitle)}`,
     ...projectDescLines,
     `Atualizado: ${formatDate(data.updatedAt)}`,
   ];
@@ -285,7 +285,7 @@ export const createOrcamentoPdf = async ({ orcamento, client, profile }) => {
     clientName: client?.name || 'Cliente',
     clientEmail: client?.email || '',
     clientPhone: client?.phone || '',
-    projectTitle: orcamento.title || 'Orcamento',
+    projectTitle: orcamento.title || 'Orçamento',
     projectDescription: orcamento.description || '',
     items: orcamento.items || [],
     materialsSubtotal: itemsSubtotal,
@@ -313,7 +313,7 @@ export async function generatePdf(orcamento_id) {
     .single();
 
   if (orderError || !order) {
-    throw new Error(orderError?.message || 'Erro ao carregar orcamento.');
+    throw new Error(orderError?.message || 'Erro ao carregar orçamento.');
   }
 
   const { data: profile } = await supabase

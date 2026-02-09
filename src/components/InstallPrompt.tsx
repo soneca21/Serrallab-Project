@@ -31,7 +31,7 @@ const InstallPrompt: React.FC = () => {
                                 ) : (
                                     <span className="text-xs opacity-90">
                                         No iPhone/iPad: toque em <span className="font-semibold">Compartilhar</span> e depois em{' '}
-                                        <span className="font-semibold">Adicionar a Tela de Inicio</span>
+                                        <span className="font-semibold">Adicionar à Tela de Início</span>
                                     </span>
                                 )}
                             </div>
@@ -54,7 +54,7 @@ const InstallPrompt: React.FC = () => {
                         {isIOS && showIOSInstallInstructions && (
                             <div className="text-xs opacity-90 flex items-center gap-1">
                                 <PlusSquare className="h-3.5 w-3.5" />
-                                Safari &gt; Compartilhar &gt; Adicionar a Tela de Inicio
+                                Safari &gt; Compartilhar &gt; Adicionar à Tela de Início
                             </div>
                         )}
                     </div>

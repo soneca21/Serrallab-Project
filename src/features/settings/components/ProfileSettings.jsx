@@ -131,7 +131,10 @@ const ProfileSettings = () => {
                 fileBase: `avatar-${user.id}-${Date.now()}`
             });
 
-            await saveProfile({ avatar_url: publicUrl });
+            const saved = await saveProfile({ avatar_url: publicUrl });
+            if (!saved) {
+                throw new Error('Upload concluído, mas não foi possível salvar a foto no perfil.');
+            }
             setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
             toast({ title: 'Foto atualizada', description: 'Sua foto de perfil foi enviada.' });
         } catch (error) {
@@ -144,7 +147,10 @@ const ProfileSettings = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await saveProfile({ company_name: formData.full_name });
+        const saved = await saveProfile({ company_name: formData.full_name });
+        if (!saved) {
+            toast({ variant: 'destructive', title: 'Erro', description: 'Não foi possível salvar as alterações do perfil.' });
+        }
     };
 
     const handleSavePreferences = async () => {

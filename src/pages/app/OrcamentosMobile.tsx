@@ -25,7 +25,7 @@ const OrcamentosMobile: React.FC = () => {
             return data || [];
         } catch {
             setOrcamentos([]);
-            setErrorMessage('Nao foi possivel carregar os orcamentos salvos no dispositivo.');
+            setErrorMessage('Não foi possível carregar os orçamentos salvos no dispositivo.');
             return [];
         }
     }, []);
@@ -41,7 +41,7 @@ const OrcamentosMobile: React.FC = () => {
         if (isOnline) {
             const result = await sync();
             if (!result?.success && cachedData.length === 0) {
-                setErrorMessage('Falha ao buscar orcamentos na rede e nao ha dados em cache.');
+                setErrorMessage('Falha ao buscar orçamentos na rede e não há dados em cache.');
             }
             await loadFromCache();
         } else if (cachedData.length === 0) {
@@ -71,19 +71,19 @@ const OrcamentosMobile: React.FC = () => {
 
     return (
         <div className="pb-4">
-            <MobileHeader title="Orcamentos" onMenu={() => void loadData()} />
+            <MobileHeader title="Orçamentos" onMenu={() => void loadData()} />
 
             <div className="p-4 space-y-4 pwa-section-compact">
                 <div className="flex items-center justify-between gap-2">
                     <Button size="sm" onClick={() => navigate('/app/orcamentos/novo')}>
-                        <Plus className="h-4 w-4 mr-1" /> Novo orcamento
+                        <Plus className="h-4 w-4 mr-1" /> Novo orçamento
                     </Button>
                 </div>
 
                 {errorMessage && (
                     <OperationalStateCard
                         kind="error"
-                        title="Falha ao carregar orcamentos"
+                        title="Falha ao carregar orçamentos"
                         description={`${errorMessage} Proximo passo: tente novamente.`}
                         onPrimaryAction={() => void loadData()}
                     />
@@ -94,7 +94,7 @@ const OrcamentosMobile: React.FC = () => {
                 ) : hasInitialOfflineEmpty ? (
                     <OperationalStateCard
                         kind="offline-empty"
-                        title="Sem cache inicial para Orcamentos"
+                        title="Sem cache inicial para Orçamentos"
                         description="Conecte-se a internet ao menos uma vez para baixar os dados."
                         onPrimaryAction={() => void loadData()}
                     />
@@ -124,10 +124,10 @@ const OrcamentosMobile: React.FC = () => {
                 {!loading && orcamentos.length === 0 && (
                     <OperationalStateCard
                         kind="empty"
-                        title="Nenhum orcamento disponivel"
+                        title="Nenhum orçamento disponível"
                         description={isOnline
-                            ? 'Nenhum orcamento foi encontrado para os filtros atuais.'
-                            : 'Voce esta offline e nao ha orcamentos em cache para exibir.'}
+                            ? 'Nenhum orçamento foi encontrado para os filtros atuais.'
+                            : 'Você está offline e não há orçamentos em cache para exibir.'}
                         onPrimaryAction={() => void loadData()}
                     />
                 )}

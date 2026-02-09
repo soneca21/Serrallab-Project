@@ -39,7 +39,7 @@ const PipelineMobile: React.FC = () => {
         } catch {
             const empty = groupOrdersByPipelineStage([]);
             setPipeline(empty);
-            setErrorMessage('Nao foi possivel carregar o pipeline salvo no dispositivo.');
+            setErrorMessage('Não foi possível carregar o pipeline salvo no dispositivo.');
             return empty;
         }
     }, []);
@@ -56,7 +56,7 @@ const PipelineMobile: React.FC = () => {
         if (isOnline) {
             const result = await sync();
             if (!result?.success && !hasCachedCards) {
-                setErrorMessage('Falha ao buscar pipeline na rede e nao ha dados em cache.');
+                setErrorMessage('Falha ao buscar pipeline na rede e não há dados em cache.');
             }
             await loadFromCache();
         } else if (!hasCachedCards) {
@@ -86,7 +86,7 @@ const PipelineMobile: React.FC = () => {
             <div className="px-4 pt-4 space-y-4 pwa-section-compact">
                 <div className="flex items-center justify-between gap-2">
                     <Button size="sm" onClick={() => navigate('/app/orcamentos/novo')}>
-                        <Plus className="h-4 w-4 mr-1" /> Novo orcamento
+                        <Plus className="h-4 w-4 mr-1" /> Novo orçamento
                     </Button>
                 </div>
 
@@ -113,8 +113,8 @@ const PipelineMobile: React.FC = () => {
                         kind="empty"
                         title="Nenhum item no pipeline"
                         description={isOnline
-                            ? 'Nao ha cards no pipeline para exibir no momento.'
-                            : 'Voce esta offline e nao ha cards em cache para exibir.'}
+                            ? 'Não há cards no pipeline para exibir no momento.'
+                            : 'Você está offline e não há cards em cache para exibir.'}
                         onPrimaryAction={() => void loadData()}
                     />
                 ) : null}

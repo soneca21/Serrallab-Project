@@ -46,7 +46,7 @@ const OfflineQueueErrors: React.FC = () => {
                         <span>{items.length} pendencia(s) com erro permanente. Proximo passo: reprocessar ou descartar.</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button size="sm" variant="ghost" onClick={() => navigate('/app/sincronizacao')} aria-label="Abrir centro de sincronizacao">
+                        <Button size="sm" variant="ghost" onClick={() => navigate('/app/sincronizacao')} aria-label="Abrir centro de sincronização">
                             Ver fila
                         </Button>
                         <Button

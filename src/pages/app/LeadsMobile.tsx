@@ -39,7 +39,7 @@ const LeadsMobile: React.FC = () => {
             return data || [];
         } catch {
             setLeads([]);
-            setErrorMessage('Nao foi possivel carregar os leads salvos no dispositivo.');
+            setErrorMessage('Não foi possível carregar os leads salvos no dispositivo.');
             return [];
         }
     }, []);
@@ -55,7 +55,7 @@ const LeadsMobile: React.FC = () => {
         if (isOnline) {
             const result = await sync();
             if (!result?.success && cachedData.length === 0) {
-                setErrorMessage('Falha ao buscar leads na rede e nao ha dados em cache.');
+                setErrorMessage('Falha ao buscar leads na rede e não há dados em cache.');
             }
             await loadFromCache();
         } else if (cachedData.length === 0) {
@@ -111,7 +111,7 @@ const LeadsMobile: React.FC = () => {
         toast({
             title: result.state === 'pending' ? 'Lead pendente' : 'Lead criado',
             description: result.state === 'pending'
-                ? 'Lead salvo localmente. Sera enviado automaticamente quando houver conexao.'
+                ? 'Lead salvo localmente. Será enviado automaticamente quando houver conexão.'
                 : 'Lead salvo com sucesso.',
         });
 
@@ -193,10 +193,10 @@ const LeadsMobile: React.FC = () => {
                 {!loading && leads.length === 0 && (
                     <OperationalStateCard
                         kind="empty"
-                        title="Nenhum lead disponivel"
+                        title="Nenhum lead disponível"
                         description={isOnline
                             ? 'Nenhum lead foi encontrado para os filtros atuais.'
-                            : 'Voce esta offline e nao ha leads em cache para exibir.'}
+                            : 'Você está offline e não há leads em cache para exibir.'}
                         onPrimaryAction={() => void handleRefresh()}
                     />
                 )}

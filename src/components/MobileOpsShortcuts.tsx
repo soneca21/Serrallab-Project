@@ -28,8 +28,8 @@ const MobileOpsShortcuts: React.FC = () => {
     const handleSyncNow = async () => {
         if (!isOnline) {
             toast({
-                title: 'Sem conexao',
-                description: 'Conecte-se a internet ou abra pendencias para revisar a fila offline.',
+                title: 'Sem conexão',
+                description: 'Conecte-se à internet ou abra pendências para revisar a fila offline.',
             });
             navigate('/app/sincronizacao');
             return;
@@ -38,13 +38,13 @@ const MobileOpsShortcuts: React.FC = () => {
         const result = await sync();
         if (result?.success) {
             toast({
-                title: 'Sincronizacao concluida',
+                title: 'Sincronização concluída',
                 description: 'Dados atualizados com sucesso.',
             });
         } else {
             toast({
-                title: 'Sincronizacao pendente',
-                description: 'Nao foi possivel sincronizar agora. Abra pendencias para detalhes.',
+                title: 'Sincronização pendente',
+                description: 'Não foi possível sincronizar agora. Abra pendências para detalhes.',
                 variant: 'destructive',
             });
         }
@@ -71,7 +71,7 @@ const MobileOpsShortcuts: React.FC = () => {
                     className="flex-1"
                 >
                     <ListChecks className="h-4 w-4 mr-2" />
-                    Pendencias {queueSize > 0 ? `(${queueSize})` : ''}
+                    Pendências {queueSize > 0 ? `(${queueSize})` : ''}
                 </Button>
             </div>
         </div>

@@ -51,7 +51,7 @@ const configItems = [
     { path: '/app/config?tab=company', label: 'Organiza\u00e7\u00e3o', icon: Building },
     { path: '/app/config/canais', label: 'Canais', icon: MessageSquare, permissionKey: 'integrations' },
     { path: '/app/config/integracoes', label: 'Integra\u00e7\u00f5es', icon: Database, permissionKey: 'integrations' },
-    { path: '/app/sincronizacao', label: 'Sincronizacao', icon: ClipboardList, permissionKey: 'dashboard' },
+    { path: '/app/sincronizacao', label: 'Sincroniza\u00e7\u00e3o', icon: ClipboardList, permissionKey: 'dashboard' },
     { path: '/app/config?tab=team', label: 'Equipe', icon: Users, permissionKey: 'team' },
     { path: '/app/config?tab=billing', label: 'Planos', icon: CreditCard, permissionKey: 'billing' },
     { path: '/app/config?tab=notifications', label: 'Notifica\u00e7\u00f5es', icon: Bell },
@@ -225,7 +225,7 @@ const Header = () => {
             pageTitle = configItem ? `Configura\u00e7\u00f5es > ${configItem.label}` : 'Configura\u00e7\u00f5es';
         }
     }
-    else if (location.pathname.includes('sincronizacao')) pageTitle = 'Configura\u00e7\u00f5es > Sincronizacao';
+    else if (location.pathname.includes('sincronizacao')) pageTitle = 'Configura\u00e7\u00f5es > Sincroniza\u00e7\u00e3o';
     else if (location.pathname.includes('agendamentos')) pageTitle = 'Agendamentos';
     else if (location.pathname.includes('leads')) pageTitle = 'Leads'; 
     else if (location.pathname.includes('webhooks')) pageTitle = 'Webhooks';
@@ -351,7 +351,6 @@ const AppLayout = () => {
 };
 
 export default AppLayout;
-
 
 
 
